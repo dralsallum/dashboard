@@ -1,0 +1,108 @@
+:root {
+  --main-background-color: #87d1cc;
+  --grid-background-color: #ffffff;
+  --main-text-color: #000000;
+  --main-font-size: 24px;
+  --second-font-size: 18px;
+  --second-text-color: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  background-image: linear-gradient(315deg, #52a7c1 0%, #b3f6d8 74%);
+}
+
+body {
+  color: var(--main-text-color);
+  font-family: "Amiri", serif;
+  min-height: 96vh;
+  min-width: 100vh;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.438);
+  border: 1px solid rgba(255, 255, 255, 0.418);
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.container {
+  display: grid;
+  min-width: 100%;
+  min-height: 100%;
+  justify-content: space-around;
+  grid-template: 1fr 3fr 1fr / 1fr 2.5fr 2.5fr;
+}
+
+.mainLogo {
+  font-size: 35px;
+}
+
+.sidebarCategories {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 48;
+  text-align: center;
+}
+
+.mainSidebar {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.gitlogo {
+}
+
+.gitMe {
+  padding-top: 50px;
+  width: 30%;
+}
+.staticPic1 {
+  width: 90%;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+#mainContainer {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 10px;
+}
+
+#search {
+  width: 50%;
+  height: 35px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background-color: #e4fff9;
+}
+
+.profileContainer {
+  display: grid;
+  grid-template: 1fr 1fr 1fr / 1fr;
+}
+
+.staticPic {
+  border-radius: 10px;
+}
+
+.bottomRight {
+  display: flex;
+  flex-direction: column;
+  padding-top: 50px;
+}
+
+.staticHeader {
+  flex: 1;
+}
