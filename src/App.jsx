@@ -8,6 +8,7 @@ import { Practice, Recommendation } from "./components";
 import Onboarding from "./pages/Onboarding";
 import Outcome from "./pages/Outcome";
 import Product from "./pages/Product";
+import Control from "./pages/Control";
 // import other pages/components as needed
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
           <Route path="/recommendation" element={<Recommendation />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/control" element={<Control />} />
         </Routes>
       </div>
     </>
