@@ -1,56 +1,62 @@
-// src/redux/userRedux.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { publicRequest } from "../requestMethods";
+import { publicRequest, userRequest } from "../requestMethods";
 
-/* ────────────────────────────────
-   THUNKS
-   ────────────────────────────────*/
 export const register = createAsyncThunk(
   "user/register",
   async (user, thunkAPI) => {
     try {
-      const { data } = await publicRequest.post("/auth/register", user);
-      return data;
-    } catch (err) {
-      const message =
-        err?.response?.data?.message ?? err.message ?? "Registration failed";
+      const response = await publicRequest.post("/bus_auth/register", user);
+      return response.data;
+    } catch (error) {
+      let message;
+      if (error.response && error.response.data.message) {
+        message = error.response.data.message;
+      } else {
+        message = error.message;
+      }
       return thunkAPI.rejectWithValue(message);
     }
   }
 );
 
-export const signIn = createAsyncThunk(
+export const login = createAsyncThunk(
   "user/login",
-  async ({ email, password }, thunkAPI) => {
+  async (credentials, thunkAPI) => {
     try {
-      const { data } = await publicRequest.post("/auth/login", {
-        email,
-        password,
-      });
-      return data;
-    } catch (err) {
-      const message =
-        err?.response?.data?.message ?? err.message ?? "Login failed";
+      const response = await publicRequest.post("/bus_auth/login", credentials);
+      return response.data;
+    } catch (error) {
+      let message = error.response?.data?.message || error.message;
       return thunkAPI.rejectWithValue(message);
     }
   }
 );
 
-/* ────────────────────────────────
-   INITIAL STATE
-   ────────────────────────────────*/
+export const updateStoreName = createAsyncThunk(
+  "user/updateStoreName",
+  async ({ id, storeName }, thunkAPI) => {
+    try {
+      const response = await userRequest.put(`/business/storeName/${id}`, {
+        storeName,
+      });
+      return response.data;
+    } catch (error) {
+      let message = error.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const initialState = {
   currentUser: null,
   isFetching: false,
   isSuccess: false,
   isError: false,
   errorMessage: "",
+  isUpdating: false,
 };
 
-/* ────────────────────────────────
-   SLICE
-   ────────────────────────────────*/
-const userSlice = createSlice({
+export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
@@ -67,19 +73,27 @@ const userSlice = createSlice({
       state.errorMessage = action.payload;
     },
     signOut: (state) => {
-      Object.assign(state, initialState); // quick reset
-    },
-    clearState: (state) => {
+      state.currentUser = null;
       state.isFetching = false;
       state.isSuccess = false;
       state.isError = false;
       state.errorMessage = "";
     },
+    clearState: (state) => {
+      state.isError = false;
+      state.isSuccess = false;
+      state.isFetching = false;
+      state.errorMessage = "";
+      state.isUpdating = false;
+    },
+    // Add reducer for optimistic updates
+    updateStoreNameLocally: (state, action) => {
+      if (state.currentUser) {
+        state.currentUser.storeName = action.payload;
+      }
+    },
   },
-
-  /* 🆕 builder-callback notation */
   extraReducers: (builder) => {
-    /* REGISTER */
     builder
       .addCase(register.pending, (state) => {
         state.isFetching = true;
@@ -90,33 +104,62 @@ const userSlice = createSlice({
         state.isFetching = false;
         state.isSuccess = true;
         state.currentUser = action.payload;
+        state.isError = false;
+        state.errorMessage = "";
       })
       .addCase(register.rejected, (state, action) => {
         state.isFetching = false;
         state.isError = true;
         state.errorMessage = action.payload;
       })
-
-      /* SIGN-IN */
-      .addCase(signIn.pending, (state) => {
+      .addCase(login.pending, (state) => {
         state.isFetching = true;
         state.isError = false;
+        state.isSuccess = false;
       })
-      .addCase(signIn.fulfilled, (state, action) => {
+      .addCase(login.fulfilled, (state, action) => {
         state.isFetching = false;
         state.isSuccess = true;
         state.currentUser = action.payload;
+        state.isError = false;
+        state.errorMessage = "";
       })
-      .addCase(signIn.rejected, (state, action) => {
+      .addCase(login.rejected, (state, action) => {
         state.isFetching = false;
+        state.isError = true;
+        state.errorMessage = action.payload;
+      })
+      // Handle updateStoreName async thunk
+      .addCase(updateStoreName.pending, (state) => {
+        state.isUpdating = true;
+        state.isError = false;
+      })
+      .addCase(updateStoreName.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        state.isSuccess = true;
+        // Update the current user with the new data
+        state.currentUser = { ...state.currentUser, ...action.payload };
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(updateStoreName.rejected, (state, action) => {
+        state.isUpdating = false;
         state.isError = true;
         state.errorMessage = action.payload;
       });
   },
 });
 
-export const { clearState, loginStart, loginSuccess, loginFailure, signOut } =
-  userSlice.actions;
+// Export the actions
+export const {
+  clearState,
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  signOut,
+  updateStoreNameLocally,
+} = userSlice.actions;
 
 export const userSelector = (state) => state.user;
+
 export default userSlice.reducer;

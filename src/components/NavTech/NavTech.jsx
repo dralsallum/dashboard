@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { signOut } from "../../redux/userRedux";
 
 /* ====== Styled Components for Navigation Bar ====== */
 const Header = styled.header`
@@ -67,8 +69,18 @@ const SubscribeButton = styled(Link)`
   cursor: pointer;
   font-size: 0.9rem;
 
+  &:hover {
+    outline: none;
+    color: #fff;
+  }
+
+  &:focus {
+    outline: none;
+    color: #fff;
+  }
+
   @media (max-width: 768px) {
-    display: none; /* Hidden on mobile */
+    display: none;
   }
 `;
 
@@ -130,7 +142,8 @@ const MobileMenuLink = styled(Link)`
 
 const NavTech = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.user.currentUser);
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -154,9 +167,16 @@ const NavTech = () => {
           </NavLinkStyled>
         </NavLinks>
 
-        <SubscribeButton to="/login">
-          انضم إلى أكثر من 260 ألف مشترك
-        </SubscribeButton>
+        {currentUser ? (
+          <SubscribeButton as="button" onClick={() => dispatch(signOut())}>
+            تسجيل الخروج
+          </SubscribeButton>
+        ) : (
+          <SubscribeButton to="/login">
+            تسجيل الدخول / حساب جديد
+          </SubscribeButton>
+        )}
+
         <MenuButton onClick={toggleMenu}>☰</MenuButton>
       </Header>
 

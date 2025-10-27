@@ -1,25 +1,402 @@
-import { useState } from "react";
-import styled, { keyframes } from "styled-components";
-import homeIcon from "../../assets/home.png";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setStoreName } from "../../redux/tabRedux";
+import NavSide from "../NavSide/NavSide";
+import {
+  MaFirst,
+  MaSec,
+  MaAll,
+  ContentSection,
+  MainCon,
+  LogoCon,
+  LogoGrid,
+  LogoDiv,
+  LogoSubDiv,
+  SearchWr,
+  SearchCon,
+  SearchSu,
+  SearchSub,
+  SearchRe,
+  SearchBtn,
+  InputWr,
+  InputCon,
+  InputSp,
+  InputKbd,
+  LogoImg,
+  NavCon,
+  MainSubCon,
+  StartCon,
+  StartDiv,
+  StartSub,
+  StartRe,
+  StartSa,
+  StartWa,
+  StartLa,
+  StartTop,
+  TopUl,
+  TopLi,
+  TopStart,
+  TopRe,
+  TopAt,
+  TopSelect,
+  TopFlex,
+  TopToo,
+  TopSpan,
+  TopSp,
+  TopImg,
+  TopBtn,
+  TopRight,
+  TopMore,
+  MidWr,
+  MidCo,
+  MidUl,
+  MidDiv,
+  MidStart,
+  MidSe,
+  MidThi,
+  MidLa,
+  MidTop,
+  ChWr,
+  ChCo,
+  ChHe,
+  ChBtn,
+  ChSpan,
+  ChImg,
+  MidMid,
+  StoWr,
+  StoTop,
+  StoBot,
+  StoMap,
+  StoBtn,
+  StoSpan,
+  StoreBot,
+  StoreTop,
+  StoreHe,
+  StoreMid,
+  StoreEx,
+  StoreBtn,
+  StoreDiv,
+  StoreSp,
+  StoreImg,
+  SiteWr,
+  SiteMid,
+  SiteDes,
+  SiteBo,
+  SiteWrap,
+  SiteSp,
+  SiteSpa,
+  SiteAt,
+  SiteBtn,
+  SiteDiv,
+  SiteEx,
+  SiteFir,
+  SiteSec,
+  SiteThi,
+  SiteSubThi,
+  SiteSuThi,
+  SiteSThi,
+  SiteSubImg,
+  SiteFou,
+  CircleFi,
+  CircleSe,
+  CircleThi,
+  CircleFou,
+  CircleFiv,
+  CircleSi,
+  OreWr,
+  OreCon,
+  OreSubCon,
+  OreTop,
+  OreSubTop,
+  OreSu,
+  OreDivImg,
+  OreHeDiv,
+  OreHe,
+  OreImg,
+  OreTopRight,
+  OreTopRi,
+  OreTopFi,
+  OreSubFi,
+  OreSubBtn,
+  OreSubImg,
+  OreSpan,
+  OreSpa,
+  OreMid,
+  OreMidSub,
+  OreMidSu,
+  OreFlex,
+  CenterTop,
+  CenterTopImg,
+  CenterBot,
+  CenterBotBtnDiv,
+  CenterBotBtn,
+  CenterBotSp,
+  CenSp,
+  CenDivMain,
+  CenDiv,
+  CenDivSp,
+  OreBot,
+  OreBotSub,
+  OreBotBtn,
+  OreBotPa,
+  OreBotSpa,
+  ProWr,
+  ProCon,
+  ProStart,
+  ProSub,
+  ProDiv,
+  ProTop,
+  ProTopSt,
+  ProTopFl,
+  ProTopLe,
+  ProTopLef,
+  ProTopLeft,
+  ProTopLeftTo,
+  ProTopLeftBtn,
+  ProTopLeftSp,
+  ProTopRightTo,
+  ProTopPlus,
+  ProPlus,
+  ProUpDow,
+  ProFilter,
+  ProTopRi,
+  ProTopRiDiv,
+  ProTopRiBtn,
+  ProBot,
+  ProBo,
+  ProBott,
+  ProBottHe,
+  ProBottPa,
+  ProBottDiv,
+  ProBottSp,
+  ProBottBtn,
+  ProMid,
+  ProMidSub,
+  ProMidStart,
+  ProMidTop,
+  ProMidImg,
+  ProMidHe,
+  ProMidPa,
+  ProBtnWr,
+  ProBtnFl,
+  ProBtnLe,
+  ProBtnSp,
+  ProBtnRi,
+  InputSpan,
+  InputImg,
+  InputSpa,
+  NotifWr,
+  NotifCon,
+  NotifSub,
+  NotifStore,
+  NotifBtn,
+  NotifBtnDiv,
+  NotDiv,
+  NotSpan,
+  NotSp,
+  ButtonRow,
+  StoreInput,
+  ModalHeader,
+  Button,
+  ModalContainer,
+  ModalImg,
+  ModalClose,
+  ModalOverlay,
+  MarketTopBtn,
+  MarketMidImg,
+  SearWr,
+  SearLe,
+  SearLeImg,
+  SearSha,
+  SearLeIn,
+  MarketBot,
+  MarkMid,
+  MarkTable,
+  MarkTabHe,
+  MarkTabBod,
+  MarkTabTr,
+  MarkTh,
+  MarkBtn,
+  MarkBtnWr,
+  MarkBtnCon,
+  MarkBtnSp,
+  MarkTw,
+  MarkTwDiv,
+  BodyWr,
+  BodyTh,
+  BodyBtnWr,
+  BodyBtnCon,
+  BodyBtn,
+  BodyBtnSp,
+  BodyTw,
+  BodyTwDiv,
+  BodyImg,
+  BodyBtSp,
+  BodyBot,
+  BodyRiBtnSp,
+  RepBtn,
+  RepExBtn,
+  RepSubImg,
+  RepBot,
+  RepDate,
+  RepMain,
+  RepTod,
+  RepTodBtn,
+  RepTodSp,
+  RepBotto,
+  RepTop,
+  RepBotPa,
+  RepTopDiv,
+  RepTopSta,
+  RepSec,
+  RepSecFi,
+  RepSecBtn,
+  RepBtnDiv,
+  RepBtnSec,
+  RepBtnFl,
+  RepFl,
+  RepFlex,
+  RepFlTop,
+  ReportWr,
+  ReportLine,
+  ReportLin,
+  ReportLi,
+  ReportLiFi,
+  ReportImg,
+  ReportText,
+  ReportTex,
+  ReportTe,
+  ReportPa,
+  AnalWr,
+  AnalCon,
+  AnalSub,
+  AnalMain,
+  AnalPad,
+  AnalFl,
+  AnalTop,
+  AnalTopBtn,
+  AnalTopPad,
+  AnalTopFl,
+  AnalTopGr,
+  AnalTopGrBtn,
+  AnalTopGrHe,
+  AnalGrSp,
+  BreakWr,
+  BreakCon,
+  BreakSub,
+  BreakRe,
+  BreakUl,
+  BreakLi,
+  BreakLiSp,
+  BreakLiSpan,
+  BreakLiBtn,
+  BreakPrice,
+  GraphWr,
+  GraphTop,
+  GraphBot,
+  GraphTopPa,
+  GraphTopCon,
+  GraphBotWr,
+  GraphBotCon,
+  GraphBotSt,
+  GraWr,
+  GraBtn,
+  GraBtnImgCon,
+  GraBtnImg,
+  GraSp,
+  AllStart,
+  ChartLine,
+  XAxisLabels,
+  XAxisLabel,
+  YAxisLabels,
+  YAxisLabel,
+  AdWr,
+  AdGrid,
+  AdSec,
+  AdPad,
+  AdTop,
+  AdTopSp,
+  AdTopSpan,
+  AdTopBtn,
+  AdMid,
+  AdBot,
+  AdBotCon,
+  AdBotWr,
+  AdBotRe,
+  CampWr,
+  CampCon,
+  CampCol,
+  CampFl,
+  CampFlTop,
+  CampFlHe,
+  CampFlDiv,
+  CampFlPa,
+  CampBtnWr,
+  CampBtnCon,
+  CampBtnBtn,
+  CampBtnSp,
+  AbaMidPa,
+  BillingContainer,
+  BillingHeader,
+  BillingFiltersContainer,
+  BillingFilterButtons,
+  BillingFilterButton,
+  BillingActionButtons,
+  BillingActionButton,
+  BillingTableContainer,
+  BillingTable,
+  BillingTableHead,
+  BillingTableRow,
+  BillingTableHeader,
+  BillingTableCell,
+  BillingTableBody,
+  BillingCheckbox,
+  BillingStatusBadge,
+  BillingPagination,
+  BillingPaginationButton,
+  BillingExtra,
+  BillingLoadingRow,
+  ArrowDir,
+  OverlayRedirect,
+  ModalRedirect,
+  MessageRedirect,
+  SubMessageRedirect,
+  ButtonRedirect,
+} from "./Dashboard.elements";
 import ordersIcon from "../../assets/orders.png";
+import draftImage from "../../assets/draft.svg";
 import tagIcon from "../../assets/tag.png";
-import customersIcon from "../../assets/customers.png";
 import customersImage from "../../assets/customerImage.svg";
 import contentImage from "../../assets/content.svg";
+import abandonImage from "../../assets/abandon.svg";
+import inventoryImage from "../../assets/inventory.svg";
+import historyImage from "../../assets/historyPur.svg";
+import giftImage from "../../assets/gift.svg";
+import transferImage from "../../assets/transfer.svg";
+import automationImage from "../../assets/automation.svg";
+import campaignImage from "../../assets/campaign.svg";
+import stateImage from "../../assets/state.svg";
 import discountImage from "../../assets/discount.svg";
-import marketingIcon from "../../assets/marketing.png";
 import discountsIcon from "../../assets/discount.png";
+import catalogeIcon from "../../assets/catalogue.png";
+import refreshIcon from "../../assets/repost.png";
+import expandIcon from "../../assets/expand.png";
+import domainIcon from "../../assets/domain.png";
 import contentIcon from "../../assets/content.png";
 import filterIcon from "../../assets/filter.png";
-import marketsIcon from "../../assets/markets.png";
-import analyticsIcon from "../../assets/analytics.png";
-import storeIcon from "../../assets/store.png";
-import plusIcon from "../../assets/plus.png";
+import removeIcon from "../../assets/remove.png";
 import plusGrayIcon from "../../assets/plusGray.png";
 import productsItem from "../../assets/products.svg";
 import copyIcon from "../../assets/copy.png";
+import rightBlockIcon from "../../assets/rightBlock.png";
+import selectIcon from "../../assets/selectIcon.png";
+import inputIcon from "../../assets/input.png";
+import pulseIcon from "../../assets/pulse.png";
 import crossIcon from "../../assets/cross.png";
+import calendarIcon from "../../assets/calendar.png";
 import arrowDown from "../../assets/arrowDown.png";
+import arrowRight from "../../assets/rightArrow.png";
+import arrowLeft from "../../assets/leftArrow.png";
 import penIcon from "../../assets/pen.png";
 import upDownIcon from "../../assets/upDown.png";
 import domesticIcon from "../../assets/domestic.png";
@@ -28,7 +405,6 @@ import paypalIcon from "../../assets/paypal.svg";
 import ordersImage from "../../assets/order.png";
 import visaIcon from "../../assets/visa.svg";
 import madaIcon from "../../assets/mada.jpg";
-import settingIcon from "../../assets/setting.png";
 import Cup from "../../assets/cup.webp";
 import Shoes from "../../assets/shoes.webp";
 import Board from "../../assets/board.png";
@@ -36,2220 +412,141 @@ import Board2 from "../../assets/board2.png";
 import Board3 from "../../assets/board3.png";
 import Chair from "../../assets/chair.webp";
 import logo from "../../assets/drslallum.png";
+import marketsIcon from "../../assets/markets.png";
+import { useNavigate } from "react-router-dom";
+import { setSettingTab } from "../../redux/settingRedux";
+import {
+  updateStoreName,
+  userSelector,
+  clearState,
+  signOut,
+} from "../../redux/userRedux";
+import axios from "axios";
+
+const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
 
-const productRotation = keyframes`
-  0%, 30% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  33.33%, 96.66% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-`;
-
-const MaFirst = styled.div`
-  background-color: #f1f1f1;
-  color: #000;
-  overflow: hidden;
-  height: 100vh;
-  position: relative;
-  direction: rtl;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const MaSec = styled.div``;
-
-const MaAll = styled.div`
-  background-color: rgba(26, 26, 26, 1);
-  height: 100vh;
-  position: relative;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ContentSection = styled.div`
-  height: 100vh;
-  position: relative;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const MainCon = styled.div`
-  display: flex;
-  background-color: rgba(26, 26, 26, 1);
-  width: 100%;
-  height: 100vh;
-  position: relative;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const LogoCon = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 0 1.25rem;
-  height: 3.5rem;
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 15rem;
-  background-color: rgba(26, 26, 26, 1);
-  z-index: 200;
-
-  @media screen and (max-width: 768px) {
-    position: relative;
-    width: 100%;
-  }
-`;
-
-const LogoSubCon = styled.div`
-  z-index: 1;
-  cursor: pointer;
-  white-space: nowrap;
-`;
-
-const LogoImg = styled.img`
-  filter: grayscale(0%);
-  cursor: pointer;
-  transition: transform 0.2s, filter 0.3s;
-  width: 5rem;
-  height: 1.8rem;
-`;
-
-const NavCon = styled.div``;
-
-const MainSubCon = styled.div`
-  width: 100%;
-  display: flex;
-  height: 100vh;
-  position: relative;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StartCon = styled.div`
-  flex: 1;
-  background-color: #f1f1f1;
-  border-top-right-radius: 0rem;
-  border-top-left-radius: 0.75rem;
-  margin-top: 3.5rem;
-  margin-right: 15rem;
-  height: calc(100vh - 3.5rem);
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  @media screen and (max-width: 768px) {
-    margin-right: 0;
-    margin-top: 0;
-    height: auto;
-    min-height: calc(100vh - 3.5rem);
-  }
-`;
-
-const StartDiv = styled.div`
-  padding: 2rem;
-  min-height: 100%;
-
-  @media screen and (max-width: 768px) {
-    padding: 1rem;
-  }
-`;
-
-const StartSub = styled.div`
-  opacity: 1;
-  transition: opacity 50ms;
-  border-radius: 0.75rem;
-  position: relative;
-  padding-bottom: 0;
-  min-width: 0px;
-  max-width: 100%;
-  height: 100%;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StartRe = styled.div`
-  width: calc(100vw - 15rem - 0 - 0 - 0);
-  transition: width var(--p-motion-duration-250) var(--p-motion-ease);
-  height: 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StartSa = styled.div`
-  padding: 0 1rem;
-  max-width: calc(41.375rem + 20rem + 1rem);
-  margin: 0px auto;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StartWa = styled.div`
-  padding: 0.5rem 0;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StartLa = styled.div`
-  margin-block-start: -1.25rem;
-  margin-block-end: initial;
-  margin-inline-start: initial;
-  margin-inline-end: initial;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StartTop = styled.div`
-  box-sizing: content-box;
-  max-width: 49.75rem;
-  padding: 0;
-  margin: 0 auto;
-  background-color: transparent;
-  padding-top: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  max-width: 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopUl = styled.ul`
-  box-sizing: content-box;
-  max-width: 49.75rem;
-  margin: 0 auto;
-  list-style-type: none;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopLi = styled.li`
-  position: relative;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopStart = styled.div`
-  color: rgba(227, 227, 227, 1);
-  background-color: #1c2122;
-  border-radius: 12px;
-  padding: 10px;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopRe = styled.div`
-  color: rgba(227, 227, 227, 1);
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopAt = styled.a`
-  justify-content: center;
-  text-align: center;
-  min-height: 1.75rem;
-  min-width: 1.75rem;
-  font-weight: 450;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  box-shadow: 0rem -0.0625rem 0rem 0rem #b5b5b5 inset,
-    0rem 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.1) inset,
-    0rem 0.03125rem 0rem 0.09375rem #fff inset;
-  color: rgba(48, 48, 48, 1);
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  gap: 0.125rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(255, 255, 255, 1);
-  border-width: initial;
-  border-style: none;
-  border-color: initial;
-  border-image: initial;
-  border-radius: 0.5rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopSelect = styled.span`
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0rem;
-  line-height: 1rem;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopFlex = styled.div`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: space-between;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopToo = styled.div`
-  display: flex;
-  align-items: center;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  width: 100%;
-  gap: 0.75rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopSpan = styled.span`
-  font-size: 0.9rem;
-  letter-spacing: 0;
-  color: #fff;
-  font-weight: 450;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopSp = styled.span`
-  cursor: pointer;
-  color: rgba(255, 255, 255, 1);
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopImg = styled.img`
-  width: 25px;
-  height: 25px;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopBtn = styled.button`
-  background: none;
-  border-color: transparent;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  margin-left: calc(0.5rem * -1);
-  color: rgba(255, 255, 255, 1);
-  outline: none;
-  box-shadow: none;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopRight = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 2px;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const TopMore = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const NavLeft = styled.div`
-  position: fixed;
-  top: 3.5rem;
-  right: 0;
-  width: 15rem;
-  height: 100vh;
-  z-index: 100;
-
-  @media screen and (max-width: 768px) {
-    position: relative;
-    width: 100%;
-    height: auto;
-  }
-`;
-
-const NavMain = styled.div`
-  display: flex;
-  align-items: stretch;
-  outline: none;
-  width: 100%;
-  height: 100%;
-  color: #000;
-  background-color: #ebebeb;
-  border-top-left-radius: 0rem;
-  border-top-right-radius: 0.75rem;
-
-  @media screen and (max-width: 768px) {
-    position: relative;
-    height: auto;
-  }
-`;
-
-const NavSubMain = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const NavStart = styled.div`
-  border-top-left-radius: 0;
-  margin-top: 0rem;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 3.5rem);
-
-  @media screen and (max-width: 768px) {
-    margin-top: 0;
-    height: auto;
-  }
-`;
-
-const NavRe = styled.div`
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0.75rem;
-  display: flex;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
-  background-color: #ebebeb;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(200, 200, 200, 0.5) transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.5);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.8);
-  }
-
-  @media screen and (max-width: 768px) {
-    height: auto;
-    padding: 1rem;
-    overflow: visible;
-  }
-`;
-
-const ListUl = styled.ul`
-  flex: 1 0 auto;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ListLi = styled.li`
-  padding-bottom: 1rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ListDiv = styled.div`
-  padding: 0 calc(0.75rem - 0);
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ListBtn = styled.button`
-  outline: 0.0625rem solid transparent;
-  color: rgba(97, 97, 97, 1);
-  text-transform: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  width: 100%;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  outline: none;
-  box-shadow: none;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-`;
-
-const ListSpan = styled.span`
-  color: rgba(97, 97, 97, 1);
-  text-transform: none;
-  font-weight: 600;
-`;
-
-const SectionDiv = styled.div`
-  margin-bottom: 1rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const SectionUl = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const SectionLi = styled.li`
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  padding: 0.5rem 0;
-  font-weight: 600;
-  color: #000;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const SectionAt = styled.button`
-  color: #4a4a4a;
-  outline: 0.0625rem solid transparent;
-  border-radius: 0.5rem;
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  max-width: 100%;
-  padding: 0 0.5rem 0 0.25rem;
-  margin: 0;
-  background: none;
-  border: none;
-  font-size: inherit;
-  line-height: inherit;
-  cursor: pointer;
-  text-decoration: none;
-  text-align: right;
-  appearance: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  outline: none;
-  box-shadow: none;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-    background-color: #fafafa;
-    color: rgba(48, 48, 48, 1);
-    text-decoration: none;
-  }
-
-  &:hover {
-    background-color: #fafafa;
-    color: rgba(48, 48, 48, 1);
-    text-decoration: none;
-  }
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const SectionIcon = styled.img`
-  flex-shrink: 0;
-  align-self: flex-start;
-  width: 1.1rem;
-  height: 1.1rem;
-  margin: 0.25rem 0 0.25rem 0.5rem;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const StoreSec = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
-
-const StoreItem = styled.li`
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #fafafa;
-  }
-
-  @media screen and (max-width: 768px) {
-    padding: 1rem;
-  }
-`;
-
-const StoreLink = styled.a`
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-`;
-
-const StoreIconImg = styled.img`
-  flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
-  margin-left: 0.5rem;
-`;
-
-const StoreLabel = styled.span`
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: rgba(97, 97, 97, 1);
-`;
-
-const MidWr = styled.div`
-  box-sizing: content-box;
-  max-width: 49.75rem;
-  padding: 0;
-  margin-top: 0.5rem;
-  margin-bottom: 4rem;
-  margin: 0 auto;
-`;
-
-const MidCo = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const MidUl = styled.ul`
-  padding: 0;
-  list-style: none;
-`;
-
-const MidDiv = styled.div`
-  box-sizing: content-box;
-  max-width: 49.75rem;
-  padding: 0;
-  margin: 0 auto;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-`;
-
-const MidStart = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-  gap: 1rem 0;
-`;
-
-const MidSe = styled.div`
-  background-color: rgba(255, 255, 255, 1);
-  box-shadow: initial;
-  border-radius: 8px;
-`;
-
-const MidThi = styled.div`
-  background-color: rgba(255, 255, 255, 1);
-  min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  border-radius: 8px;
-`;
-
-const MidLa = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-  gap: 1rem;
-`;
-
-const MidTop = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-`;
-
-const ChWr = styled.div`
-  display: grid;
-  align-items: center;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 0.5rem;
-`;
-
-const ChCo = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 1rem 0;
-`;
-
-const ChHe = styled.h1`
-  letter-spacing: 0rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25rem;
-  margin: 0;
-  text-align: inherit;
-`;
-
-const ChBtn = styled.button`
-  margin: 0;
-  min-height: 1.25rem;
-  min-width: 1.25rem;
-  justify-content: center;
-  text-align: center;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0rem 0rem;
-  background: transparent;
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: transparent;
-  color: inherit;
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-`;
-
-const ChSpan = styled.span`
-  margin: -0.125rem 0;
-  display: inline-flex;
-  align-items: center;
-`;
-
-const ChImg = styled.img`
-  width: 15px;
-  height: 15px;
-`;
-
-const MidMid = styled.div`
-  transition-delay: 0ms;
-  transition-duration: 300ms;
-  transition-timing-function: ease-in-out;
-  max-height: none;
-  overflow: visible;
-  padding-top: 0px;
-  padding-bottom: 0px;
-  transition-property: max-height;
-`;
-
-const StoWr = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-  gap: 1rem 0;
-`;
-
-const StoTop = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, auto);
-  gap: 1rem;
-`;
-
-const StoBot = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(3, auto);
-  gap: 1rem;
-`;
-
-const StoMap = styled.div`
-  grid-column: span 1;
-  grid-row: 1 / -1;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 1);
-  border-radius: 0.75rem;
-  box-shadow: 0rem 0.3125rem 0.3125rem -0.15625rem rgba(0, 0, 0, 0.03),
-    0rem 0.1875rem 0.1875rem -0.09375rem rgba(0, 0, 0, 0.02),
-    0rem 0.125rem 0.125rem -0.0625rem rgba(0, 0, 0, 0.02),
-    0rem 0.0625rem 0.0625rem -0.03125rem rgba(0, 0, 0, 0.03),
-    0rem 0.03125rem 0.03125rem 0rem rgba(0, 0, 0, 0.04),
-    0rem 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.06);
-  align-items: start;
-`;
-
-const StoBtn = styled.button`
-  justify-content: center;
-  text-align: center;
-  min-height: 1.75rem;
-  min-width: 1.75rem;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(255, 255, 255, 1);
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0rem -0.0625rem 0rem 0rem #b5b5b5 inset,
-    0rem 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.1) inset,
-    0rem 0.03125rem 0rem 0.09375rem #fff inset;
-  color: rgba(48, 48, 48, 1);
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-`;
-
-const StoSpan = styled.span`
-  font-weight: 550;
-  font-size: 0.75rem;
-  letter-spacing: 0rem;
-  line-height: 1rem;
-  margin: 0;
-  text-align: inherit;
-`;
-
-const StoreBot = styled.div`
-  background-color: initial;
-  box-shadow: initial;
-  border-end-start-radius: initial;
-  border-end-end-radius: initial;
-  border-start-end-radius: initial;
-  border-color: initial;
-  border-style: initial;
-  border-block-start-width: 0;
-  border-block-end-width: 0;
-  border-inline-start-width: 0;
-  border-inline-end-width: 0;
-  color: inherit;
-  min-height: initial;
-  min-width: initial;
-  outline-color: initial;
-  outline-style: none;
-  outline-width: 0;
-  overflow-x: visible;
-  overflow-y: visible;
-  width: initial;
-`;
-
-const StoreTop = styled.div`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  justify-content: flex-start;
-`;
-
-const StoreHe = styled.h3`
-  letter-spacing: 0rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.25rem;
-`;
-
-const StoreMid = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-`;
-
-const StoreEx = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-`;
-
-const StoreBtn = styled.button`
-  display: flex;
-  all: unset;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-`;
-
-const StoreDiv = styled.div`
-  display: flex;
-  width: 100%;
-  gap: 4px;
-`;
-
-const StoreSp = styled.span`
-  font-size: 0.8125rem;
-`;
-
-const StoreImg = styled.img`
-  display: block;
-  height: 1.5rem;
-  max-width: ${(props) => props.widthMax || "2.5rem"};
-  box-shadow: ${(props) =>
-    props.BoxShadow || "0 0 0.25rem 0 rgba(0, 0, 0, 0.17)"};
-  border-radius: 0.25rem;
-`;
-const SiteWr = styled.div`
-  grid-column: span 1;
-  grid-row: 1 / -1;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr auto;
-  padding: 0rem;
-  background-color: rgba(255, 255, 255, 1);
-  border-radius: 0.75rem;
-  box-shadow: 0rem 0.3125rem 0.3125rem -0.15625rem rgba(0, 0, 0, 0.03),
-    0rem 0.1875rem 0.1875rem -0.09375rem rgba(0, 0, 0, 0.02),
-    0rem 0.125rem 0.125rem -0.0625rem rgba(0, 0, 0, 0.02),
-    0rem 0.0625rem 0.0625rem -0.03125rem rgba(0, 0, 0, 0.03),
-    0rem 0.03125rem 0.03125rem 0rem rgba(0, 0, 0, 0.04),
-    0rem 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  position: relative;
-`;
-
-const SiteMid = styled.div`
-  padding: 1rem;
-  z-index: 520;
-  position: relative;
-`;
-
-const SiteDes = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-`;
-
-const SiteBo = styled.div`
-  display: flex;
-  padding: 1rem;
-  gap: 1rem;
-  z-index: 520;
-  position: relative;
-`;
-
-const SiteWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-`;
-
-const SiteSp = styled.span`
-  font-size: 0.8125rem;
-  letter-spacing: 0rem;
-  line-height: 1.25rem;
-  font-weight: 600;
-`;
-
-const SiteSpa = styled.span`
-  font-size: 0.8125rem;
-  letter-spacing: 0rem;
-  line-height: 1.25rem;
-  font-weight: 600;
-  color: rgba(97, 97, 97, 1);
-`;
-
-const SiteAt = styled.a`
-  font-size: 0.8125rem;
-  letter-spacing: 0rem;
-  line-height: 1.25rem;
-  font-weight: 600;
-  color: #458fff;
-  text-decoration: underline;
-
-  &:hover {
-    opacity: 0.8;
-  }
-`;
-
-const SiteBtn = styled.button`
-  all: unset;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-`;
-
-const SiteDiv = styled.div`
-  justify-content: center;
-  text-align: center;
-  min-height: 2rem;
-  min-width: 2rem;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.375rem 0.75rem;
-  flex: 1;
-
-  background: ${(props) =>
-    props.background
-      ? props.background
-      : `linear-gradient(
-          180deg,
-          rgba(48, 48, 48, 0) 63.53%,
-          rgba(255, 255, 255, 0.15) 100%
-        ), rgba(48, 48, 48, 1)`};
-
-  border: ${(props) => props.border || "none"};
-  border-radius: 0.5rem;
-
-  box-shadow: ${(props) =>
-    props.boxShadow
-      ? props.boxShadow
-      : `0rem -0.0625rem 0rem 0.0625rem rgba(0, 0, 0, 0.8) inset,
-         0rem 0rem 0rem 0.0625rem rgba(48, 48, 48, 1) inset,
-         0rem 0.03125rem 0rem 0.09375rem rgba(255, 255, 255, 0.25) inset`};
-
-  color: ${(props) => props.color || "rgba(255, 255, 255, 1)"};
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    opacity: 0.9;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const SiteEx = styled.div`
-  margin-bottom: 15rem;
-`;
-
-const SiteFir = styled.div`
-  z-index: 510;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(255, 255, 255, 1) 65.98%
-  );
-  position: absolute;
-  bottom: 5.9375rem;
-  left: 0;
-  right: 0;
-  height: 6.0625rem;
-  pointer-events: none;
-`;
-
-const SiteSec = styled.div`
-  z-index: 510;
-  background: rgba(255, 255, 255, 1);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 6.0625rem;
-  pointer-events: none;
-`;
-
-const SiteThi = styled.div`
-  --size: 50rem;
-  position: absolute;
-  z-index: 100;
-  top: 40%;
-  left: 50%;
-  display: grid;
-  overflow: hidden;
-  width: 50rem;
-  padding: calc(50rem / 20);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  aspect-ratio: 1;
-`;
-
-// First product - shows first (0s delay)
-const SiteSubThi = styled.div`
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  grid-area: 1 / 1;
-  object-fit: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: ${productRotation} 12s infinite ease-in-out;
-  animation-delay: 0s;
-  opacity: 1;
-`;
-
-// Second product - shows second (2s delay)
-const SiteSuThi = styled.div`
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  grid-area: 1 / 1;
-  object-fit: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: ${productRotation} 12s infinite ease-in-out;
-  animation-delay: 4s;
-  opacity: 0;
-`;
-
-// Third product - shows third (4s delay)
-const SiteSThi = styled.div`
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  grid-area: 1 / 1;
-  object-fit: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: ${productRotation} 12s infinite ease-in-out;
-  animation-delay: 8s;
-  opacity: 0;
-`;
-
-const SiteSubImg = styled.img`
-  width: 12.5rem;
-  height: 11.25rem;
-  user-select: none;
-  pointer-events: none;
-  object-fit: contain;
-`;
-
-const SiteFou = styled.div`
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -60%);
-  z-index: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 26.25rem;
-  height: 26.25rem;
-  background: #458fff0d;
-`;
-
-const CircleFi = styled.div`
-  width: 26.25rem;
-  height: 26.25rem;
-  background: #ffffff1a;
-  border-radius: 624.9375rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0.0625rem solid rgba(69, 143, 255, 1);
-  transition: all 0.3s ease-out;
-  overflow: hidden;
-  opacity: 0.4;
-`;
-
-const CircleSe = styled.div`
-  width: 23.75rem;
-  height: 23.75rem;
-  background: #ffffff1a;
-  border-radius: 624.9375rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0.0625rem solid rgba(69, 143, 255, 1);
-  transition: all 0.3s ease-out;
-  overflow: hidden;
-  opacity: 0.6;
-`;
-
-const CircleThi = styled.div`
-  width: 21.25rem;
-  height: 21.25rem;
-  background: #ffffff1a;
-  border-radius: 624.9375rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0.0625rem solid rgba(69, 143, 255, 1);
-  transition: all 0.3s ease-out;
-  overflow: hidden;
-  opacity: 1;
-`;
-
-const CircleFou = styled.div`
-  width: 18.75rem;
-  height: 18.75rem;
-  background: #ffffff1a;
-  border-radius: 624.9375rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0.0625rem solid rgba(69, 143, 255, 1);
-  transition: all 0.3s ease-out;
-  overflow: hidden;
-  opacity: 1;
-`;
-
-const CircleFiv = styled.div`
-  width: 16.25rem;
-  height: 16.25rem;
-
-  background: #ffffff1a;
-  border-radius: 624.9375rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0.0625rem solid rgba(69, 143, 255, 1);
-  transition: all 0.3s ease-out;
-  overflow: hidden;
-  opacity: 1;
-`;
-
-const CircleSi = styled.div`
-  width: 13.75rem;
-  height: 13.75rem;
-  background: #ffffff1a;
-  border-radius: 624.9375rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 0.0625rem solid rgba(69, 143, 255, 1);
-  transition: all 0.3s ease-out;
-  overflow: hidden;
-  opacity: 1;
-`;
-
-const OreWr = styled.div`
-  opacity: 1;
-  transition: opacity 50ms;
-  border-radius: 0.75rem;
-  position: relative;
-  min-width: 0;
-  max-width: 100%;
-  height: 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreCon = styled.div`
-  transition: width 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
-
-  height: 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreSubCon = styled.div`
-  max-width: none;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreTop = styled.div`
-  position: relative;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreSubTop = styled.div`
-  display: flex;
-  justify-content: space-between;
-  line-height: normal;
-  min-height: 1.75rem;
-  min-width: 0;
-  flex-wrap: nowrap;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreSu = styled.div`
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.5rem;
-  width: inherit;
-  overflow: hidden;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreDivImg = styled.div`
-  padding: 0.25rem;
-  border-radius: 0.375rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreHeDiv = styled.div`
-  margin-inline-start: calc(0.125rem * -1);
-  padding-inline-start: 0;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreHe = styled.h1`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 600;
-  font-size: 1.2rem;
-  line-height: 1.5rem;
-  color: rgba(48, 48, 48, 1);
-  margin: 0;
-  text-align: inherit;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreImg = styled.img`
-  width: 20px;
-  height: 20px;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreTopRight = styled.div`
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  align-self: flex-start;
-  justify-content: flex-end;
-  margin-left: 1rem;
-  white-space: nowrap;
-  max-width: 50%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreTopRi = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreTopFi = styled.div`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.375rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreSubFi = styled.div`
-  flex: 0 0 auto;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreSubBtn = styled.button`
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.25rem 0.75rem;
-  color: rgba(48, 48, 48, 1);
-  user-select: none;
-  touch-action: manipulation;
-  cursor: pointer;
-  all: unset;
-  border: none !important;
-  position: relative;
-  background: rgba(227, 227, 227, 1) !important;
-  box-shadow: none !important;
-  border: none;
-  border-radius: 0.5rem !important;
-  min-height: 1.75rem;
-  align-items: center;
-  text-align: center;
-  padding: 0.25rem 0.75rem;
-  justify-content: center;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-`;
-const OreSubImg = styled.img`
-  width: 15px;
-  height: 15px;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreSpan = styled.span`
-  display: inline-flex;
-  align-items: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreSpa = styled.span`
-  font-size: 0.8rem;
-  letter-spacing: 0rem;
-  font-weight: 550;
-  margin: 0;
-  text-align: inherit;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreMid = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: calc(1rem * -1);
-  margin-left: calc(1rem * -1);
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreMidSub = styled.div`
-  max-width: calc(100% - 1rem);
-  margin-top: 1rem;
-  margin-left: 1rem;
-  flex: 1 1 100%;
-  min-width: 51%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreMidSu = styled.div`
-  background-color: rgba(255, 255, 255, 1);
-  box-shadow: initial;
-  border-radius: initial;
-  border-radius: 8px;
-  margin-top: 1rem;
-  padding: 4rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const OreFlex = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: initial;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenterTop = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenterTopImg = styled.img`
-  width: 200px;
-  height: 200px;
-  transition: opacity 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
-  z-index: 100;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenterBot = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenterBotBtnDiv = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenterBotBtn = styled.button`
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  min-height: 1.75rem;
-  min-width: 1.75rem;
-  margin-top: 0.5rem;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.375rem 0.75rem;
-  background: linear-gradient(
-      180deg,
-      rgba(48, 48, 48, 0) 63.53%,
-      rgba(255, 255, 255, 0.15) 100%
-    ),
-    rgba(48, 48, 48, 1);
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0.5rem;
-  color: rgba(255, 255, 255, 1);
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: manipulation;
-  margin-top: 0.5rem;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenterBotSp = styled.span`
-  font-size: 0.8rem;
-  letter-spacing: 0rem;
-  font-weight: 600;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenSp = styled.span`
-  font-size: 0.9rem;
-  letter-spacing: 0rem;
-  font-weight: 500;
-  text-align: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenDivMain = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 400px;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const CenDiv = styled.div`
-  font-size: 1rem;
-  letter-spacing: 0rem;
-  font-weight: 500;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0.2rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const CenDivSp = styled.span`
-  font-size: 1rem;
-  letter-spacing: 0rem;
-  font-weight: 600;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreBot = styled.div`
-  max-width: calc(100% - 1rem);
-  margin-top: 1rem;
-  margin-left: 1rem;
-  flex: 1 1 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreBotSub = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 1.25rem;
-  width: auto;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreBotBtn = styled.button`
-  appearance: none;
-  display: inline;
-  text-align: inherit;
-  padding: 0;
-  background: none;
-  border: 0;
-  color: rgba(0, 91, 211, 1);
-  text-decoration: underline;
-  cursor: pointer;
-  touch-action: manipulation;
-  margin-right: 3px;
-  font-size: 0.75rem;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreBotPa = styled.p`
-  font-size: 0.75rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const OreBotSpa = styled.span`
-  font-size: 0.75rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProWr = styled.div`
-  opacity: 1;
-  transition: opacity 50ms;
-  border-radius: 0.75rem;
-  position: relative;
-  padding-bottom: 0px;
-  flex: 1 1;
-  min-width: 0;
-  max-width: 100%;
-  height: 100%;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProCon = styled.div`
-  transition: width 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
-  width: calc(100vw - 15rem - 0px - 0px - 0);
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProStart = styled.div`
-  padding: 0 1rem;
-  margin: 0 auto;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProSub = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-  margin-top: 0.5rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProDiv = styled.div`
-  background-color: rgba(255, 255, 255, 1);
-  box-shadow: initial;
-  border-radius: 8px;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTop = styled.div`
-  height: auto !important;
-  width: 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProTopSt = styled.div`
-  border-bottom: 0.0625rem solid rgba(227, 227, 227, 1);
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-  background: rgba(255, 255, 255, 1);
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProTopFl = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: start;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProTopLe = styled.div`
-  flex: 1 1;
-  height: 2.75rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopLef = styled.div`
-  transition: opacity 150ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  opacity: 1;
-  padding: 5px;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopLeft = styled.div`
-  position: relative;
-  display: flex;
-  padding-right: 0.5rem;
-  align-items: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProTopLeftTo = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  margin: 0;
-  list-style: none;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  flex-wrap: wrap;
-  align-items: stretch;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopLeftBtn = styled.button`
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border: 0;
-  background: rgba(0, 0, 0, 0.05);
-  color: rgba(181, 181, 181, 1);
-  border-radius: 0.5rem;
-  text-decoration: none;
-  width: 100%;
-  height: 1.75rem;
-  min-width: 100%;
-  margin-top: 0.0625rem;
-  margin-bottom: calc(0.0625rem * -1);
-  outline: none;
-  text-align: center;
-  white-space: nowrap;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopLeftSp = styled.span`
-  font-size: 0.85rem;
-  font-weight: 700;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProTopRightTo = styled.div`
-  position: relative;
-  right: 0;
-  top: 0;
-  padding: 0;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopPlus = styled.div`
-  cursor: default;
-  color: rgba(181, 181, 181, 1);
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  width: 2rem;
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border: 0;
-  border-radius: 0.5rem;
-  background-color: transparent;
-  text-decoration: none;
-  height: 1.75rem;
-  min-width: 100%;
-  margin-top: 0.0625rem;
-  margin-bottom: calc(0.0625rem * -1);
-  outline: none;
-  text-align: center;
-  white-space: nowrap;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProPlus = styled.img`
-  width: 15px;
-  height: 15px;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProUpDow = styled.img`
-  width: 15px;
-  height: 15px;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProFilter = styled.img`
-  width: 25px;
-  height: 15px;
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProTopRi = styled.div`
-  position: relative;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0.375rem 0.5rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopRiDiv = styled.div`
-  display: block;
-  unicode-bidi: isolate;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 0.5rem;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProTopRiBtn = styled.button`
-  display: flex;
-  outline: 0;
-  position: relative;
-  justify-content: center;
-  text-align: center;
-  min-height: 1.75rem;
-  min-width: 1.75rem;
-  background: rgba(0, 0, 0, 0.05);
-  color: rgba(181, 181, 181, 1);
-  box-shadow: none;
-  user-select: none;
-  pointer-events: none;
-  all: unset;
-  box-sizing: border-box;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.25rem 0.25rem;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBot = styled.div`
-  background-color: rgba(247, 247, 247, 1);
-  box-shadow: initial;
-  border-color: initial;
-  border-style: initial;
-  border-block-start-width: 0;
-  border-block-end-width: 0;
-  border-inline-start-width: 0;
-  border-inline-end-width: 0;
-  color: #000#;
-  min-height: initial;
-  min-width: initial;
-  max-width: initial;
-  outline-color: initial;
-  outline-style: initial;
-  overflow-x: initial;
-  overflow-y: initial;
-  width: initial;
-  padding: 2rem;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBo = styled.div`
-  display: flex;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBott = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  justify-content: initial;
-  gap: initial, initial, initial, 0.25rem;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBottHe = styled.h3`
-  font-size: 0.9rem;
-  font-weight: 600;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBottPa = styled.p`
-  font-size: 0.85rem;
-  font-weight: 450;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBottDiv = styled.div`
-  display: flex;
-  margin-top: 12px;
-  justify-content: center;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBottSp = styled.span`
-  font-size: 0.75rem;
-  font-weight: 550;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBottBtn = styled.button`
-  justify-content: center;
-  text-align: center;
-  min-height: 1.75rem;
-  min-width: 1.75rem;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(255, 255, 255, 1);
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0rem -0.0625rem 0rem 0rem #b5b5b5 inset,
-    0rem 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.1) inset,
-    0rem 0.03125rem 0rem 0.09375rem #fff inset;
-  color: rgba(48, 48, 48, 1);
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMid = styled.div`
-  padding: 2rem;
-  margin-top: 1rem;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMidSub = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMidStart = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMidTop = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: initial;
-  justify-content: initial;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMidImg = styled.img`
-  overflow-clip-margin: content-box;
-  overflow: clip;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMidHe = styled.h3`
-  font-size: 1.5rem;
-  font-weight: 600;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProMidPa = styled.p`
-  font-size: 1rem;
-  font-weight: 450;
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBtnWr = styled.div`
-  padding: 10px 10px 0 0;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBtnFl = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: start;
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBtnLe = styled.button`
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 1.75rem;
-  min-height: 1.75rem;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: linear-gradient(
-      180deg,
-      rgba(48, 48, 48, 0) 63.53%,
-      rgba(255, 255, 255, 0.15) 100%
-    ),
-    rgba(48, 48, 48, 1);
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0rem -0.0625rem 0rem 0.0625rem rgba(0, 0, 0, 0.8) inset,
-    0rem 0rem 0rem 0.0625rem rgba(48, 48, 48, 1) inset,
-    0rem 0.03125rem 0rem 0.09375rem rgba(255, 255, 255, 0.25) inset;
-  color: rgba(255, 255, 255, 1);
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: manipulation;
-  margin-left: 12px;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-
-  @media screen and (max-width: 768px) {
-  }
-`;
-
-const ProBtnSp = styled.span`
-  font-size: 0.85rem;
-  font-weight: 600;
-  @media screen and (max-width: 768px) {
-  }
-`;
-const ProBtnRi = styled.button`
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 1.75rem;
-  min-height: 1.75rem;
-  all: unset;
-  position: relative;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(255, 255, 255, 1);
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0rem -0.0625rem 0rem 0rem #b5b5b5 inset,
-    0rem 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.1) inset,
-    0rem 0.03125rem 0rem 0.09375rem #fff inset;
-  color: rgba(48, 48, 48, 1);
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
-
-  @media screen and (max-width: 768px) {
-  }
-`;
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("المنتجات");
-  const Pages = [
-    { text: "الرئيسية", icon: homeIcon },
-    { text: "الطلبات", icon: ordersIcon },
-    { text: "المنتجات", icon: tagIcon },
-    { text: "العملاء", icon: customersIcon },
-    { text: "التسويق", icon: marketingIcon },
-    { text: "الخصومات", icon: discountsIcon },
-    { text: "المحتوى", icon: contentIcon },
-    { text: "الأسواق", icon: marketsIcon },
-    { text: "التحليلات", icon: analyticsIcon },
-  ];
+  const dispatch = useDispatch();
+  const activeTab = useSelector((state) => state.tab.activeTab);
+  const storeName = useSelector((state) => state.tab.storeName);
+  const [localName, setLocalName] = useState("");
+  const [storeToggle, setStoreToggle] = useState(true);
+  const [inputModule, setInputModule] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("الكل");
+  const [showTimeOutModal, setShowtimeOutModel] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [toggleSubscribe, setToggleSubscribe] = useState(true);
+  const [ordersData, setOrdersData] = useState([]);
+  const [preOrdered, setPreOrdered] = useState(true);
+  const [toggleTop, setToggleTop] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { currentUser, isUpdating, isError, errorMessage, isSuccess } =
+    useSelector(userSelector);
 
   const handleTab = (item) => {
-    setActiveTab(item);
+    dispatch(setSettingTab(item));
+    navigate(`/preference?tab=${encodeURIComponent(item)}`);
   };
 
-  const Sales = [
-    { text: "قنوات البيع", subText: "المتجر الإلكتروني", icon: storeIcon },
-    { text: "التطبيقات", subText: "إضافة", icon: plusIcon },
+  const businessId = currentUser?._id;
+  const accessToken = currentUser?.accessToken;
+
+  const onOrderClick = (quotaId) => {
+    if (quotaId) {
+      navigate(`/quota/${quotaId}`);
+    }
+  };
+
+  const handleTokenExpiration = () => {
+    setShowtimeOutModel(true);
+  };
+
+  const handleLoginRedirect = () => {
+    dispatch(signOut());
+    dispatch(clearState());
+  };
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!accessToken || !businessId) {
+        console.log("Missing:", { accessToken, businessId });
+        return;
+      }
+
+      setIsLoading(true);
+      setError("");
+      console.log(businessId);
+
+      try {
+        const response = await axios.get(`${BASE_URL}/quota`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        setOrdersData(response.data);
+        setPreOrdered(response.data.length > 0);
+      } catch (err) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          handleTokenExpiration();
+        } else {
+          setError("تعذّر جلب بيانات الطلبات");
+        }
+        setPreOrdered(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [accessToken, businessId]);
+
+  const filters = [
+    "الكل",
+    "مدفوع",
+    "مفتوح",
+    "فشل",
+    "قيد المراجعة",
+    "تم الاسترداد",
+    "ملغي",
   ];
+
+  const handleDestination = (des) => {
+    navigate(des);
+  };
+
+  const handleToggle = (toggle) => {
+    toggle((pre) => !pre);
+  };
+
+  const handleStoreName = async () => {
+    if (!currentUser?._id) {
+      console.error("User ID not found");
+      return;
+    }
+
+    const trimmedName = localName.trim();
+    if (!trimmedName) {
+      console.error("Store name cannot be empty");
+      return;
+    }
+
+    dispatch(setStoreName(trimmedName));
+
+    try {
+      setIsLoading(true);
+      await dispatch(
+        updateStoreName({
+          id: currentUser._id,
+          storeName: trimmedName,
+        })
+      ).unwrap();
+    } catch (error) {
+      console.error("Failed to update store name:", error);
+    } finally {
+      setIsLoading(false);
+      setInputModule(false);
+    }
+  };
 
   const ImgArray1 = [
     { text: "", icon: paypalIcon },
@@ -2262,14 +559,53 @@ const Dashboard = () => {
   ];
   const ImgArray3 = [{ text: "f8u1iq-av.myshopify.com", icon: copyIcon }];
 
+  const BtnArray = [
+    { icon: refreshIcon, btn: handleStoreName },
+    { icon: expandIcon, btn: handleStoreName },
+  ];
+
+  const AdArray = [
+    { title: "Online store sessions" },
+    { title: "Online store rate" },
+    { title: "Average order value" },
+    { title: "Total sales" },
+    { title: "Sales attributed to marketing" },
+    { title: "Orders attributed to marketing" },
+  ];
+
+  const BreakArray = [
+    { title: "كامل المبيعات", price: "0.00" },
+    { title: "الخصومات", price: "0.00" },
+    { title: "الترجيع", price: "0.00" },
+    { title: "صافي المبيعات", price: "0.00" },
+    { title: "تكاليف الشحن", price: "0.00" },
+    { title: "الضريبة", price: "0.00" },
+    { title: "جميع المبيعات", price: "0.00" },
+  ];
+
+  const TimeOutModel = () => {
+    if (!showTimeOutModal) return null;
+    return (
+      <OverlayRedirect>
+        <ModalRedirect>
+          <MessageRedirect>الجلسة انتهت سجل مره ثانية</MessageRedirect>
+          <SubMessageRedirect>يجب تسجيل الدخول من جديد</SubMessageRedirect>
+          <ButtonRedirect onClick={handleLoginRedirect}>
+            سجل الآن
+          </ButtonRedirect>
+        </ModalRedirect>
+      </OverlayRedirect>
+    );
+  };
+
   const renderContent = () => {
     const StoreMapped = ({
       title,
       btnText,
       arrayText,
-      subText,
       widthText,
       boxText,
+      handlePro,
     }) => {
       return (
         <StoMap>
@@ -2285,7 +621,7 @@ const Dashboard = () => {
                       <StoreSp>{item.text}</StoreSp>
                       <StoreImg
                         widthMax={widthText}
-                        BoxShadow={boxText}
+                        boxShadow={boxText}
                         src={item.icon}
                         alt=""
                       />
@@ -2296,7 +632,7 @@ const Dashboard = () => {
             </StoreEx>
           </StoreMid>
           <StoreBot>
-            <StoBtn href="">
+            <StoBtn onClick={handlePro}>
               <StoSpan>{btnText}</StoSpan>
             </StoBtn>
           </StoreBot>
@@ -2304,7 +640,14 @@ const Dashboard = () => {
       );
     };
 
-    const SiteMapped = ({ imgFirst, imgSec, imgThi, priBtn, secBtn }) => {
+    const SiteMapped = ({
+      imgFirst,
+      imgSec,
+      imgThi,
+      priBtn,
+      secBtn,
+      handlePri,
+    }) => {
       return (
         <SiteWr>
           <SiteFir></SiteFir>
@@ -2340,14 +683,14 @@ const Dashboard = () => {
               <SiteWrap>
                 <SiteSpa>ابدأ بإضافة منتج وبعض التفاصيل الأساسية.</SiteSpa>
                 <SiteSpa>
-                  <SiteAt href="">ابدأ بمنتج نموذجي</SiteAt>
+                  <SiteAt>ابدأ بمنتج نموذجي</SiteAt>
                 </SiteSpa>
               </SiteWrap>
             </SiteDes>
           </SiteMid>
           <SiteBo>
             <SiteDiv>
-              <SiteBtn>
+              <SiteBtn onClick={handlePri}>
                 <SiteSp>{priBtn}</SiteSp>
               </SiteBtn>
             </SiteDiv>
@@ -2374,6 +717,7 @@ const Dashboard = () => {
       paraText,
       firBtn,
       secBtn,
+      handlePro,
       exFir,
       exSec,
       exBtn,
@@ -2443,7 +787,7 @@ const Dashboard = () => {
                           <ProMidPa>{paraText}</ProMidPa>
                           <ProBtnWr>
                             <ProBtnFl>
-                              <ProBtnLe>
+                              <ProBtnLe onClick={handlePro}>
                                 <ProBtnSp>{firBtn}</ProBtnSp>
                               </ProBtnLe>
                               <ProBtnRi>
@@ -2476,6 +820,45 @@ const Dashboard = () => {
         </ProWr>
       );
     };
+    const AbandonProps = ({ title, imgSrc, heText, paraText, imgSvg }) => {
+      return (
+        <ProWr>
+          <ProCon>
+            <ProStart>
+              <OreTop>
+                <OreSubTop>
+                  <OreSu>
+                    <OreDivImg>
+                      <span>
+                        <OreImg src={imgSrc} alt="" />
+                      </span>
+                    </OreDivImg>
+                    <OreHeDiv>
+                      <OreHe>{title}</OreHe>
+                    </OreHeDiv>
+                  </OreSu>
+                </OreSubTop>
+              </OreTop>
+              <ProSub>
+                <ProDiv>
+                  <ProMid>
+                    <ProMidSub>
+                      <ProMidStart>
+                        <ProMidTop>
+                          <ProMidHe>{heText}</ProMidHe>
+                          <AbaMidPa>{paraText}</AbaMidPa>
+                        </ProMidTop>
+                        <ProMidImg src={imgSvg} alt="" />
+                      </ProMidStart>
+                    </ProMidSub>
+                  </ProMid>
+                </ProDiv>
+              </ProSub>
+            </ProStart>
+          </ProCon>
+        </ProWr>
+      );
+    };
 
     const OrderProps = ({
       title,
@@ -2488,6 +871,7 @@ const Dashboard = () => {
       exFir,
       exSec,
       imgSvg,
+      handleSub,
     }) => {
       return (
         <OreWr>
@@ -2536,7 +920,7 @@ const Dashboard = () => {
                           <CenSp>{paraText}</CenSp>
                         </CenDivMain>
                         <CenterBotBtnDiv>
-                          <CenterBotBtn>
+                          <CenterBotBtn onClick={handleSub}>
                             <CenterBotSp>{firBtn}</CenterBotSp>
                           </CenterBotBtn>
                         </CenterBotBtnDiv>
@@ -2559,6 +943,393 @@ const Dashboard = () => {
       );
     };
 
+    const ReportProps = ({ title, tran }) => {
+      return (
+        <RepSec transformLoc={tran}>
+          <RepSecFi>
+            <RepSecBtn>
+              <RepBtnDiv>
+                <RepBtnSec>
+                  <RepBtnFl>
+                    <RepFl>
+                      <RepFlex>
+                        <RepFlTop>{title}</RepFlTop>
+                      </RepFlex>
+                    </RepFl>
+                    <ReportWr>
+                      <ReportText>
+                        <ReportTe>
+                          <ReportPa> 0 ريال</ReportPa>
+                        </ReportTe>
+                        <ReportTex>
+                          <ReportImg src={removeIcon} alt="" />
+                        </ReportTex>
+                      </ReportText>
+                      <ReportLine>
+                        <ReportLin>
+                          <ReportLi>
+                            <ReportLiFi>
+                              <ReportImg src={pulseIcon} alt="" />
+                            </ReportLiFi>
+                          </ReportLi>
+                        </ReportLin>
+                      </ReportLine>
+                    </ReportWr>
+                  </RepBtnFl>
+                </RepBtnSec>
+              </RepBtnDiv>
+            </RepSecBtn>
+          </RepSecFi>
+        </RepSec>
+      );
+    };
+
+    const AnalyticProps = ({ title, tran }) => {
+      return (
+        <AnalWr>
+          <AnalCon>
+            <AnalSub>
+              <AnalMain>
+                <AnalPad>
+                  <AnalFl>
+                    <AnalTop>
+                      <AnalTopBtn>
+                        <AnalTopPad>
+                          <AnalTopFl>
+                            <AnalTopGr>
+                              <span>
+                                <AnalTopGrBtn>
+                                  <AnalTopGrHe>
+                                    <AnalGrSp>
+                                      مجموع المبيعات من البداية
+                                    </AnalGrSp>
+                                  </AnalTopGrHe>
+                                </AnalTopGrBtn>
+                              </span>
+                            </AnalTopGr>
+                          </AnalTopFl>
+                        </AnalTopPad>
+                      </AnalTopBtn>
+                    </AnalTop>
+                    <GraphWr>
+                      <GraphTop>
+                        <GraphTopCon>
+                          <GraphTopPa>0 ريال</GraphTopPa>
+                        </GraphTopCon>
+                        <ReportTex>
+                          <ReportImg src={removeIcon} alt="" />
+                        </ReportTex>
+                      </GraphTop>
+                      <GraphBot>
+                        <GraphBotWr>
+                          <GraphBotCon>
+                            <GraphBotSt>
+                              <AllStart>
+                                <YAxisLabels>
+                                  <YAxisLabel>10 ريال</YAxisLabel>
+                                  <YAxisLabel>5 ريال</YAxisLabel>
+                                  <YAxisLabel>0 ريال</YAxisLabel>
+                                </YAxisLabels>
+                                <ChartLine />
+                                <XAxisLabels>
+                                  <XAxisLabel>12 AM</XAxisLabel>
+                                  <XAxisLabel>3 AM</XAxisLabel>
+                                  <XAxisLabel>6 AM</XAxisLabel>
+                                  <XAxisLabel>9 AM</XAxisLabel>
+                                  <XAxisLabel>12 PM</XAxisLabel>
+                                  <XAxisLabel>3 PM</XAxisLabel>
+                                  <XAxisLabel>6 PM</XAxisLabel>
+                                  <XAxisLabel>9 PM</XAxisLabel>
+                                </XAxisLabels>
+                              </AllStart>
+                              <GraWr>
+                                <GraBtn>
+                                  <GraBtnImgCon>
+                                    <GraBtnImg src={removeIcon} alt="" />
+                                  </GraBtnImgCon>
+                                  <GraSp>
+                                    <span>Jun 26, 2025</span>
+                                  </GraSp>
+                                </GraBtn>
+                                <GraBtn>
+                                  <GraBtnImgCon>
+                                    <GraBtnImg src={removeIcon} alt="" />
+                                  </GraBtnImgCon>
+                                  <GraSp>
+                                    <span>Jun 27, 2025</span>
+                                  </GraSp>
+                                </GraBtn>
+                              </GraWr>
+                            </GraphBotSt>
+                          </GraphBotCon>
+                        </GraphBotWr>
+                      </GraphBot>
+                    </GraphWr>
+                  </AnalFl>
+                </AnalPad>
+              </AnalMain>
+            </AnalSub>
+          </AnalCon>
+        </AnalWr>
+      );
+    };
+
+    const CampaignProps = ({ title, imgSrc, subTitle, btnText }) => {
+      return (
+        <AdWr>
+          <CampWr>
+            <CampCon>
+              <CampCol>
+                <CampFl>
+                  <CampFlTop>
+                    <CampFlHe>{title}</CampFlHe>
+                    <CampFlDiv>
+                      <CampFlPa>{subTitle}</CampFlPa>
+                    </CampFlDiv>
+                    <CampBtnWr>
+                      <CampBtnCon>
+                        <CampBtnBtn>
+                          <CampBtnSp>{btnText}</CampBtnSp>
+                        </CampBtnBtn>
+                      </CampBtnCon>
+                    </CampBtnWr>
+                  </CampFlTop>
+                  <img src={imgSrc} alt="" />
+                </CampFl>
+              </CampCol>
+            </CampCon>
+          </CampWr>
+        </AdWr>
+      );
+    };
+
+    const BreakProps = ({ title, tran }) => {
+      return (
+        <BreakWr>
+          <AnalCon>
+            <AnalSub>
+              <AnalMain>
+                <AnalPad>
+                  <AnalFl>
+                    <AnalTop>
+                      <AnalTopBtn>
+                        <AnalTopPad>
+                          <AnalTopFl>
+                            <AnalTopGr>
+                              <span>
+                                <AnalTopGrBtn>
+                                  <AnalTopGrHe>
+                                    <AnalGrSp>
+                                      مجموع المبيعات من البداية
+                                    </AnalGrSp>
+                                  </AnalTopGrHe>
+                                </AnalTopGrBtn>
+                              </span>
+                            </AnalTopGr>
+                          </AnalTopFl>
+                        </AnalTopPad>
+                      </AnalTopBtn>
+                    </AnalTop>
+                    <BreakCon>
+                      <BreakSub>
+                        <BreakRe>
+                          <BreakUl>
+                            {BreakArray.map((item, index) => {
+                              return (
+                                <BreakLi>
+                                  <BreakLiSp>
+                                    <BreakLiBtn>{item.title}</BreakLiBtn>
+                                  </BreakLiSp>
+                                  <BreakLiSpan>
+                                    <BreakPrice>ريال 0.00</BreakPrice>
+                                    <ReportTex>
+                                      <ReportImg src={removeIcon} alt="" />
+                                    </ReportTex>
+                                  </BreakLiSpan>
+                                </BreakLi>
+                              );
+                            })}
+                          </BreakUl>
+                        </BreakRe>
+                      </BreakSub>
+                    </BreakCon>
+                  </AnalFl>
+                </AnalPad>
+              </AnalMain>
+            </AnalSub>
+          </AnalCon>
+        </BreakWr>
+      );
+    };
+
+    const PageProps = ({ title, subTitle, imgSvg, tran }) => {
+      return (
+        <ProWr>
+          <ProCon>
+            <ProStart>
+              <OreTop>
+                <OreSubTop>
+                  <OreSu>
+                    <OreDivImg>
+                      <span>
+                        <OreImg src={marketsIcon} alt="" />
+                      </span>
+                    </OreDivImg>
+                    <OreHeDiv>
+                      <OreHe>{title}</OreHe>
+                    </OreHeDiv>
+                  </OreSu>
+                  {subTitle && (
+                    <OreTopRight>
+                      <OreTopRi>
+                        <OreTopFi>
+                          <OreSubFi>
+                            <RepBtn>
+                              <OreSpa>{subTitle}</OreSpa>
+                            </RepBtn>
+                          </OreSubFi>
+                        </OreTopFi>
+                      </OreTopRi>
+                    </OreTopRight>
+                  )}
+                </OreSubTop>
+              </OreTop>
+              <ProSub>
+                <ProDiv>
+                  <ProTop>
+                    <ProTopSt>
+                      <ProTopFl>
+                        <ProTopLe>
+                          <ProTopLef>
+                            <ProTopLeft>
+                              <ProTopRightTo>
+                                <MarketTopBtn>
+                                  <MarketMidImg src={selectIcon} alt="" />
+                                </MarketTopBtn>
+                              </ProTopRightTo>
+                            </ProTopLeft>
+                          </ProTopLef>
+                        </ProTopLe>
+                        <SearWr>
+                          <SearLe>
+                            <span>
+                              <SearLeImg src={inputIcon} alt="" />
+                            </span>
+                          </SearLe>
+                          <SearLeIn
+                            type="text"
+                            placeholder="ابحث بكل الاسواق"
+                          />
+                          <SearSha></SearSha>
+                        </SearWr>
+                        <ProTopRi>
+                          <span>
+                            <ProTopRiDiv>
+                              <MarketTopBtn>
+                                <MarketMidImg src={rightBlockIcon} alt="" />
+                              </MarketTopBtn>
+                            </ProTopRiDiv>
+                          </span>
+                        </ProTopRi>
+                      </ProTopFl>
+                    </ProTopSt>
+                  </ProTop>
+                  <MarkMid>
+                    <MarkTable>
+                      <MarkTabHe>
+                        <MarkTabTr>
+                          <MarkTh>
+                            <MarkBtnWr>
+                              <MarkBtnCon>
+                                <MarkBtn>
+                                  <MarkBtnSp>السوق</MarkBtnSp>
+                                  <span></span>
+                                </MarkBtn>
+                              </MarkBtnCon>
+                            </MarkBtnWr>
+                          </MarkTh>
+                          <MarkTw>
+                            <MarkTwDiv>
+                              <MarkBtnSp>الحالة</MarkBtnSp>
+                            </MarkTwDiv>
+                          </MarkTw>
+                          <MarkTw>
+                            <MarkTwDiv>
+                              <MarkBtnSp>تخصيص</MarkBtnSp>
+                            </MarkTwDiv>
+                          </MarkTw>
+                        </MarkTabTr>
+                      </MarkTabHe>
+                      <MarkTabBod>
+                        <BodyWr>
+                          <BodyTh>
+                            <BodyBtnWr>
+                              <BodyBtnCon>
+                                <BodyBtn>
+                                  <BodyBtnSp>
+                                    المملكة العربية السعودية
+                                  </BodyBtnSp>
+                                  <span></span>
+                                </BodyBtn>
+                              </BodyBtnCon>
+                            </BodyBtnWr>
+                          </BodyTh>
+                          <BodyTw>
+                            <BodyTwDiv>
+                              <MarkBtnSp>نشط</MarkBtnSp>
+                            </BodyTwDiv>
+                          </BodyTw>
+                          <BodyTw>
+                            <BodyTwDiv>
+                              <BodyBtSp>
+                                <BodyImg src={domainIcon} alt="" />
+                              </BodyBtSp>
+                              <BodyBtSp>
+                                <BodyImg src={catalogeIcon} alt="" />
+                              </BodyBtSp>
+                            </BodyTwDiv>
+                          </BodyTw>
+                        </BodyWr>
+                      </MarkTabBod>
+                      <MarkTabBod>
+                        <BodyWr>
+                          <BodyTh background={"rgba(248, 247, 255, 1)"}>
+                            <BodyBtnWr>
+                              <BodyBtnCon>
+                                <BodyBtn>
+                                  <BodyRiBtnSp>اصنع سوق عالمي</BodyRiBtnSp>
+                                  <span></span>
+                                </BodyBtn>
+                              </BodyBtnCon>
+                            </BodyBtnWr>
+                          </BodyTh>
+                          <BodyTw background={"rgba(248, 247, 255, 1)"}>
+                            <BodyTwDiv>
+                              <MarkBtnSp></MarkBtnSp>
+                            </BodyTwDiv>
+                          </BodyTw>
+                          <BodyTh background={"rgba(248, 247, 255, 1)"}>
+                            <BodyBtnWr>
+                              <BodyBtnCon>
+                                <BodyBtn>
+                                  <BodyRiBtnSp>ازالة</BodyRiBtnSp>
+                                  <span></span>
+                                </BodyBtn>
+                              </BodyBtnCon>
+                            </BodyBtnWr>
+                          </BodyTh>
+                        </BodyWr>
+                      </MarkTabBod>
+                    </MarkTable>
+                  </MarkMid>
+                </ProDiv>
+              </ProSub>
+            </ProStart>
+          </ProCon>
+        </ProWr>
+      );
+    };
+
     switch (activeTab) {
       case "الرئيسية":
         return (
@@ -2570,40 +1341,72 @@ const Dashboard = () => {
                     <StartTop>
                       <div></div>
                     </StartTop>
-                    <TopUl>
-                      <TopLi>
-                        <TopStart>
-                          <TopRe>
-                            <TopFlex>
-                              <TopToo>
+                    {inputModule ? (
+                      <ModalOverlay>
+                        <ModalContainer>
+                          <ModalClose
+                            onClick={() => handleToggle(setInputModule)}
+                          >
+                            <ModalImg src={crossIcon} alt="" />
+                          </ModalClose>
+                          <ModalHeader>اختار اسم لمتجرك</ModalHeader>
+                          <StoreInput
+                            placeholder="اختار اسم المتجر"
+                            value={localName}
+                            onChange={(e) => setLocalName(e.target.value)}
+                          />
+                          <ButtonRow>
+                            <Button onClick={handleStoreName}>
+                              {isLoading ? "جاري المعالجة ..." : "احفظ"}
+                            </Button>
+                          </ButtonRow>
+                        </ModalContainer>
+                      </ModalOverlay>
+                    ) : null}
+                    {toggleSubscribe ? (
+                      <TopUl>
+                        <TopLi>
+                          <TopStart>
+                            <TopRe>
+                              <TopFlex>
+                                <TopToo>
+                                  <div>
+                                    <TopMore>
+                                      <TopSpan>
+                                        <span>
+                                          "اختر خطة واحصل على 3 أشهر مقابل 1
+                                          ريال شهريًا
+                                        </span>
+                                      </TopSpan>
+                                    </TopMore>
+                                  </div>
+                                  <TopAt
+                                    onClick={() => {
+                                      handleDestination("/pay");
+                                    }}
+                                  >
+                                    <TopSelect>اختار الخطة</TopSelect>
+                                  </TopAt>
+                                </TopToo>
                                 <div>
-                                  <TopMore>
-                                    <TopSpan>
-                                      <span>
-                                        "اختر خطة واحصل على 3 أشهر مقابل 1 ريال
-                                        شهريًا
-                                      </span>
-                                    </TopSpan>
-                                  </TopMore>
+                                  <TopRight>
+                                    <TopBtn
+                                      onClick={() => {
+                                        handleToggle(setToggleSubscribe);
+                                      }}
+                                    >
+                                      <TopSp>
+                                        <TopImg src={crossIcon} alt="" />
+                                      </TopSp>
+                                    </TopBtn>
+                                  </TopRight>
                                 </div>
-                                <TopAt href="">
-                                  <TopSelect>اختار الخطة</TopSelect>
-                                </TopAt>
-                              </TopToo>
-                              <div>
-                                <TopRight>
-                                  <TopBtn>
-                                    <TopSp>
-                                      <TopImg src={crossIcon} alt="" />
-                                    </TopSp>
-                                  </TopBtn>
-                                </TopRight>
-                              </div>
-                            </TopFlex>
-                          </TopRe>
-                        </TopStart>
-                      </TopLi>
-                    </TopUl>
+                              </TopFlex>
+                            </TopRe>
+                          </TopStart>
+                        </TopLi>
+                      </TopUl>
+                    ) : null}
                     <MidWr>
                       <MidCo>
                         <MidUl>
@@ -2615,8 +1418,12 @@ const Dashboard = () => {
                                     <MidTop>
                                       <ChWr>
                                         <ChCo>
-                                          <ChHe>غير اسم المتجر</ChHe>
-                                          <ChBtn href="">
+                                          <ChHe>{storeName}</ChHe>
+                                          <ChBtn
+                                            onClick={() => {
+                                              handleToggle(setInputModule);
+                                            }}
+                                          >
                                             <ChSpan>
                                               <ChImg src={penIcon} alt="" />
                                             </ChSpan>
@@ -2638,8 +1445,11 @@ const Dashboard = () => {
                                             imgFirst={Cup}
                                             imgSec={Shoes}
                                             imgThi={Chair}
-                                            priBtn="اضافة المنتجات "
+                                            priBtn="اضافة المنتجات"
                                             secBtn="استيراد"
+                                            handlePri={() => {
+                                              handleDestination("/item");
+                                            }}
                                           />
                                         </StoTop>
                                         <StoBot>
@@ -2648,12 +1458,18 @@ const Dashboard = () => {
                                             btnText={"تفعيل"}
                                             arrayText={ImgArray1}
                                             widthText={"5rem"}
+                                            handlePro={() => {
+                                              handleTab("المدفوعات");
+                                            }}
                                           />
                                           <StoreMapped
                                             title={"راجع أسعار الشحن الخاصة بك"}
                                             btnText={"مراجعة"}
                                             arrayText={ImgArray2}
                                             widthText={"4.5rem"}
+                                            handlePro={() => {
+                                              handleTab("الشحن");
+                                            }}
                                           />
                                           <StoreMapped
                                             title={"خصص نطاقك"}
@@ -2661,6 +1477,9 @@ const Dashboard = () => {
                                             arrayText={ImgArray3}
                                             widthText={"1.5rem"}
                                             boxText={"transparent"}
+                                            handlePro={() => {
+                                              handleTab("الرابط");
+                                            }}
                                           />
                                         </StoBot>
                                       </StoWr>
@@ -2682,18 +1501,133 @@ const Dashboard = () => {
       case "الطلبات":
         return (
           <>
-            <OrderProps
-              title="الطلبات"
-              subTitle="خيارات اكثر"
-              heText="ستظهر طلباتك هنا"
-              paraText="للحصول على الطلبات وقبول المدفوعات من العملاء، تحتاج إلى اختيار خطة. سيتم فرض رسوم الخطة عليك فقط بعد انتهاء الفترة التجريبية المجانية"
-              firBtn="اختار الخطة"
-              exFir="اعرف المزيد عن"
-              exSec="الطلبات"
-              imgSrc={ordersIcon}
-              imgImg={ordersImage}
-              imgSvg={arrowDown}
-            />
+            {preOrdered ? (
+              <BillingContainer>
+                <BillingHeader>
+                  <BillingFiltersContainer>
+                    <BillingFilterButtons>
+                      {filters.map((filter) => (
+                        <BillingFilterButton
+                          key={filter}
+                          active={activeFilter === filter}
+                          onClick={() => setActiveFilter(filter)}
+                        >
+                          {filter}
+                        </BillingFilterButton>
+                      ))}
+                    </BillingFilterButtons>
+
+                    <BillingActionButtons>
+                      <BillingActionButton>
+                        <ProFilter src={filterIcon} alt="Filter" />
+                      </BillingActionButton>
+                      <BillingActionButton>
+                        <ProFilter src={upDownIcon} alt="Sort" />
+                      </BillingActionButton>
+                    </BillingActionButtons>
+                  </BillingFiltersContainer>
+                </BillingHeader>
+
+                <BillingTableContainer>
+                  <BillingTable>
+                    <BillingTableHead>
+                      <BillingTableHeader>
+                        <BillingCheckbox type="checkbox" />
+                      </BillingTableHeader>
+                      <BillingTableHeader>تاريخ الطلب</BillingTableHeader>
+                      <BillingTableHeader>الاسم</BillingTableHeader>
+                      <BillingTableHeader>رقم الجوال</BillingTableHeader>
+                      <BillingTableHeader>تفاصيل الطلب</BillingTableHeader>
+                      <BillingTableHeader>المورد</BillingTableHeader>
+                      <BillingTableHeader align="center">
+                        عدد الضيوف
+                      </BillingTableHeader>
+                      <BillingTableHeader>تاريخ الزواج</BillingTableHeader>
+                      <BillingTableHeader align="center">
+                        حالة الطلب
+                      </BillingTableHeader>
+                    </BillingTableHead>
+
+                    <BillingTableBody>
+                      {isLoading ? (
+                        <BillingLoadingRow>جاري التحميل...</BillingLoadingRow>
+                      ) : (
+                        ordersData.map((quota, index) => (
+                          <BillingTableRow
+                            key={quota._id || index}
+                            onClick={() => onOrderClick(quota._id)}
+                          >
+                            <BillingTableCell>
+                              <BillingCheckbox
+                                type="checkbox"
+                                onClick={(e) => e.stopPropagation()} // Prevent row click when clicking checkbox
+                              />
+                            </BillingTableCell>
+                            <BillingTableCell>
+                              {new Date(quota.createdAt).toLocaleDateString(
+                                "ar-SA"
+                              )}
+                            </BillingTableCell>
+                            <BillingTableCell>
+                              {`${quota.firstName} ${quota.lastName}`}
+                            </BillingTableCell>
+                            <BillingTableCell>
+                              {quota.phoneNumber}
+                            </BillingTableCell>
+                            <BillingTableCell
+                              title={quota.weddingDetails || "لا توجد تفاصيل"}
+                            >
+                              {quota.weddingDetails || "لا توجد تفاصيل"}
+                            </BillingTableCell>
+                            <BillingTableCell>
+                              {quota.vendor?.name || "غير محدد"}
+                            </BillingTableCell>
+                            <BillingTableCell align="center" weight="500">
+                              {quota.guestCount}
+                            </BillingTableCell>
+                            <BillingTableCell>
+                              {quota.weddingDate}
+                            </BillingTableCell>
+                            <BillingTableCell align="center">
+                              <BillingStatusBadge status={quota.status}>
+                                {quota.status || "قيد المراجعة"}
+                              </BillingStatusBadge>
+                            </BillingTableCell>
+                          </BillingTableRow>
+                        ))
+                      )}
+                    </BillingTableBody>
+                  </BillingTable>
+                </BillingTableContainer>
+
+                <BillingPagination>
+                  <BillingExtra>
+                    <BillingPaginationButton disabled>
+                      <ArrowDir src={arrowRight} alt="Filter" />
+                    </BillingPaginationButton>
+                    <BillingPaginationButton>
+                      <ArrowDir src={arrowLeft} alt="Filter" />
+                    </BillingPaginationButton>
+                  </BillingExtra>
+                </BillingPagination>
+              </BillingContainer>
+            ) : (
+              <OrderProps
+                title="الطلبات"
+                subTitle="خيارات اكثر"
+                heText="ستظهر طلباتك هنا"
+                paraText="للحصول على الطلبات وقبول المدفوعات من العملاء، تحتاج إلى اختيار خطة. سيتم فرض رسوم الخطة عليك فقط بعد انتهاء الفترة التجريبية المجانية"
+                firBtn="اختار الخطة"
+                exFir="اعرف المزيد عن"
+                exSec="الطلبات"
+                imgSrc={ordersIcon}
+                imgImg={ordersImage}
+                imgSvg={arrowDown}
+                handleSub={() => {
+                  handleDestination("/pay");
+                }}
+              />
+            )}
           </>
         );
       case "المنتجات":
@@ -2704,6 +1638,9 @@ const Dashboard = () => {
             heText="أضف منتجاتك"
             paraText="ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك"
             firBtn="اضافة منتج"
+            handlePro={() => {
+              handleDestination("/item");
+            }}
             secBtn="استورد"
             exFir="ابحث عن منتجات لبيعها"
             exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
@@ -2730,10 +1667,118 @@ const Dashboard = () => {
         );
       case "التسويق":
         return (
-          <>
-            <div></div>
-            <div></div>
-          </>
+          <OreWr>
+            <OreCon>
+              <OreSubCon>
+                <OreTop>
+                  <OreSubTop>
+                    <OreSu>
+                      <OreDivImg>
+                        <span>
+                          <OreImg src={contentIcon} alt="" />
+                        </span>
+                      </OreDivImg>
+                      <OreHeDiv>
+                        <OreHe>التسويق</OreHe>
+                      </OreHeDiv>
+                    </OreSu>
+                    <OreTopRight>
+                      <OreTopRi>
+                        <OreTopFi>
+                          {BtnArray.map((item, index) => {
+                            return (
+                              <OreSpan key={index}>
+                                <RepExBtn>
+                                  <RepSubImg src={item.icon} alt="" />
+                                </RepExBtn>
+                              </OreSpan>
+                            );
+                          })}
+                          <RepBtn>
+                            <OreSpa>تخصيص</OreSpa>
+                          </RepBtn>
+                        </OreTopFi>
+                      </OreTopRi>
+                    </OreTopRight>
+                  </OreSubTop>
+                </OreTop>
+                <RepBot>
+                  <RepDate>
+                    <RepTod>
+                      <RepTodBtn>
+                        <span>
+                          <BodyImg src={calendarIcon} alt="" />
+                        </span>
+                        <RepTodSp>اليوم</RepTodSp>
+                      </RepTodBtn>
+                    </RepTod>
+                    <RepTod>
+                      <RepTodBtn>
+                        <RepTodSp>مقارنة مع: ٢٤/٨/٢٠١٣</RepTodSp>
+                      </RepTodBtn>
+                    </RepTod>
+                  </RepDate>
+                  <AdWr>
+                    <AdGrid>
+                      {AdArray.map((item, index) => {
+                        return (
+                          <AdSec key={index}>
+                            <AdPad>
+                              <AdTop>
+                                <AdTopSp>
+                                  <AdTopSpan>{item.title}</AdTopSpan>
+                                </AdTopSp>
+                                <AdTopSp>
+                                  <AdTopBtn>
+                                    <AdTopSp>
+                                      <ChImg src={contentIcon} alt="" />
+                                    </AdTopSp>
+                                  </AdTopBtn>
+                                </AdTopSp>
+                              </AdTop>
+                              <AdMid>
+                                <ReportTex>
+                                  <ReportImg src={removeIcon} alt="" />
+                                </ReportTex>
+                              </AdMid>
+                              <AdBot>
+                                <AdBotWr>
+                                  <AdBotCon>
+                                    <AdBotRe>
+                                      <div
+                                        style={{
+                                          height: "2px",
+                                          width: "100%",
+                                          backgroundColor: "#00b2ff",
+                                          marginTop: "auto",
+                                        }}
+                                      />
+                                    </AdBotRe>
+                                  </AdBotCon>
+                                </AdBotWr>
+                              </AdBot>
+                            </AdPad>
+                          </AdSec>
+                        );
+                      })}
+                    </AdGrid>
+                  </AdWr>
+                  <CampaignProps
+                    imgSrc={campaignImage}
+                    subTitle="أنشئ حملات لتقييم مدى تأثير المبادرات التسويقية على أهداف عملك. قم بتسجيل نقاط التواصل سواء كانت عبر  الإنترنت أو دون اتصال، أضف  أنشطة الحملات من قنوات تسويقية متعددة، وتابع  النتائج بسهولة "
+                    title="مركز تتبع حملاتك التسويقية"
+                    btnText="اصنع حملتك"
+                  />
+                  <CampaignProps
+                    imgSrc={stateImage}
+                    subTitle="نمّ جمهورك على منصات التواصل الاجتماعي، واجذب عملاء جدد من خلال الاشتراك في النشرات البريدية، وزِد من معدلات التحويل باستخدام الدردشة، والمزيد"
+                    title="زِد عدد الزوار باستخدام تطبيقات التسويق"
+                    btnText="استكشف تسويق التطبيقات"
+                  />
+                </RepBot>
+              </OreSubCon>
+            </OreCon>
+          </OreWr>
         );
       case "الخصومات":
         return (
@@ -2770,16 +1815,262 @@ const Dashboard = () => {
           </>
         );
       case "الأسواق":
+        return <PageProps title="الاسواق" />;
+      case "جزء":
+        return <PageProps title="جزء" />;
+      case "المجموعة":
+        return <PageProps title="المجموعة" subTitle="اصنع مجموعة" />;
+      case "التحليلات":
+        return (
+          <OreWr>
+            <OreCon>
+              <OreSubCon>
+                <OreTop>
+                  <OreSubTop>
+                    <OreSu>
+                      <OreDivImg>
+                        <span>
+                          <OreImg src={contentIcon} alt="" />
+                        </span>
+                      </OreDivImg>
+                      <OreHeDiv>
+                        <OreHe>التحليلات</OreHe>
+                      </OreHeDiv>
+                    </OreSu>
+                    <OreTopRight>
+                      <OreTopRi>
+                        <OreTopFi>
+                          {BtnArray.map((item, index) => {
+                            return (
+                              <OreSpan key={index}>
+                                <RepExBtn>
+                                  <RepSubImg src={item.icon} alt="" />
+                                </RepExBtn>
+                              </OreSpan>
+                            );
+                          })}
+                          <RepBtn>
+                            <OreSpa>تخصيص</OreSpa>
+                          </RepBtn>
+                        </OreTopFi>
+                      </OreTopRi>
+                    </OreTopRight>
+                  </OreSubTop>
+                </OreTop>
+                <RepBot>
+                  <RepDate>
+                    <RepTod>
+                      <RepTodBtn>
+                        <span>
+                          <BodyImg src={calendarIcon} alt="" />
+                        </span>
+                        <RepTodSp>اليوم</RepTodSp>
+                      </RepTodBtn>
+                    </RepTod>
+                    <RepTod>
+                      <RepTodBtn>
+                        <RepTodSp>مقارنة مع: ٢٤/٨/٢٠١٣</RepTodSp>
+                      </RepTodBtn>
+                    </RepTod>
+                  </RepDate>
+                  <RepMain>
+                    <RepTop>
+                      <RepTopDiv>
+                        <RepTopSta>
+                          <ReportProps
+                            title="صافي المبيعات"
+                            tran={"translate(-216px, 0px)"}
+                          />
+                          <ReportProps
+                            title="معدل عودة العملاء"
+                            tran={"translate(22px, 0px)"}
+                          />
+                          <ReportProps
+                            title="طلبات نفذت"
+                            tran={"translate(260px, 0px)"}
+                          />
+                          <ReportProps
+                            title="الطلبات"
+                            tran={"translate(499px, 0px)"}
+                          />
+                          <AnalyticProps />
+                          <BreakProps />
+                        </RepTopSta>
+                      </RepTopDiv>
+                    </RepTop>
+                    <RepBotto>
+                      <RepBotPa>
+                        Learn more about <span>analytic</span>
+                      </RepBotPa>
+                    </RepBotto>
+                  </RepMain>
+                </RepBot>
+              </OreSubCon>
+            </OreCon>
+          </OreWr>
+        );
+      case "مسودة":
         return (
           <>
-            <div></div>
+            <OrderProps
+              title="مسودة"
+              subTitle="خيارات اكثر"
+              heText="إنشاء الطلبات والفواتير يدويًا"
+              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
+              firBtn="انشاء مسودة طلب"
+              exFir="اعرف المزيد عن"
+              exSec="الطلبات"
+              imgSrc={ordersIcon}
+              imgImg={draftImage}
+              imgSvg={arrowDown}
+            />
+          </>
+        );
+      case "المخزون":
+        return (
+          <>
+            <OrderProps
+              title="المخزون"
+              subTitle="خيارات اكثر"
+              heText="إنشاء الطلبات والفواتير يدويًا"
+              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
+              firBtn="انشاء مسودة طلب"
+              exFir="اعرف المزيد عن"
+              exSec="الطلبات"
+              imgSrc={ordersIcon}
+              imgImg={inventoryImage}
+              imgSvg={arrowDown}
+            />
+          </>
+        );
+      case "تاريخ الشراء":
+        return (
+          <>
+            <OrderProps
+              title="تاريخ الشراء"
+              subTitle="خيارات اكثر"
+              heText="إنشاء الطلبات والفواتير يدويًا"
+              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
+              firBtn="انشاء مسودة طلب"
+              exFir="اعرف المزيد عن"
+              exSec="الطلبات"
+              imgSrc={ordersIcon}
+              imgImg={historyImage}
+              imgSvg={arrowDown}
+            />
+          </>
+        );
+      case "التحويل":
+        return (
+          <>
+            <OrderProps
+              title="التحويل"
+              subTitle="خيارات اكثر"
+              heText="إنشاء الطلبات والفواتير يدويًا"
+              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
+              firBtn="انشاء مسودة طلب"
+              exFir="اعرف المزيد عن"
+              exSec="الطلبات"
+              imgSrc={ordersIcon}
+              imgImg={transferImage}
+              imgSvg={arrowDown}
+            />
+          </>
+        );
+      case "الهدايا":
+        return (
+          <>
+            <OrderProps
+              title="الهدايا"
+              subTitle="خيارات اكثر"
+              heText="إنشاء الطلبات والفواتير يدويًا"
+              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
+              firBtn="انشاء مسودة طلب"
+              exFir="اعرف المزيد عن"
+              exSec="الطلبات"
+              imgSrc={ordersIcon}
+              imgImg={giftImage}
+              imgSvg={arrowDown}
+            />
+          </>
+        );
+      case "الحملات":
+        return (
+          <>
+            <ProductProps
+              title="الحملات"
+              subTitle="الكل"
+              heText="أضف منتجاتك"
+              paraText="ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك"
+              firBtn="اضافة منتج"
+              handlePro={() => {
+                handleDestination("/item");
+              }}
+              secBtn="استورد"
+              exFir="ابحث عن منتجات لبيعها"
+              exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
+              exBtn="تصفح تطبيقات توريد المنتجات"
+              imgSrc={ordersIcon}
+              imgSvg={campaignImage}
+            />
+          </>
+        );
+      case "الاتمته":
+        return (
+          <>
+            <ProductProps
+              title="الاتمته"
+              subTitle="الكل"
+              heText="أضف منتجاتك"
+              paraText="ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك"
+              firBtn="اضافة منتج"
+              handlePro={() => {
+                handleDestination("/item");
+              }}
+              secBtn="استورد"
+              exFir="ابحث عن منتجات لبيعها"
+              exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
+              exBtn="تصفح تطبيقات توريد المنتجات"
+              imgSrc={ordersIcon}
+              imgSvg={automationImage}
+            />
+          </>
+        );
+      case "السلات المتروكة":
+        return (
+          <>
+            <AbandonProps
+              title="السلات المتروكة"
+              subTitle="الكل"
+              heText="ستظهر عمليات الدفع المتروكة هنا"
+              paraText="اطّلع على الوقت الذي يضيف فيه العملاء منتجًا إلى سلة التسوق دون إتمام عملية الدفع. يمكنك أيضًا إرسال رابط السلة إلى العملاء عبر البريد الإلكتروني."
+              firBtn="اضافة منتج"
+              handlePro={() => {
+                handleDestination("/item");
+              }}
+              secBtn="استورد"
+              exFir="ابحث عن منتجات لبيعها"
+              exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
+              exBtn="تصفح تطبيقات توريد المنتجات"
+              imgSrc={ordersIcon}
+              imgSvg={abandonImage}
+              handlePri={() => {
+                handleDestination("/item");
+              }}
+            />
+          </>
+        );
+      case "المتجر":
+        return (
+          <>
+            <div>المتجر ...</div>
             <div></div>
           </>
         );
-      case "التحليلات":
+      case "التطبيقات":
         return (
           <>
-            <div></div>
+            <div>التطبيقات ...</div>
             <div></div>
           </>
         );
@@ -2793,81 +2084,63 @@ const Dashboard = () => {
           <ContentSection>
             <MainCon>
               <LogoCon>
-                <LogoSubCon>
-                  <LogoImg src={logo} alt="" />
-                </LogoSubCon>
+                <LogoGrid>
+                  <LogoDiv>
+                    <LogoSubDiv>
+                      <LogoImg src={logo} alt="" />
+                    </LogoSubDiv>
+                  </LogoDiv>
+                  <SearchWr>
+                    <SearchCon>
+                      <SearchSu>
+                        <SearchSub>
+                          <SearchRe>
+                            <SearchBtn>
+                              <InputWr>
+                                <InputCon>
+                                  <InputSpan>
+                                    <InputImg src={inputIcon} alt="" />
+                                  </InputSpan>
+                                  <InputSpa>ابحث</InputSpa>
+                                </InputCon>
+                                <InputSp>
+                                  <InputKbd>⌘</InputKbd>
+                                  <InputKbd>K</InputKbd>
+                                </InputSp>
+                              </InputWr>
+                            </SearchBtn>
+                          </SearchRe>
+                        </SearchSub>
+                      </SearchSu>
+                    </SearchCon>
+                  </SearchWr>
+                  <NotifWr>
+                    <NotifCon></NotifCon>
+                    <NotifSub>
+                      <NotifStore>
+                        <NotifBtn>
+                          <NotifBtnDiv>
+                            <NotDiv>
+                              <NotSpan>MS</NotSpan>
+                            </NotDiv>
+                            <NotSp>{storeName}</NotSp>
+                          </NotifBtnDiv>
+                        </NotifBtn>
+                      </NotifStore>
+                    </NotifSub>
+                  </NotifWr>
+                </LogoGrid>
               </LogoCon>
               <NavCon></NavCon>
               <MainSubCon>
-                <NavLeft>
-                  <NavMain>
-                    <NavSubMain>
-                      <NavStart>
-                        <NavRe>
-                          <SectionDiv>
-                            <SectionUl>
-                              {Pages.map((item, index) => {
-                                return (
-                                  <SectionLi key={index}>
-                                    <SectionAt
-                                      onClick={() => handleTab(item.text)}
-                                    >
-                                      <SectionIcon src={item.icon} />
-                                      <span>{item.text}</span>
-                                    </SectionAt>
-                                  </SectionLi>
-                                );
-                              })}
-                            </SectionUl>
-                          </SectionDiv>
-                          <ListUl>
-                            {Sales.map((item, index) => {
-                              return (
-                                <ListLi key={index}>
-                                  <ListDiv>
-                                    <ListBtn>
-                                      <ListSpan>{item.text}</ListSpan>
-                                      <span>.</span>
-                                    </ListBtn>
-                                  </ListDiv>
-                                  <StoreSec>
-                                    <StoreItem>
-                                      <StoreLink href="">
-                                        <StoreIconImg
-                                          src={item.icon}
-                                          alt="Online Store"
-                                        />
-                                        <StoreLabel>{item.subText}</StoreLabel>
-                                      </StoreLink>
-                                    </StoreItem>
-                                  </StoreSec>
-                                </ListLi>
-                              );
-                            })}
-                          </ListUl>
-
-                          <StoreSec>
-                            <StoreItem>
-                              <StoreLink href="">
-                                <StoreIconImg
-                                  src={settingIcon}
-                                  alt="Online Store"
-                                />
-                                <StoreLabel>الاعدادات</StoreLabel>
-                              </StoreLink>
-                            </StoreItem>
-                          </StoreSec>
-                        </NavRe>
-                      </NavStart>
-                    </NavSubMain>
-                  </NavMain>
-                </NavLeft>
+                <NavSide />
                 <StartCon>
                   <StartDiv>{renderContent()}</StartDiv>
                 </StartCon>
               </MainSubCon>
             </MainCon>
           </ContentSection>
+          <TimeOutModel />
         </MaAll>
       </MaSec>
     </MaFirst>

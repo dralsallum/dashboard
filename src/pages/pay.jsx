@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Checkout, Dashboard, Footer, NavTech } from "../components";
+import { Subscription } from "../components";
 
-const Control = () => {
+const Pay = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   return (
     <>
-      <Dashboard />
+      <Subscription />
     </>
   );
 };
 
-export default Control;
+export default Pay;
