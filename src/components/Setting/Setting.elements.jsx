@@ -3010,3 +3010,164 @@ export const Button = styled.button`
     background: #0056b3;
   }
 `;
+
+export const WireAccountDisplay = styled.div`
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 16px;
+`;
+
+export const WireAccountItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+export const WireAccountLabel = styled.span`
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+`;
+
+export const WireAccountValue = styled.span`
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+`;
+
+export const VerificationStatus = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: ${(props) => (props.verified ? "#d1fae5" : "#fef3c7")};
+  color: ${(props) => (props.verified ? "#065f46" : "#92400e")};
+`;
+
+export const EditButton = styled.button`
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #2563eb;
+  }
+`;
+
+// Form Components
+export const WireAccountForm = styled.form`
+  margin-top: 16px;
+`;
+
+export const FormGroup = styled.div`
+  margin-bottom: 20px;
+`;
+
+export const FormLabel = styled.label`
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+`;
+
+export const FormInput = styled.input`
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+  direction: ${(props) => (props.name === "iban" ? "ltr" : "rtl")};
+  text-align: ${(props) => (props.name === "iban" ? "left" : "right")};
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+`;
+
+export const FormHelper = styled.p`
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  direction: rtl;
+  text-align: right;
+`;
+
+export const FormActions = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+`;
+
+export const SaveBut = styled.button`
+  padding: 10px 24px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #059669;
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+`;
+
+export const CanButton = styled.button`
+  padding: 10px 24px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #e5e7eb;
+  }
+`;
+
+export const MessageBox = styled.div`
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-top: 16px;
+  font-size: 14px;
+  background: ${(props) => (props.type === "success" ? "#d1fae5" : "#fee2e2")};
+  color: ${(props) => (props.type === "success" ? "#065f46" : "#991b1b")};
+  border: 1px solid
+    ${(props) => (props.type === "success" ? "#a7f3d0" : "#fecaca")};
+`;

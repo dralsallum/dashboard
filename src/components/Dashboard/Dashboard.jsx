@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import styled, { keyframes } from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { setStoreName } from "../../redux/tabRedux";
 import NavSide from "../NavSide/NavSide";
@@ -405,8 +406,8 @@ import paypalIcon from "../../assets/paypal.svg";
 import ordersImage from "../../assets/order.png";
 import visaIcon from "../../assets/visa.svg";
 import madaIcon from "../../assets/mada.jpg";
-import Cup from "../../assets/cup.webp";
-import Shoes from "../../assets/shoes.webp";
+import WeddingCake from "../../assets/weddingCake.png";
+import Flower from "../../assets/flowerBrand.png";
 import Board from "../../assets/board.png";
 import Board2 from "../../assets/board2.png";
 import Board3 from "../../assets/board3.png";
@@ -415,6 +416,7 @@ import logo from "../../assets/drslallum.png";
 import marketsIcon from "../../assets/markets.png";
 import { useNavigate } from "react-router-dom";
 import { setSettingTab } from "../../redux/settingRedux";
+import { setActiveTab } from "../../redux/tabRedux";
 import {
   updateStoreName,
   userSelector,
@@ -422,6 +424,319 @@ import {
   signOut,
 } from "../../redux/userRedux";
 import axios from "axios";
+import { Star, ShieldCheck, MapPin } from "lucide-react";
+
+/* ====== SHELL / LAYOUT ====== */
+
+const SkyShell = styled.div`
+  min-height: 100vh;
+  background-color: #f9fafb;
+  direction: rtl;
+  padding: 1rem;
+`;
+
+const FrostTop = styled.div`
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+`;
+
+const EchoRow = styled.div`
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const ZenithTitle = styled.h1`
+  font-size: 1.5rem;
+  font-weight: bold;
+`;
+
+const ArcSet = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const NovaBtn = styled.button`
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+`;
+
+const CoreBody = styled.div`
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+`;
+
+const ShellGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const LeftCol = styled.div``;
+
+const RightCol = styled.div`
+  position: sticky;
+  top: 1.25rem;
+  height: fit-content;
+
+  @media (max-width: 1024px) {
+    position: static;
+  }
+`;
+
+const Card = styled.div`
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+`;
+
+const Avatar = styled.img`
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  object-fit: cover;
+`;
+
+const DocName = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+`;
+
+const Subtle = styled.div`
+  color: #6b7280;
+  font-size: 0.95rem;
+`;
+
+const MetaLine = styled.div`
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 6px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #374151;
+  }
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 800;
+  margin: 1rem 0 0.75rem;
+`;
+
+const Label = styled.label`
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+`;
+
+const SelectWrap = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.75rem 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const SelectEl = styled.select`
+  width: 100%;
+  font-size: 1rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #111827;
+`;
+
+const DayHeading = styled.div`
+  margin-top: 1.25rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+`;
+
+const SlotsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 0.75rem;
+`;
+
+const SlotBtn = styled.button`
+  background: ${(p) => (p.$available ? "#000" : "#e5e7eb")};
+  color: ${(p) => (p.$available ? "#fff" : "#9ca3af")};
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: ${(p) => (p.$available ? "pointer" : "not-allowed")};
+  transition: transform 0.06s ease, filter 0.15s ease;
+  outline: ${(p) => (p.$selected ? "3px solid #1d4ed8" : "none")};
+
+  &:active {
+    transform: ${(p) => (p.$available ? "translateY(1px)" : "none")};
+  }
+  &:hover {
+    filter: ${(p) => (p.$available ? "brightness(1.03)" : "none")};
+  }
+`;
+
+const ContinueBar = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const ContinueBtn = styled.button`
+  background: ${(p) => (p.disabled ? "#9ca3af" : "#70747e")};
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 12px 18px;
+  font-weight: 800;
+  cursor: ${(p) => (p.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(p) => (p.disabled ? 0.6 : 1)};
+`;
+
+const AdminPanel = styled.div`
+  background: #ffffffff;
+  margin: 1rem 0 1.5rem 0;
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+    color: #000;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 0.75rem 0;
+  }
+`;
+
+const DaySelect = styled.select`
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  color: #111827;
+
+  &:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  }
+`;
+
+const DayRow = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const TimeGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+`;
+
+const TimeInput = styled.input`
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 2px 4px;
+  font-size: 0.95rem;
+  width: 120px;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  box-sizing: border-box;
+  height: 40px;
+  line-height: 1.2;
+  outline: none;
+
+  &:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  }
+`;
+
+const Phone = styled.div`
+  width: 390px;
+  border-radius: 28px;
+  padding: 12px;
+  background: #e5e7eb;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  margin-inline-start: auto;
+
+  @media (max-width: 1024px) {
+    margin: 0 auto;
+  }
+`;
+
+const PhoneScreen = styled.div`
+  position: relative;
+  height: 680px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  direction: rtl;
+`;
+
+const PhoneBody = styled.div`
+  width: 92%;
+  padding: 20px 0 28px;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+`;
 
 const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
 
@@ -430,7 +745,6 @@ const Dashboard = () => {
   const activeTab = useSelector((state) => state.tab.activeTab);
   const storeName = useSelector((state) => state.tab.storeName);
   const [localName, setLocalName] = useState("");
-  const [storeToggle, setStoreToggle] = useState(true);
   const [inputModule, setInputModule] = useState(false);
   const [activeFilter, setActiveFilter] = useState("الكل");
   const [showTimeOutModal, setShowtimeOutModel] = useState(false);
@@ -438,15 +752,149 @@ const Dashboard = () => {
   const [toggleSubscribe, setToggleSubscribe] = useState(true);
   const [ordersData, setOrdersData] = useState([]);
   const [preOrdered, setPreOrdered] = useState(true);
-  const [toggleTop, setToggleTop] = useState(true);
   const [error, setError] = useState("");
+  const [reason, setReason] = useState("زيارة جديدة");
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
   const navigate = useNavigate();
-  const { currentUser, isUpdating, isError, errorMessage, isSuccess } =
-    useSelector(userSelector);
+  const { currentUser } = useSelector(userSelector);
+
+  const [isAdmin, setIsAdmin] = useState(true); // Toggle for demo
+
+  // Admin configuration state
+  const [workingDays, setWorkingDays] = useState({
+    0: false, // Sunday
+    1: true, // Monday
+    2: true, // Tuesday
+    3: true, // Wednesday
+    4: true, // Thursday
+    5: false, // Friday
+    6: false, // Saturday
+  });
+
+  const [workingHours, setWorkingHours] = useState({
+    start: "09:00",
+    end: "17:00",
+  });
+
+  // Generate available dates (next 14 days)
+  // Generate available dates (next 14 days)
+  const availableDates = useMemo(() => {
+    const dates = [];
+    const today = new Date();
+
+    const startDay = parseInt(workingHours.startDay ?? 0);
+    const endDay = parseInt(workingHours.endDay ?? 6);
+
+    for (let i = 0; i < 14; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+
+      const day = date.getDay();
+
+      // Include only days between startDay and endDay
+      if (
+        (startDay <= endDay && day >= startDay && day <= endDay) ||
+        (startDay > endDay && (day >= startDay || day <= endDay))
+      ) {
+        dates.push(date);
+      }
+    }
+
+    return dates.slice(0, 5); // Show first 5 available days
+  }, [workingHours.startDay, workingHours.endDay, workingDays]);
+
+  const generateTimeSlots = (startTime, endTime, interval = 30) => {
+    const slots = [];
+    const [startHour, startMin] = startTime.split(":").map(Number);
+    const [endHour, endMin] = endTime.split(":").map(Number);
+
+    let currentHour = startHour;
+    let currentMin = startMin;
+
+    while (
+      currentHour < endHour ||
+      (currentHour === endHour && currentMin < endMin)
+    ) {
+      const hour12 = currentHour % 12 || 12;
+      const period = currentHour >= 12 ? "PM" : "AM";
+      const timeStr = `${hour12}:${currentMin
+        .toString()
+        .padStart(2, "0")} ${period}`;
+      slots.push(timeStr);
+
+      currentMin += interval;
+      if (currentMin >= 60) {
+        currentMin -= 60;
+        currentHour++;
+      }
+    }
+
+    return slots;
+  };
+  // Generate time slots for available dates
+  const dateSlots = useMemo(() => {
+    const slots = {};
+    availableDates.forEach((date) => {
+      const dateKey = date.toISOString().split("T")[0];
+      slots[dateKey] = generateTimeSlots(workingHours.start, workingHours.end);
+    });
+    return slots;
+  }, [availableDates, workingHours]);
+
+  const handleDayToggle = (day) => {
+    setWorkingDays((prev) => ({ ...prev, [day]: !prev[day] }));
+  };
+
+  const handleTimeChange = (field, value) => {
+    setWorkingHours((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const slots = useMemo(
+    () => ({
+      today: ["1:30 PM", "2:15 PM", "4:00 PM"],
+      tomorrow: [
+        "1:15 PM",
+        "1:30 PM",
+        "2:00 PM",
+        "2:15 PM",
+        "2:30 PM",
+        "4:30 PM",
+      ],
+    }),
+    []
+  );
+
+  const Rating = ({ value, reviews }) => (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        fontWeight: 800,
+      }}
+    >
+      <Star size={18} style={{ color: "#f59e0b" }} />
+      {value.toFixed(2)} · {reviews.toLocaleString()} reviews
+    </span>
+  );
+
+  const AddressLine = ({ distance, addr }) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <MapPin size={18} /> {distance} · {addr}
+    </span>
+  );
+
+  const makeSlotKey = (dayLabel, t) => `${dayLabel}-${t}`;
 
   const handleTab = (item) => {
     dispatch(setSettingTab(item));
     navigate(`/preference?tab=${encodeURIComponent(item)}`);
+  };
+
+  const handlePage = (item) => {
+    dispatch(setActiveTab(item));
+    navigate(`/control?tab=${encodeURIComponent(item)}`);
   };
 
   const businessId = currentUser?._id;
@@ -548,6 +996,35 @@ const Dashboard = () => {
     }
   };
 
+  const formatDate = (date) => {
+    const days = [
+      "الأحد",
+      "الاثنين",
+      "الثلاثاء",
+      "الأربعاء",
+      "الخميس",
+      "الجمعة",
+      "السبت",
+    ];
+    const months = [
+      "يناير",
+      "فبراير",
+      "مارس",
+      "أبريل",
+      "مايو",
+      "يونيو",
+      "يوليو",
+      "أغسطس",
+      "سبتمبر",
+      "أكتوبر",
+      "نوفمبر",
+      "ديسمبر",
+    ];
+    return `${days[date.getDay()]}، ${date.getDate()} ${
+      months[date.getMonth()]
+    }`;
+  };
+
   const ImgArray1 = [
     { text: "", icon: paypalIcon },
     { text: "", icon: visaIcon },
@@ -647,6 +1124,7 @@ const Dashboard = () => {
       priBtn,
       secBtn,
       handlePri,
+      handleDes,
     }) => {
       return (
         <SiteWr>
@@ -654,10 +1132,10 @@ const Dashboard = () => {
           <SiteSec></SiteSec>
           <SiteThi>
             <SiteSuThi>
-              <SiteSubImg src={imgFirst} alt="Shoes" />
+              <SiteSubImg src={imgFirst} alt="WeddingCake" />
             </SiteSuThi>
             <SiteSubThi>
-              <SiteSubImg src={imgSec} alt="Cup" />
+              <SiteSubImg src={imgSec} alt="flowers" />
             </SiteSubThi>
             <SiteSThi>
               <SiteSubImg src={imgThi} alt="Chair" />
@@ -700,7 +1178,7 @@ const Dashboard = () => {
               color="rgba(48, 48, 48, 1)"
               border="1px solid rgba(0, 0, 0, 0.1)"
             >
-              <SiteBtn>
+              <SiteBtn onClick={handleDes}>
                 <SiteSp>{secBtn}</SiteSp>
               </SiteBtn>
             </SiteDiv>
@@ -1440,10 +1918,13 @@ const Dashboard = () => {
                                             imgThi={Board3}
                                             priBtn="تصفح المواقع"
                                             secBtn="اصنع"
+                                            handlePri={() => {
+                                              handlePage("المتجر");
+                                            }}
                                           />
                                           <SiteMapped
-                                            imgFirst={Cup}
-                                            imgSec={Shoes}
+                                            imgFirst={Flower}
+                                            imgSec={WeddingCake}
                                             imgThi={Chair}
                                             priBtn="اضافة المنتجات"
                                             secBtn="استيراد"
@@ -2062,11 +2543,443 @@ const Dashboard = () => {
         );
       case "المتجر":
         return (
-          <>
-            <div>المتجر ...</div>
-            <div></div>
-          </>
+          <SkyShell>
+            <FrostTop>
+              <EchoRow>
+                <ZenithTitle>حجز موعد</ZenithTitle>
+                <ArcSet>
+                  <NovaBtn onClick={() => setIsAdmin(!isAdmin)}>
+                    {isAdmin ? "عرض العميل" : "لوحة الإدارة"}
+                  </NovaBtn>
+                </ArcSet>
+              </EchoRow>
+            </FrostTop>
+
+            <CoreBody>
+              <ShellGrid>
+                <LeftCol>
+                  <Card>
+                    <Row>
+                      <Avatar
+                        src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=256&auto=format&fit=crop"
+                        alt="doctor"
+                      />
+                      <div style={{ flex: 1 }}>
+                        <DocName>د. هارولد واتسون، MD</DocName>
+                        <Subtle>طبيب رعاية أولية</Subtle>
+                        <MetaLine>
+                          <Rating value={4.9} reviews={860} />
+                        </MetaLine>
+                        <MetaLine>
+                          <AddressLine
+                            distance="٥٫٣ ميل"
+                            addr="1515 Park Center Dr، وحدة 2J، أورلاندو، فلوريدا 32835"
+                          />
+                        </MetaLine>
+                      </div>
+                    </Row>
+                  </Card>
+
+                  <Card>
+                    <SectionTitle>تفاصيل الجدولة</SectionTitle>
+                    <Label>سبب الزيارة</Label>
+                    <SelectWrap>
+                      <SelectEl
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                      >
+                        <option>مرض عارض</option>
+                        <option>فحص سنوي</option>
+                        <option>زيارة فيديو</option>
+                        <option>مراجعة متابعة</option>
+                      </SelectEl>
+                    </SelectWrap>
+
+                    {isAdmin && (
+                      <AdminPanel>
+                        <h3> اوقات العمل </h3>
+
+                        <Label>أيام العمل:</Label>
+                        <DayRow>
+                          <div style={{ flex: 1 }}>
+                            <Label style={{ fontSize: "0.85rem" }}>
+                              اليوم الأول
+                            </Label>
+                            <DaySelect
+                              value={workingHours.startDay || "0"}
+                              onChange={(e) =>
+                                setWorkingHours((prev) => ({
+                                  ...prev,
+                                  startDay: e.target.value,
+                                }))
+                              }
+                            >
+                              <option value="0">الأحد</option>
+                              <option value="1">الاثنين</option>
+                              <option value="2">الثلاثاء</option>
+                              <option value="3">الأربعاء</option>
+                              <option value="4">الخميس</option>
+                              <option value="5">الجمعة</option>
+                              <option value="6">السبت</option>
+                            </DaySelect>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <Label style={{ fontSize: "0.85rem" }}>
+                              اليوم الأخير
+                            </Label>
+                            <DaySelect
+                              value={workingHours.endDay || "4"}
+                              onChange={(e) =>
+                                setWorkingHours((prev) => ({
+                                  ...prev,
+                                  endDay: e.target.value,
+                                }))
+                              }
+                            >
+                              <option value="0">الأحد</option>
+                              <option value="1">الاثنين</option>
+                              <option value="2">الثلاثاء</option>
+                              <option value="3">الأربعاء</option>
+                              <option value="4">الخميس</option>
+                              <option value="5">الجمعة</option>
+                              <option value="6">السبت</option>
+                            </DaySelect>
+                          </div>
+                        </DayRow>
+
+                        <hr />
+
+                        <Label>ساعات العمل:</Label>
+                        <TimeGroup>
+                          <div>
+                            <Label style={{ fontSize: "0.85rem" }}>من:</Label>
+                            <TimeInput
+                              type="time"
+                              value={workingHours.start}
+                              onChange={(e) =>
+                                setWorkingHours((prev) => ({
+                                  ...prev,
+                                  start: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                          <div>
+                            <Label style={{ fontSize: "0.85rem" }}>إلى:</Label>
+                            <TimeInput
+                              type="time"
+                              value={workingHours.end}
+                              onChange={(e) =>
+                                setWorkingHours((prev) => ({
+                                  ...prev,
+                                  end: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        </TimeGroup>
+                      </AdminPanel>
+                    )}
+                  </Card>
+
+                  <Card>
+                    <SectionTitle>المواعيد المتاحة</SectionTitle>
+
+                    {availableDates.length === 0 ? (
+                      <div
+                        style={{
+                          color: "#ef4444",
+                          padding: "1rem",
+                          textAlign: "center",
+                        }}
+                      >
+                        لا توجد أيام عمل محددة. يرجى تكوين أيام العمل في لوحة
+                        الإدارة.
+                      </div>
+                    ) : (
+                      availableDates.map((date, idx) => {
+                        const dateKey = date.toISOString().split("T")[0];
+                        const slots = dateSlots[dateKey] || [];
+                        const isToday = idx === 0;
+
+                        return (
+                          <div key={dateKey}>
+                            <DayHeading>
+                              {isToday ? "اليوم، " : ""}
+                              {formatDate(date)}
+                            </DayHeading>
+                            <SlotsGrid>
+                              {slots.map((time) => {
+                                const slotKey = `${dateKey}-${time}`;
+                                const isAvailable = true; // You can add logic to check bookings
+
+                                return (
+                                  <SlotBtn
+                                    key={slotKey}
+                                    onClick={() =>
+                                      isAvailable && setSelectedSlot(slotKey)
+                                    }
+                                    $selected={selectedSlot === slotKey}
+                                    $available={isAvailable}
+                                  >
+                                    {time}
+                                  </SlotBtn>
+                                );
+                              })}
+                            </SlotsGrid>
+                          </div>
+                        );
+                      })
+                    )}
+
+                    <ContinueBar>
+                      <ContinueBtn disabled={!selectedSlot}>
+                        {selectedSlot ? "متابعة" : "اختر وقتًا"}
+                      </ContinueBtn>
+                    </ContinueBar>
+                  </Card>
+                </LeftCol>
+                <RightCol>
+                  <Phone>
+                    <PhoneScreen>
+                      <PhoneBody>
+                        {/* رأس الصفحة */}
+                        <div style={{ padding: "8px 12px" }}>
+                          <h2
+                            style={{
+                              fontWeight: 900,
+                              fontSize: 24,
+                              margin: "8px 0",
+                            }}
+                          >
+                            حجز موعد
+                          </h2>
+                        </div>
+
+                        {/* ملخص الطبيب */}
+                        <div style={{ padding: "6px 12px" }}>
+                          <div style={{ display: "flex", gap: 12 }}>
+                            <img
+                              src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=128&auto=format&fit=crop"
+                              alt="doctor"
+                              style={{
+                                width: 56,
+                                height: 56,
+                                borderRadius: 9999,
+                                objectFit: "cover",
+                              }}
+                            />
+                            <div>
+                              <div style={{ fontWeight: 900 }}>
+                                د. هارولد واتسون، MD
+                              </div>
+                              <div style={{ color: "#6b7280" }}>
+                                طبيب رعاية أولية
+                              </div>
+                              <div
+                                style={{
+                                  marginTop: 6,
+                                  display: "flex",
+                                  gap: 10,
+                                  alignItems: "center",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                  }}
+                                >
+                                  <Star
+                                    size={16}
+                                    style={{ color: "#f59e0b" }}
+                                  />{" "}
+                                  ٤٫٩٠ التقييم · ٨٦٠ مراجعات
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* تفاصيل الجدولة */}
+                        <div style={{ padding: "10px 12px" }}>
+                          <div style={{ fontWeight: 900, margin: "6px 0" }}>
+                            تفاصيل الجدولة
+                          </div>
+                          <div
+                            style={{
+                              border: "1px solid #e5e7eb",
+                              borderRadius: 12,
+                              padding: "10px 12px",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <div style={{ fontWeight: 700 }}>{reason}</div>
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="#6b7280"
+                              strokeWidth="2"
+                            >
+                              <path
+                                d="M6 9l6 6 6-6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 10,
+                              border: "1px solid #e5e7eb",
+                              borderRadius: 12,
+                              padding: "10px 12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              fontWeight: 900,
+                            }}
+                          >
+                            <ShieldCheck size={18} /> تحقّق إذا كان ضمن شبكة
+                            التأمين
+                          </div>
+                        </div>
+
+                        {/* المواعيد المتاحة (أول ٤ أوقات فقط لكل يوم) */}
+                        <div style={{ padding: "10px 12px" }}>
+                          <div style={{ fontWeight: 900, margin: "6px 0" }}>
+                            المواعيد المتاحة
+                          </div>
+
+                          {availableDates.length === 0 ? (
+                            <div
+                              style={{
+                                color: "#ef4444",
+                                padding: "1rem",
+                                textAlign: "center",
+                                border: "1px solid #fee2e2",
+                                borderRadius: 12,
+                                background: "#fff1f2",
+                                fontWeight: 700,
+                              }}
+                            >
+                              لا توجد أيام عمل محددة. يرجى تكوين أيام العمل في
+                              لوحة الإدارة.
+                            </div>
+                          ) : (
+                            availableDates.map((date, idx) => {
+                              const dateKey = date.toISOString().split("T")[0];
+                              const slots = dateSlots[dateKey] || [];
+                              const previewSlots = slots.slice(0, 4); // <-- أهم سطر: أول ٤ فقط
+                              const isToday = idx === 0;
+
+                              return (
+                                <div
+                                  key={`m-${dateKey}`}
+                                  style={{ marginTop: 12 }}
+                                >
+                                  <div
+                                    style={{ fontWeight: 900, marginTop: 6 }}
+                                  >
+                                    {isToday ? "اليوم، " : ""}
+                                    {formatDate(date)}
+                                  </div>
+
+                                  {previewSlots.length === 0 ? (
+                                    <div
+                                      style={{
+                                        marginTop: 8,
+                                        padding: "8px 10px",
+                                        border: "1px dashed #e5e7eb",
+                                        borderRadius: 10,
+                                        color: "#6b7280",
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      لا توجد أوقات متاحة لهذا اليوم.
+                                    </div>
+                                  ) : (
+                                    <div
+                                      style={{
+                                        display: "grid",
+                                        gridTemplateColumns: "1fr 1fr",
+                                        gap: 10,
+                                        marginTop: 8,
+                                      }}
+                                    >
+                                      {previewSlots.map((time) => {
+                                        const slotKey = `${dateKey}-${time}`;
+                                        const selected =
+                                          selectedSlot === slotKey;
+
+                                        return (
+                                          <button
+                                            key={`m-${slotKey}`}
+                                            onClick={() =>
+                                              setSelectedSlot(slotKey)
+                                            }
+                                            style={{
+                                              background: "#000",
+                                              color: "#fff",
+                                              border: "none",
+                                              borderRadius: 10,
+                                              padding: "10px 12px",
+                                              fontWeight: 900,
+                                              outline: selected
+                                                ? "3px solid #1d4ed8"
+                                                : "none",
+                                              cursor: "pointer",
+                                            }}
+                                          >
+                                            {time}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
+                          )}
+
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              marginTop: 12,
+                            }}
+                          >
+                            <button
+                              disabled={!selectedSlot}
+                              style={{
+                                background: "#70747E",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 9999,
+                                padding: "10px 16px",
+                                fontWeight: 900,
+                                opacity: selectedSlot ? 1 : 0.6,
+                                cursor: selectedSlot ? "pointer" : "default",
+                              }}
+                            >
+                              {selectedSlot ? "متابعة" : "اختر وقتًا"}
+                            </button>
+                          </div>
+                        </div>
+                      </PhoneBody>
+                    </PhoneScreen>
+                  </Phone>
+                </RightCol>
+              </ShellGrid>
+            </CoreBody>
+          </SkyShell>
         );
+
       case "التطبيقات":
         return (
           <>

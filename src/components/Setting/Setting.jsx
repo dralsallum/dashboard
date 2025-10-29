@@ -342,6 +342,21 @@ import {
   StoreInput,
   ButtonRow,
   Button,
+  MessageBox,
+  WireAccountDisplay,
+  WireAccountItem,
+  WireAccountLabel,
+  WireAccountValue,
+  WireAccountForm,
+  FormGroup,
+  FormLabel,
+  SaveBut,
+  CanButton,
+  FormHelper,
+  FormActions,
+  VerificationStatus,
+  EditButton,
+  FormInput,
 } from "./Setting.elements";
 import inputIcon from "../../assets/input.png";
 import homeIcon from "../../assets/home.png";
@@ -353,6 +368,9 @@ import SetSide from "../SetSide/SetSide";
 import { useNavigate } from "react-router-dom";
 import { setSettingTab } from "../../redux/settingRedux";
 import { userSelector } from "../../redux/userRedux";
+import axios from "axios";
+
+const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
 
 const Setting = () => {
   const navigate = useNavigate();
@@ -364,17 +382,95 @@ const Setting = () => {
   const { currentUser } = useSelector(userSelector);
   const email = useSelector((state) => state.user.currentUser?.email ?? "");
   const country = useSelector((state) => state.user.currentUser?.country ?? "");
-  const [localEmail, setLocalEmail] = useState("");
-  const [localCountry, setLocalCountry] = useState("");
-  const [localPhone, setLocalPhone] = useState();
+  const [data, setData] = useState("");
+  const [wireAccount, setWireAccount] = useState({
+    bankName: "",
+    accountHolderName: "",
+    iban: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const businessId = currentUser?._id;
+  const accessToken = currentUser?.accessToken;
 
-  const handleDestination = (des) => {
-    navigate(des);
+  useEffect(() => {
+    fetchWireAccount();
+  }, []);
+
+  const fetchWireAccount = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/business/wire-account/${currentUser._id}`,
+        { headers: { Authorization: `Bearer ${currentUser.accessToken}` } }
+      );
+      if (response.data.wireAccount) {
+        setWireAccount(response.data.wireAccount);
+      }
+    } catch (error) {
+      console.error("Error fetching wire account:", error);
+    }
   };
 
-  const handleTab = (item) => {
-    dispatch(setSettingTab(item));
-    navigate(`/preference?tab=${encodeURIComponent(item)}`);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setWireAccount((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ type: "", text: "" });
+
+    try {
+      const response = await axios.put(
+        `${BASE_URL}/business/wire-account/${currentUser._id}`,
+        wireAccount,
+        { headers: { Authorization: `Bearer ${currentUser.accessToken}` } }
+      );
+
+      setWireAccount(response.data.wireAccount);
+      setIsEditing(false);
+      setMessage({
+        type: "success",
+        text: "تم حفظ معلومات الحساب البنكي بنجاح",
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "حدث خطأ أثناء حفظ البيانات",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasWireAccount =
+    wireAccount.bankName && wireAccount.accountHolderName && wireAccount.iban;
+
+  useEffect(() => {
+    if (!accessToken || !businessId) {
+      console.log("Missing:", { accessToken, businessId });
+      return;
+    }
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/business/${currentUser._id}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        setData(response.data.businessBalance);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+  const handleDestination = (des) => {
+    navigate(des);
   };
 
   const paymentMethods = {
@@ -1234,7 +1330,7 @@ const Setting = () => {
                     <BillingSectionHeader>
                       <BillingTotal>
                         <BillingTotalLabel>الإجمالي الحالي</BillingTotalLabel>
-                        <BillingTotalAmount>0.00 ريال</BillingTotalAmount>
+                        <BillingTotalAmount>{data} ريال</BillingTotalAmount>
                       </BillingTotal>
                       <BillingSectionTitle>
                         دورة الفوترة الحالية
@@ -1243,7 +1339,7 @@ const Setting = () => {
 
                     <BillingDetails>
                       <BillingDate>
-                        تم الفوترة في: 4 يوليو 2025{" "}
+                        تم الفوترة في: 4 يوليو 2025
                         <BillingLink>عرض الرسوم الحالية</BillingLink>
                       </BillingDate>
                     </BillingDetails>
@@ -1396,77 +1492,121 @@ const Setting = () => {
                             <SetTopHe>المدفوعات</SetTopHe>
                           </SetTopUr>
                         </SetTopSuq>
-                        <BillingProfileBtn>
-                          <BillingProfileIcon>📊</BillingProfileIcon>
-                          <BillingProfileText>ملف الفوترة</BillingProfileText>
-                        </BillingProfileBtn>
                       </SetTopSu>
                     </SetTopSub>
                   </SetTop>
                 </SettingTop>
 
                 <SettingMiddle>
-                  {/* Payment Providers Section */}
+                  {/* Wire Transfer Account Section */}
                   <PaymentSection>
                     <PaymentSectionHeader>
                       <PaymentSectionTitle>
-                        مقدمو خدمات الدفع
+                        معلومات الحساب البنكي
                       </PaymentSectionTitle>
                       <PaymentSectionDescription>
-                        مقدمو الخدمات الذين يمكنونك من قبول طرق الدفع بمعدل
-                        يحدده الطرف الثالث. ستطبق رسوم إضافية على الطلبات
-                        الجديدة بمجرد <PaymentLink>اختيار خطة</PaymentLink>.
-                      </PaymentSectionDescription>
-                    </PaymentSectionHeader>
-                    <PaymentProviderBtn
-                      onClick={() => {
-                        handleTab("المبيعات");
-                      }}
-                    >
-                      اختر مقدم خدمة
-                    </PaymentProviderBtn>
-                  </PaymentSection>
-
-                  {/* Supported Payment Methods Section */}
-                  <PaymentSection>
-                    <PaymentSectionHeader>
-                      <PaymentSectionTitle>
-                        طرق الدفع المدعومة
-                      </PaymentSectionTitle>
-                      <PaymentSectionDescription>
-                        طرق الدفع المتاحة مع أحد مقدمي خدمات الدفع المعتمدين من
-                        Shopify
+                        أضف معلومات حسابك البنكي لاستلام المدفوعات عبر التحويل
+                        البنكي
                       </PaymentSectionDescription>
                     </PaymentSectionHeader>
 
-                    <PaymentMethodsContainer>
-                      {/* PayPal Method */}
-                      <PaymentMethodCard>
-                        <PaymentMethodInfo>
-                          <PaymentMethodIcon>
-                            <img
-                              src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTcuMDc2IDNIMTUuNzE2QzE3LjY3NiAzIDE5LjI3NiA0LjYgMTkuMjc2IDYuNTZDMTkuMjc2IDguNTIgMTcuNjc2IDEwLjEyIDE1LjcxNiAxMC4xMkg5LjA3NkwxMC4wNzYgMTNIMTEuMDc2TDEyLjA3NiAxNkg0LjA3NkwyLjA3NiA5SDUuMDc2TDcuMDc2IDNaIiBmaWxsPSIjMDAzMDg3Ii8+CjxwYXRoIGQ9Ik05LjA3NiAxMC4xMkgxNS43MTZDMTcuNjc2IDEwLjEyIDE5LjI3NiAxMS43MiAxOS4yNzYgMTMuNjhDMTkuMjc2IDE1LjY0IDE3LjY3NiAxNy4yNCAxNS43MTYgMTcuMjRIOC4wNzZMMTAuMDc2IDEzSDE0LjA3NkMxNS42NzYgMTMgMTcuMDc2IDE0LjQgMTcuMDc2IDE2QzE3LjA3NiAxNy42IDE1LjY3NiAxOSAxNC4wNzYgMTlIMTIuMDc2TDEwLjA3NiAxM1oiIGZpbGw9IiMwMDlDREUiLz4KPC9zdmc+"
-                              alt="PayPal"
-                            />
-                          </PaymentMethodIcon>
-                          <PaymentMethodDetails>
-                            <PaymentMethodName>PayPal</PaymentMethodName>
-                            <PaymentMethodFee>
-                              بدون رسوم معاملات
-                            </PaymentMethodFee>
-                          </PaymentMethodDetails>
-                        </PaymentMethodInfo>
-                        <PaymentMethodBtn>تفعيل PayPal</PaymentMethodBtn>
-                      </PaymentMethodCard>
+                    {message.text && (
+                      <MessageBox type={message.type}>
+                        {message.text}
+                      </MessageBox>
+                    )}
 
-                      {/* Add Payment Method Button */}
-                      <AddPaymentMethodBtn>
-                        <AddPaymentMethodIcon>+</AddPaymentMethodIcon>
-                        <AddPaymentMethodText>
-                          إضافة طريقة دفع
-                        </AddPaymentMethodText>
-                      </AddPaymentMethodBtn>
-                    </PaymentMethodsContainer>
+                    {!isEditing ? (
+                      <WireAccountDisplay>
+                        <WireAccountItem>
+                          <WireAccountLabel>اسم البنك:</WireAccountLabel>
+                          <WireAccountValue>
+                            {wireAccount.bankName}
+                          </WireAccountValue>
+                        </WireAccountItem>
+                        <WireAccountItem>
+                          <WireAccountLabel>اسم صاحب الحساب:</WireAccountLabel>
+                          <WireAccountValue>
+                            {wireAccount.accountHolderName}
+                          </WireAccountValue>
+                        </WireAccountItem>
+                        <WireAccountItem>
+                          <WireAccountLabel>رقم IBAN:</WireAccountLabel>
+                          <WireAccountValue>
+                            {wireAccount.iban}
+                          </WireAccountValue>
+                        </WireAccountItem>
+                        <WireAccountItem>
+                          <WireAccountLabel>حالة التحقق:</WireAccountLabel>
+                          <VerificationStatus verified={wireAccount.isVerified}>
+                            {wireAccount.isVerified
+                              ? "✓ تم التحقق"
+                              : "⏳ قيد المراجعة"}
+                          </VerificationStatus>
+                        </WireAccountItem>
+                        <EditButton onClick={() => setIsEditing(true)}>
+                          تعديل المعلومات
+                        </EditButton>
+                      </WireAccountDisplay>
+                    ) : (
+                      <WireAccountForm onSubmit={handleSubmit}>
+                        <FormGroup>
+                          <FormLabel>اسم البنك *</FormLabel>
+                          <FormInput
+                            type="text"
+                            name="bankName"
+                            value={wireAccount.bankName}
+                            onChange={handleInputChange}
+                            placeholder="مثال: البنك الأهلي السعودي"
+                            required
+                          />
+                        </FormGroup>
+
+                        <FormGroup>
+                          <FormLabel>اسم صاحب الحساب بالكامل *</FormLabel>
+                          <FormInput
+                            type="text"
+                            name="accountHolderName"
+                            value={wireAccount.accountHolderName}
+                            onChange={handleInputChange}
+                            placeholder="الاسم كما هو مسجل في البنك"
+                            required
+                          />
+                        </FormGroup>
+
+                        <FormGroup>
+                          <FormLabel>رقم IBAN *</FormLabel>
+                          <FormInput
+                            type="text"
+                            name="iban"
+                            value={wireAccount.iban}
+                            onChange={handleInputChange}
+                            placeholder="SA0000000000000000000000"
+                            required
+                          />
+                          <FormHelper>
+                            أدخل رقم IBAN بدون مسافات (يبدأ عادة بـ SA)
+                          </FormHelper>
+                        </FormGroup>
+
+                        <FormActions>
+                          <SaveBut type="submit" disabled={loading}>
+                            {loading ? "جاري الحفظ..." : "حفظ المعلومات"}
+                          </SaveBut>
+                          {hasWireAccount && (
+                            <CanButton
+                              type="button"
+                              onClick={() => {
+                                setIsEditing(false);
+                                fetchWireAccount();
+                              }}
+                            >
+                              إلغاء
+                            </CanButton>
+                          )}
+                        </FormActions>
+                      </WireAccountForm>
+                    )}
                   </PaymentSection>
 
                   {/* Payment Capture Method Section */}
@@ -1547,81 +1687,12 @@ const Setting = () => {
                       </ManualPaymentMethodText>
                     </ManualPaymentMethodBtn>
                   </PaymentSection>
-
-                  {/* Payment Method Customizations Section */}
-                  <PaymentSection>
-                    <PaymentSectionHeader>
-                      <PaymentSectionTitle>
-                        تخصيصات طريقة الدفع
-                      </PaymentSectionTitle>
-                      <PaymentSectionDescription>
-                        تحكم في كيفية ظهور طرق الدفع لعملائك عند الخروج
-                      </PaymentSectionDescription>
-                    </PaymentSectionHeader>
-
-                    <CustomizationBtn>
-                      عرض تطبيقات تخصيص طريقة الدفع
-                    </CustomizationBtn>
-                  </PaymentSection>
-
-                  {/* Gift Card Expiration Section */}
-                  <PaymentSection>
-                    <PaymentSectionHeader>
-                      <PaymentSectionTitle>
-                        انتهاء صلاحية بطاقة الهدايا
-                      </PaymentSectionTitle>
-                    </PaymentSectionHeader>
-
-                    <PaymentCaptureOptions>
-                      <PaymentCaptureOption>
-                        <PaymentRadio
-                          type="radio"
-                          name="giftcard"
-                          id="never-expire"
-                          defaultChecked
-                        />
-                        <PaymentCaptureLabel htmlFor="never-expire">
-                          <PaymentCaptureTitle>
-                            بطاقات الهدايا لا تنتهي صلاحيتها أبداً
-                          </PaymentCaptureTitle>
-                        </PaymentCaptureLabel>
-                      </PaymentCaptureOption>
-
-                      <PaymentCaptureOption>
-                        <PaymentRadio
-                          type="radio"
-                          name="giftcard"
-                          id="expire"
-                        />
-                        <PaymentCaptureLabel htmlFor="expire">
-                          <PaymentCaptureTitle>
-                            بطاقات الهدايا تنتهي صلاحيتها
-                          </PaymentCaptureTitle>
-                        </PaymentCaptureLabel>
-                      </PaymentCaptureOption>
-                    </PaymentCaptureOptions>
-                  </PaymentSection>
-
-                  {/* Apple Wallet Passes Section */}
-                  <PaymentSection>
-                    <AppleWalletHeader>
-                      <AppleWalletInfo>
-                        <PaymentSectionTitle>
-                          تمريرات Apple Wallet
-                        </PaymentSectionTitle>
-                        <PaymentSectionDescription>
-                          امنح العملاء تمريرة Apple Wallet رقمية لاستخدامها عبر
-                          الإنترنت أو في متاجر البيع بالتجزئة الخاصة بك
-                        </PaymentSectionDescription>
-                      </AppleWalletInfo>
-                      <CustomizeBtn>تخصيص</CustomizeBtn>
-                    </AppleWalletHeader>
-                  </PaymentSection>
                 </SettingMiddle>
               </SettingPad>
             </SettingCon>
           </SettingWr>
         );
+
       case "السلة":
         return (
           <SettingWr dir="rtl">
