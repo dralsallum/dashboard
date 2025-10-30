@@ -1,6 +1,34 @@
 import React, { useEffect, useMemo, useState } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { Star, ChevronDown } from "lucide-react";
+import { publicRequest, userRequest } from "../../requestMethods";
+import { Loader2 } from "lucide-react"; // simple spinning gear icon
+
+const Spin = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
+const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  direction: rtl;
+  color: #444;
+  background: #f7f2e6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 100dvh;
+`;
+
+const Gear = styled(Loader2)`
+  animation: ${Spin} 1.2s linear infinite;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: #f6e05e;
+`;
 
 /* ---------- لوحة الألوان ---------- */
 const C = {
@@ -376,13 +404,11 @@ const Website = () => {
     try {
       const { hostname, pathname, search } = window.location;
 
-      // 1) /appointment/:slug أو أي مسار شبيه: خذ آخر جزء غير فاضي
       const parts = pathname.split("/").filter(Boolean);
       if (parts.length >= 2 && parts[0].toLowerCase().includes("appointment")) {
         return parts[1];
       }
       if (parts.length >= 1) {
-        // لو صفحتك /doctor/:slug أو /store/:slug … إلخ
         const maybe = parts[parts.length - 1];
         if (
           maybe &&
@@ -501,7 +527,12 @@ const Website = () => {
   };
 
   if (loading)
-    return <div style={{ padding: 24, direction: "rtl" }}>جاري التحميل…</div>;
+    return (
+      <LoadingWrapper>
+        <Gear />
+        جاري التحميل…
+      </LoadingWrapper>
+    );
   if (err)
     return (
       <div style={{ padding: 24, color: "crimson", direction: "rtl" }}>
