@@ -50,6 +50,7 @@ const Phone = styled.div`
   background: ${C.cream};
   display: flex;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const PhoneInner = styled.div`
