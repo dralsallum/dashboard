@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import Pay from "./pages/pay";
 import Quota from "./pages/Quota";
 import Upload from "./pages/Upload";
+import Appointment from "./pages/Appointment";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -42,6 +43,7 @@ const App = () => {
           <Route path="/recommendation" element={<Recommendation />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/pay" element={<Pay />} />
+          <Route path="/appointment/:slug" element={<Appointment />} />
           <Route path="/quota/:id" element={<Quota />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route
