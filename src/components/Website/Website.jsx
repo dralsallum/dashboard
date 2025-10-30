@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { Star, ChevronDown } from "lucide-react";
-import { publicRequest, userRequest } from "../../requestMethods";
-import { Loader2 } from "lucide-react"; // simple spinning gear icon
+import { publicRequest } from "../../requestMethods";
+import { Loader2 } from "lucide-react";
 
+/* ---------- حركة التحميل ---------- */
 const Spin = keyframes`
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -57,7 +58,7 @@ const PhoneInner = styled.div`
   width: 100%;
   max-width: 420px;
   background: ${C.cream};
-  padding-bottom: 116px; /* مساحة لشريط الحجز السفلي */
+  padding-bottom: 116px;
   -webkit-overflow-scrolling: touch;
   direction: rtl;
   text-align: right;
@@ -80,7 +81,6 @@ const Section = styled.div`
   }
 `;
 
-/* نسخة ترويسة داخل البطاقة */
 const SectionHeader = styled(Section)`
   border-bottom: 1px solid ${C.line};
   color: ${C.ink900};
@@ -123,7 +123,7 @@ const Tiny = styled.div`
   margin-top: 2px;
 `;
 
-/* ---------- عناصر عامة (بدون inline) ---------- */
+/* ---------- عناصر عامة ---------- */
 const Row = styled.div`
   display: flex;
   gap: ${(p) => p.$gap || 0}px;
@@ -313,8 +313,8 @@ const TimesRow = styled.div`
 const TimeBtn = styled.button`
   padding: 10px 0;
   border-radius: 10px;
-  border: 1px solid ${C.yellowBorder};
-  background: ${C.yellow};
+  border: 2px solid ${(p) => (p.$selected ? C.ink900 : C.yellowBorder)};
+  background: ${(p) => (p.$selected ? "#fff" : C.yellow)};
   color: ${C.ink900};
   font-weight: 700;
   font-size: 15px;
@@ -323,6 +323,12 @@ const TimeBtn = styled.button`
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${(p) => (p.$selected ? "#fff" : C.yellowBorder)};
+    transform: translateY(-2px);
+  }
 `;
 
 const MoreBtn = styled(TimeBtn)`
@@ -340,6 +346,114 @@ const OutlineBtn = styled.button`
   font-weight: 700;
   color: ${C.ink900};
   cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${C.ink900};
+    color: #fff;
+  }
+`;
+
+/* ---------- Patient Info Form ---------- */
+const FormGroup = styled.div`
+  margin-bottom: 16px;
+`;
+
+const FormLabel = styled.label`
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: ${C.ink900};
+  margin-bottom: 6px;
+`;
+
+const FormInput = styled.input`
+  width: 100%;
+  background: #fff;
+  border: 1px solid ${C.line};
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 15px;
+  color: ${C.ink900};
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: ${C.ink400};
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px ${C.ink900}22;
+  }
+`;
+
+const RadioGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: ${C.ink900};
+  cursor: pointer;
+`;
+
+const RadioInput = styled.input`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`;
+
+const BackBtn = styled.button`
+  background: transparent;
+  border: none;
+  color: ${C.ink900};
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  text-decoration: underline;
+  transition: color 0.2s;
+
+  &:hover {
+    color: ${C.ink700};
+  }
+`;
+
+const AppointmentSummary = styled.div`
+  background: ${C.cream};
+  border: 1px solid ${C.line};
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+`;
+
+const SummaryRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: ${C.ink700};
+  font-size: 14px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+/* ---------- تخطيطات مساعدة ---------- */
+const TwoCol = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+`;
+
+const Spacer16 = styled.div`
+  height: 16px;
 `;
 
 /* ---------- شريط الحجز السفلي ---------- */
@@ -367,6 +481,17 @@ const BookBtn = styled.button`
   border: 2px solid ${C.ink900};
   border-radius: 10px;
   cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${C.yellowBorder};
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const KPI = styled.div`
@@ -388,13 +513,29 @@ const Website = () => {
   const [err, setErr] = useState("");
 
   // المواعيد القادمة (أقرب 3 أيام بدءًا من أول يوم متاح)
-  const [visibleDays, setVisibleDays] = useState([]); // [{date, title, slots: []}]
+  const [visibleDays, setVisibleDays] = useState([]);
+
+  // Booking flow state
+  const [bookingStep, setBookingStep] = useState(1);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
+  // حقول خطوة الحجز الأولى
+  const [appointmentType, setAppointmentType] = useState("مرض عارض");
+  const [insurancePlan, setInsurancePlan] = useState("");
+
+  // حقول خطوة البيانات الشخصية
+  const [patientInfo, setPatientInfo] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    dob: "",
+    sex: "",
+  });
 
   // --- helpers to extract slug from URL ---
   const getSlugFromUrl = () => {
     try {
       const { hostname, pathname, search } = window.location;
-
       const parts = pathname.split("/").filter(Boolean);
       if (parts.length >= 2 && parts[0].toLowerCase().includes("appointment")) {
         return parts[1];
@@ -408,16 +549,11 @@ const Website = () => {
           return maybe;
         }
       }
-
-      // 2) ?store=slug
       const qs = new URLSearchParams(search);
       const fromQuery = qs.get("store");
       if (fromQuery) return fromQuery;
-
-      // 3) subdomain: slug.yourdomain.com (تجاهل localhost)
       const first = hostname.split(".")[0];
       if (first && first !== "localhost" && first !== "www") return first;
-
       return null;
     } catch {
       return null;
@@ -457,7 +593,6 @@ const Website = () => {
       setLoading(true);
       setErr("");
       try {
-        // 1) جلب بيانات المتجر/العيادة
         const storeRes = await publicRequest.get(`/business/store/${slug}`);
         const data = storeRes.data;
 
@@ -470,7 +605,7 @@ const Website = () => {
             .join("")
             .slice(0, 2),
           rating: 4.6,
-          reviewHighlight: "“تجربة ممتازة، إنصات واهتمام ونصائح واضحة.”",
+          reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة.",
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
           avatar:
             data?.storeSettings?.logo ||
@@ -484,7 +619,6 @@ const Website = () => {
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
 
-        // 2) جلب التوافر من الباكند: أول تاريخ متاح + أقرب 3 أيام
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -503,19 +637,18 @@ const Website = () => {
           ? availRes.data.availability
           : [];
 
-        // إيجاد أول يوم يحتوي على مواعيد
         const firstIdx = availability.findIndex(
           (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
         );
 
         if (firstIdx === -1) {
-          setVisibleDays([]); // لا يوجد توافر
+          setVisibleDays([]);
         } else {
           const nextThree = availability.slice(firstIdx, firstIdx + 3);
           const normalized = nextThree.map((day) => ({
-            date: day.date, // YYYY-MM-DD
+            date: day.date,
             title: fmtDayTitle(day.date),
-            slots: day.availableSlots, // ["09:00", ...]
+            slots: day.availableSlots,
           }));
           setVisibleDays(normalized);
         }
@@ -528,8 +661,79 @@ const Website = () => {
     };
 
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* ---------- أحداث خطوة 1 ---------- */
+  const handlePickTime = (date, time) => {
+    // فقط اختيار الوقت — لا ننتقل تلقائياً
+    setSelectedSlot({ date, time });
+  };
+
+  const canProceedStep1 =
+    appointmentType &&
+    insurancePlan.trim().length > 0 &&
+    activeLocation &&
+    selectedSlot;
+
+  const goToStep2 = () => {
+    if (!canProceedStep1) return;
+    setBookingStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /* ---------- أحداث خطوة 2 ---------- */
+  const handleBackToSelection = () => {
+    setBookingStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleInputChange = (field, value) => {
+    setPatientInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBookingSubmit = async () => {
+    const isFormValid =
+      patientInfo.email &&
+      patientInfo.firstName &&
+      patientInfo.lastName &&
+      patientInfo.dob &&
+      patientInfo.sex;
+
+    if (!isFormValid) {
+      alert("الرجاء ملء جميع الحقول المطلوبة");
+      return;
+    }
+
+    try {
+      const bookingData = {
+        appointmentType,
+        insurancePlan,
+        location: activeLocation,
+        isNewPatient,
+        slotDate: selectedSlot?.date,
+        slotTime: selectedSlot?.time,
+        patient: {
+          email: patientInfo.email,
+          firstName: patientInfo.firstName,
+          lastName: patientInfo.lastName,
+          dob: patientInfo.dob,
+          sex: patientInfo.sex,
+        },
+        doctorName: doctor?.name,
+      };
+
+      console.log("Booking submitted:", bookingData);
+
+      // مثال استدعاء فعلي عند توفر المسار:
+      // const response = await publicRequest.post('/appointments/book', bookingData);
+      // if (response?.data?.success) alert('تم حجز الموعد بنجاح!');
+
+      alert("تم حجز الموعد بنجاح!");
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert("حدث خطأ أثناء الحجز. الرجاء المحاولة مرة أخرى.");
+    }
+  };
 
   if (loading)
     return (
@@ -538,14 +742,149 @@ const Website = () => {
         جاري التحميل…
       </LoadingWrapper>
     );
+
   if (err)
     return (
       <div style={{ padding: 24, color: "crimson", direction: "rtl" }}>
         {err}
       </div>
     );
+
   if (!doctor) return null;
 
+  /* ---------- الخطوة 2: بيانات المراجع ---------- */
+  if (bookingStep === 2) {
+    const isFormValid =
+      patientInfo.email &&
+      patientInfo.firstName &&
+      patientInfo.lastName &&
+      patientInfo.dob &&
+      patientInfo.sex;
+
+    return (
+      <>
+        <Phone>
+          <PhoneInner>
+            <Card>
+              <Section>
+                <BackBtn onClick={handleBackToSelection}>← العودة</BackBtn>
+              </Section>
+
+              <SectionHeader>
+                <Heading20>أخبرنا قليلاً عنك</Heading20>
+                <P>لحجز موعدك، نحتاج للتحقق من بعض المعلومات.</P>
+              </SectionHeader>
+
+              <Section>
+                <AppointmentSummary>
+                  <DayHeader style={{ fontSize: 16, marginBottom: 12 }}>
+                    تفاصيل الموعد
+                  </DayHeader>
+                  <SummaryRow>
+                    <strong>{doctor.name}</strong> - {doctor.specialty}
+                  </SummaryRow>
+                  <SummaryRow>
+                    📅 {fmtDayTitle(selectedSlot?.date)} في {selectedSlot?.time}
+                  </SummaryRow>
+                  <SummaryRow>📍 {activeLocation}</SummaryRow>
+                  <SummaryRow>📝 {appointmentType}</SummaryRow>
+                  <SummaryRow>
+                    👤 {isNewPatient ? "مراجع جديد" : "مراجع سابق"}
+                  </SummaryRow>
+                  <SummaryRow>💳 {insurancePlan}</SummaryRow>
+                </AppointmentSummary>
+
+                <FormGroup>
+                  <FormLabel>البريد الإلكتروني *</FormLabel>
+                  <FormInput
+                    type="email"
+                    value={patientInfo.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="example@email.com"
+                    required
+                  />
+                </FormGroup>
+
+                <TwoCol>
+                  <FormGroup>
+                    <FormLabel>الاسم الأول *</FormLabel>
+                    <FormInput
+                      value={patientInfo.firstName}
+                      onChange={(e) =>
+                        handleInputChange("firstName", e.target.value)
+                      }
+                      placeholder="الاسم الأول"
+                      required
+                    />
+                  </FormGroup>
+
+                  <FormGroup>
+                    <FormLabel>اسم العائلة *</FormLabel>
+                    <FormInput
+                      value={patientInfo.lastName}
+                      onChange={(e) =>
+                        handleInputChange("lastName", e.target.value)
+                      }
+                      placeholder="اسم العائلة"
+                      required
+                    />
+                  </FormGroup>
+                </TwoCol>
+
+                <FormGroup>
+                  <FormLabel>تاريخ الميلاد *</FormLabel>
+                  <FormInput
+                    type="date"
+                    value={patientInfo.dob}
+                    onChange={(e) => handleInputChange("dob", e.target.value)}
+                    required
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <FormLabel>الجنس *</FormLabel>
+                  <RadioGroup>
+                    <RadioLabel>
+                      <RadioInput
+                        type="radio"
+                        name="sex"
+                        value="male"
+                        checked={patientInfo.sex === "male"}
+                        onChange={(e) =>
+                          handleInputChange("sex", e.target.value)
+                        }
+                      />
+                      ذكر
+                    </RadioLabel>
+                    <RadioLabel>
+                      <RadioInput
+                        type="radio"
+                        name="sex"
+                        value="female"
+                        checked={patientInfo.sex === "female"}
+                        onChange={(e) =>
+                          handleInputChange("sex", e.target.value)
+                        }
+                      />
+                      أنثى
+                    </RadioLabel>
+                  </RadioGroup>
+                </FormGroup>
+              </Section>
+            </Card>
+          </PhoneInner>
+        </Phone>
+
+        <BottomBar>
+          <BookBtn onClick={handleBookingSubmit} disabled={!isFormValid}>
+            تأكيد الحجز
+          </BookBtn>
+        </BottomBar>
+      </>
+    );
+  }
+
+  /* ---------- الخطوة 1: اختيار الموعد + بيانات أساسية ---------- */
   return (
     <>
       <Phone>
@@ -610,44 +949,66 @@ const Website = () => {
           <Card>
             <SectionHeader>
               <Heading20>احجز موعدًا مجانًا</Heading20>
-              <P>تتم جدولة المواعيد عبر شريكنا Zocdoc</P>
+              <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
             </SectionHeader>
 
             <Section>
-              {/* تفاصيل الحجز / التأمين / جديد-قديم / الموقع */}
+              {/* نوع الموعد */}
               <div>
                 <Label>تفاصيل الحجز</Label>
                 <SelectWrap>
-                  <Select defaultValue="مرض عارض">
+                  <Select
+                    value={appointmentType}
+                    onChange={(e) => setAppointmentType(e.target.value)}
+                  >
                     <option>مرض عارض</option>
                     <option>مراجعة متابعة</option>
                     <option>فحص سنوي</option>
+                    <option>استشارة</option>
+                    <option>أخرى</option>
                   </Select>
                 </SelectWrap>
               </div>
 
-              <div style={{ marginTop: 16 }}>
-                <Input placeholder="شركة التأمين والخطة" />
+              <Spacer16 />
+
+              {/* التأمين */}
+              <div>
+                <Label>شركة التأمين والخطة *</Label>
+                <Input
+                  placeholder="مثال: BUPA — Classic"
+                  value={insurancePlan}
+                  onChange={(e) => setInsurancePlan(e.target.value)}
+                />
               </div>
 
-              <div style={{ marginTop: 16 }}>
+              <Spacer16 />
+
+              {/* مراجع جديد/سابق */}
+              <div>
+                <Label>نوع المراجع</Label>
                 <Toggle>
                   <ToggleBtn
                     $active={isNewPatient}
                     onClick={() => setIsNewPatient(true)}
+                    type="button"
                   >
                     مراجع جديد
                   </ToggleBtn>
                   <ToggleBtn
                     $active={!isNewPatient}
                     onClick={() => setIsNewPatient(false)}
+                    type="button"
                   >
                     مراجع سابق
                   </ToggleBtn>
                 </Toggle>
               </div>
 
-              <div style={{ marginTop: 16 }}>
+              <Spacer16 />
+
+              {/* الموقع */}
+              <div>
                 <Label>الموقع</Label>
                 <SelectWrap>
                   <Select
@@ -661,9 +1022,11 @@ const Website = () => {
                 </SelectWrap>
               </div>
 
+              <Spacer16 />
+
               {/* التوافر من الباكند: أقرب 3 أيام بدءاً من أول يوم متاح */}
-              <div style={{ marginTop: 16 }}>
-                <Label>المواعيد المتاحة</Label>
+              <div>
+                <Label>المواعيد المتاحة *</Label>
                 <AvailBlock>
                   {visibleDays.length === 0 ? (
                     <P>لا توجد مواعيد متاحة حاليًا.</P>
@@ -672,16 +1035,31 @@ const Website = () => {
                       <div key={day.date + idx}>
                         <DayHeader>{day.title}</DayHeader>
                         <TimesRow>
-                          {day.slots.slice(0, 7).map((t) => (
-                            <TimeBtn key={t}>{t}</TimeBtn>
-                          ))}
-                          {day.slots.length > 7 && <MoreBtn>المزيد</MoreBtn>}
+                          {day.slots.slice(0, 7).map((t) => {
+                            const selected =
+                              selectedSlot?.date === day.date &&
+                              selectedSlot?.time === t;
+                            return (
+                              <TimeBtn
+                                key={t}
+                                $selected={selected}
+                                onClick={() => handlePickTime(day.date, t)}
+                                type="button"
+                                aria-pressed={selected}
+                              >
+                                {t}
+                              </TimeBtn>
+                            );
+                          })}
+                          {day.slots.length > 7 && (
+                            <MoreBtn type="button">المزيد</MoreBtn>
+                          )}
                         </TimesRow>
                       </div>
                     ))
                   )}
                   {visibleDays.length > 0 && (
-                    <OutlineBtn>عرض المزيد من التوافر</OutlineBtn>
+                    <OutlineBtn type="button">عرض المزيد من التوافر</OutlineBtn>
                   )}
                 </AvailBlock>
               </div>
@@ -691,7 +1069,9 @@ const Website = () => {
       </Phone>
 
       <BottomBar>
-        <BookBtn>احجز الموعد الآن</BookBtn>
+        <BookBtn onClick={goToStep2} disabled={!canProceedStep1}>
+          احجز الموعد الآن
+        </BookBtn>
       </BottomBar>
     </>
   );
