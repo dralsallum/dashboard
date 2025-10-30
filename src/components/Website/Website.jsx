@@ -92,6 +92,7 @@ const HeaderRow = styled.div`
   gap: 12px;
   align-items: center;
   padding: 16px 12px 0;
+  margin: 10px 0 0 0;
 `;
 
 const Avatar = styled.img`
@@ -240,14 +241,6 @@ const Select = styled.select`
   }
 `;
 
-const DropdownIcon = styled(ChevronDown)`
-  position: absolute;
-  left: 12px; /* RTL: الأيقونة على اليسار */
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${C.ink400};
-`;
-
 const Input = styled.input`
   width: 100%;
   background: #fff;
@@ -376,13 +369,6 @@ const BookBtn = styled.button`
   cursor: pointer;
 `;
 
-/* ---------- أقسام التقييم (شبكة) ---------- */
-const TwoCol = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-`;
-
 const KPI = styled.div`
   font-size: ${(p) => p.$size || 18}px;
   font-weight: ${(p) => (p.$bold ? 700 : 600)};
@@ -392,6 +378,7 @@ const KPI = styled.div`
 
 /* ===================================================== */
 const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
+
 const Website = () => {
   const [doctor, setDoctor] = useState(null);
   const [activeTab] = useState("الحجز");
@@ -399,6 +386,9 @@ const Website = () => {
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+
+  // المواعيد القادمة (أقرب 3 أيام بدءًا من أول يوم متاح)
+  const [visibleDays, setVisibleDays] = useState([]); // [{date, title, slots: []}]
 
   // --- helpers to extract slug from URL ---
   const getSlugFromUrl = () => {
@@ -434,6 +424,27 @@ const Website = () => {
     }
   };
 
+  // عرض عنوان اليوم بالعربية (اليوم/غدًا/اسم اليوم)
+  const fmtDayTitle = (dateISO) => {
+    const d = new Date(dateISO + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const dKey = d.toISOString().split("T")[0];
+    const tKey = today.toISOString().split("T")[0];
+    const tmKey = tomorrow.toISOString().split("T")[0];
+
+    const fmt = (opts) => d.toLocaleDateString("ar-SA", opts);
+
+    if (dKey === tKey)
+      return `اليوم، ${fmt({ month: "short", day: "numeric" })}`;
+    if (dKey === tmKey)
+      return `غدًا، ${fmt({ month: "short", day: "numeric" })}`;
+    return fmt({ weekday: "long", month: "short", day: "numeric" });
+  };
+
   useEffect(() => {
     const slug = getSlugFromUrl();
     if (!slug) {
@@ -442,17 +453,14 @@ const Website = () => {
       return;
     }
 
-    const fetchDoctor = async () => {
+    const fetchAll = async () => {
       setLoading(true);
       setErr("");
       try {
-        const res = await fetch(`${BASE_URL}/business/store/${slug}`);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
+        // 1) جلب بيانات المتجر/العيادة
+        const storeRes = await publicRequest.get(`/business/store/${slug}`);
+        const data = storeRes.data;
 
-        // خرط بيانات العرض
         const mapped = {
           name: data?.username || "طبيب",
           specialty: data?.storeName || "طبيب عام",
@@ -461,7 +469,7 @@ const Website = () => {
             .map((w) => w[0]?.toUpperCase())
             .join("")
             .slice(0, 2),
-          rating: 4.6, // تقدر تربط تقييم حقيقي لاحقاً
+          rating: 4.6,
           reviewHighlight: "“تجربة ممتازة، إنصات واهتمام ونصائح واضحة.”",
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
           avatar:
@@ -475,57 +483,53 @@ const Website = () => {
 
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
+
+        // 2) جلب التوافر من الباكند: أول تاريخ متاح + أقرب 3 أيام
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30);
+
+        const availRes = await publicRequest.get(
+          `/appointments/available/${slug}`,
+          {
+            params: {
+              startDate: startDate.toISOString().split("T")[0],
+              endDate: endDate.toISOString().split("T")[0],
+            },
+          }
+        );
+
+        const availability = Array.isArray(availRes.data?.availability)
+          ? availRes.data.availability
+          : [];
+
+        // إيجاد أول يوم يحتوي على مواعيد
+        const firstIdx = availability.findIndex(
+          (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
+        );
+
+        if (firstIdx === -1) {
+          setVisibleDays([]); // لا يوجد توافر
+        } else {
+          const nextThree = availability.slice(firstIdx, firstIdx + 3);
+          const normalized = nextThree.map((day) => ({
+            date: day.date, // YYYY-MM-DD
+            title: fmtDayTitle(day.date),
+            slots: day.availableSlots, // ["09:00", ...]
+          }));
+          setVisibleDays(normalized);
+        }
       } catch (e) {
         console.error(e);
-        setErr("تعذر جلب بيانات العيادة.");
+        setErr("تعذر جلب بيانات العيادة أو التوافر.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDoctor();
+    fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // الأيام (اليوم + 4 أيام)
-  const days = useMemo(() => {
-    const make = (offset) => {
-      const d = new Date();
-      d.setDate(d.getDate() + offset);
-      return d;
-    };
-    return [make(0), make(1), make(2), make(3), make(4)];
-  }, []);
-
-  const fmtDayTitle = (d, idx) => {
-    const fmt = (opts) => d.toLocaleDateString("ar-SA", opts);
-    if (idx === 0) return `اليوم، ${fmt({ month: "short", day: "numeric" })}`;
-    if (idx === 1) return `غدًا، ${fmt({ month: "short", day: "numeric" })}`;
-    return fmt({ weekday: "long", month: "short", day: "numeric" });
-  };
-
-  const getTimes = (d, idx) => {
-    const todayPM = [
-      "16:40",
-      "16:50",
-      "17:00",
-      "17:10",
-      "17:20",
-      "17:30",
-      "17:40",
-    ];
-    const tomorrowAM = [
-      "09:00",
-      "09:10",
-      "09:20",
-      "09:30",
-      "09:40",
-      "09:50",
-      "10:00",
-    ];
-    if (idx === 0) return todayPM;
-    if (idx === 1) return tomorrowAM;
-    return ["09:00", "09:20", "09:40", "10:00", "16:40", "17:00"];
-  };
 
   if (loading)
     return (
@@ -542,7 +546,6 @@ const Website = () => {
     );
   if (!doctor) return null;
 
-  // ====== بقية واجهتك الحالية (مختصرة هنا) — فقط استبدل مصادر البيانات بـ doctor ======
   return (
     <>
       <Phone>
@@ -658,26 +661,28 @@ const Website = () => {
                 </SelectWrap>
               </div>
 
-              {/* التوافر */}
+              {/* التوافر من الباكند: أقرب 3 أيام بدءاً من أول يوم متاح */}
               <div style={{ marginTop: 16 }}>
                 <Label>المواعيد المتاحة</Label>
                 <AvailBlock>
-                  {days.map((d, idx) => {
-                    const times = getTimes(d, idx);
-                    const title = fmtDayTitle(d, idx);
-                    return (
-                      <div key={idx}>
-                        <DayHeader>{title}</DayHeader>
+                  {visibleDays.length === 0 ? (
+                    <P>لا توجد مواعيد متاحة حاليًا.</P>
+                  ) : (
+                    visibleDays.map((day, idx) => (
+                      <div key={day.date + idx}>
+                        <DayHeader>{day.title}</DayHeader>
                         <TimesRow>
-                          {times.slice(0, 7).map((t) => (
+                          {day.slots.slice(0, 7).map((t) => (
                             <TimeBtn key={t}>{t}</TimeBtn>
                           ))}
-                          <MoreBtn>المزيد</MoreBtn>
+                          {day.slots.length > 7 && <MoreBtn>المزيد</MoreBtn>}
                         </TimesRow>
                       </div>
-                    );
-                  })}
-                  <OutlineBtn>عرض المزيد من التوافر</OutlineBtn>
+                    ))
+                  )}
+                  {visibleDays.length > 0 && (
+                    <OutlineBtn>عرض المزيد من التوافر</OutlineBtn>
+                  )}
                 </AvailBlock>
               </div>
             </Section>
