@@ -231,7 +231,7 @@ const Select = styled.select`
   background: ${C.card};
   border: 1px solid ${C.line};
   border-radius: 8px;
-  padding: 12px 40px 12px 12px;
+  padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
 
@@ -511,19 +511,11 @@ const Website = () => {
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-
-  // المواعيد القادمة (أقرب 3 أيام بدءًا من أول يوم متاح)
   const [visibleDays, setVisibleDays] = useState([]);
-
-  // Booking flow state
   const [bookingStep, setBookingStep] = useState(1);
   const [selectedSlot, setSelectedSlot] = useState(null);
-
-  // حقول خطوة الحجز الأولى
   const [appointmentType, setAppointmentType] = useState("مرض عارض");
   const [insurancePlan, setInsurancePlan] = useState("");
-
-  // حقول خطوة البيانات الشخصية
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -724,10 +716,6 @@ const Website = () => {
 
       console.log("Booking submitted:", bookingData);
 
-      // مثال استدعاء فعلي عند توفر المسار:
-      // const response = await publicRequest.post('/appointments/book', bookingData);
-      // if (response?.data?.success) alert('تم حجز الموعد بنجاح!');
-
       alert("تم حجز الموعد بنجاح!");
     } catch (error) {
       console.error("Booking error:", error);
@@ -767,7 +755,7 @@ const Website = () => {
           <PhoneInner>
             <Card>
               <Section>
-                <BackBtn onClick={handleBackToSelection}>← العودة</BackBtn>
+                <BackBtn onClick={handleBackToSelection}> العودة</BackBtn>
               </Section>
 
               <SectionHeader>
