@@ -1,8 +1,8 @@
+// Website.jsx - Updated to use businessId from slug
 import React, { useEffect, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
-import { Star, ChevronDown } from "lucide-react";
+import { Star, ChevronDown, Loader2 } from "lucide-react";
 import { publicRequest } from "../../requestMethods";
-import { Loader2 } from "lucide-react";
 
 /* ---------- حركة التحميل ---------- */
 const Spin = keyframes`
@@ -241,7 +241,7 @@ const Select = styled.select`
   }
 `;
 
-const Input = styled.input`
+const TextArea = styled.textarea`
   width: 100%;
   background: #fff;
   border: 1px solid ${C.line};
@@ -249,6 +249,9 @@ const Input = styled.input`
   padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
 
   &::placeholder {
     color: ${C.ink400};
@@ -502,7 +505,6 @@ const KPI = styled.div`
 `;
 
 /* ===================================================== */
-const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
 
 const Website = () => {
   const [doctor, setDoctor] = useState(null);
@@ -515,44 +517,26 @@ const Website = () => {
   const [bookingStep, setBookingStep] = useState(1);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [appointmentType, setAppointmentType] = useState("مرض عارض");
-  const [insurancePlan, setInsurancePlan] = useState("");
+  const [describe, setDescribe] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
     lastName: "",
-    dob: "",
-    sex: "",
+    phoneNumber: "",
   });
+  const [businessId, setBusinessId] = useState(null); // Store businessId
 
-  // --- helpers to extract slug from URL ---
+  // حاول أخذ الـ slug من الرابط، وإلّا استخدم قيمة افتراضية
   const getSlugFromUrl = () => {
     try {
-      const { hostname, pathname, search } = window.location;
-      const parts = pathname.split("/").filter(Boolean);
-      if (parts.length >= 2 && parts[0].toLowerCase().includes("appointment")) {
-        return parts[1];
-      }
-      if (parts.length >= 1) {
-        const maybe = parts[parts.length - 1];
-        if (
-          maybe &&
-          !["appointment", "doctor", "store"].includes(maybe.toLowerCase())
-        ) {
-          return maybe;
-        }
-      }
-      const qs = new URLSearchParams(search);
-      const fromQuery = qs.get("store");
-      if (fromQuery) return fromQuery;
-      const first = hostname.split(".")[0];
-      if (first && first !== "localhost" && first !== "www") return first;
-      return null;
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      return parts[parts.length - 1] || "demo-doctor-clinic";
     } catch {
-      return null;
+      return "demo-doctor-clinic";
     }
   };
 
-  // عرض عنوان اليوم بالعربية (اليوم/غدًا/اسم اليوم)
   const fmtDayTitle = (dateISO) => {
     const d = new Date(dateISO + "T00:00:00");
     const today = new Date();
@@ -585,8 +569,18 @@ const Website = () => {
       setLoading(true);
       setErr("");
       try {
+        // معلومات المتجر/الطبيب - الـ API يرجع Business document
         const storeRes = await publicRequest.get(`/business/store/${slug}`);
         const data = storeRes.data;
+
+        // Extract businessId from the response (_id is the businessId)
+        const extractedBusinessId = data?._id;
+        if (!extractedBusinessId) {
+          throw new Error("Business ID not found in response");
+        }
+
+        setBusinessId(extractedBusinessId); // Save businessId to state
+        console.log("Business ID extracted from slug:", extractedBusinessId);
 
         const mapped = {
           name: data?.username || "طبيب",
@@ -601,16 +595,18 @@ const Website = () => {
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
           avatar:
             data?.storeSettings?.logo ||
-            "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=256&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=256&q=80",
           locationOptions: [
             data?.storeSettings?.description ? "العيادة" : "زيارة في العيادة",
             "زيارة عبر الفيديو",
           ],
+          businessId: extractedBusinessId, // Store in doctor object too
         };
 
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
 
+        // التوافر
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -655,17 +651,11 @@ const Website = () => {
     fetchAll();
   }, []);
 
-  /* ---------- أحداث خطوة 1 ---------- */
   const handlePickTime = (date, time) => {
-    // فقط اختيار الوقت — لا ننتقل تلقائياً
     setSelectedSlot({ date, time });
   };
 
-  const canProceedStep1 =
-    appointmentType &&
-    insurancePlan.trim().length > 0 &&
-    activeLocation &&
-    selectedSlot;
+  const canProceedStep1 = appointmentType && activeLocation && selectedSlot;
 
   const goToStep2 = () => {
     if (!canProceedStep1) return;
@@ -673,7 +663,6 @@ const Website = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  /* ---------- أحداث خطوة 2 ---------- */
   const handleBackToSelection = () => {
     setBookingStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -688,38 +677,66 @@ const Website = () => {
       patientInfo.email &&
       patientInfo.firstName &&
       patientInfo.lastName &&
-      patientInfo.dob &&
-      patientInfo.sex;
+      patientInfo.phoneNumber &&
+      describe;
 
     if (!isFormValid) {
       alert("الرجاء ملء جميع الحقول المطلوبة");
       return;
     }
 
+    if (!businessId) {
+      alert("خطأ: لم يتم العثور على معرف العيادة");
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      const bookingData = {
-        appointmentType,
-        insurancePlan,
-        location: activeLocation,
-        isNewPatient,
-        slotDate: selectedSlot?.date,
-        slotTime: selectedSlot?.time,
-        patient: {
-          email: patientInfo.email,
-          firstName: patientInfo.firstName,
-          lastName: patientInfo.lastName,
-          dob: patientInfo.dob,
-          sex: patientInfo.sex,
-        },
-        doctorName: doctor?.name,
+      const appointmentDetailsText = `
+نوع الموعد: ${appointmentType}
+الموقع: ${activeLocation}
+نوع المراجع: ${isNewPatient ? "مراجع جديد" : "مراجع سابق"}
+التاريخ: ${fmtDayTitle(selectedSlot?.date)}
+الوقت: ${selectedSlot?.time}
+الطبيب: ${doctor?.name}
+التخصص: ${doctor?.specialty}
+وصف الزيارة: ${describe}
+      `.trim();
+
+      // بيانات مطابقة لنموذج Quota مع businessId من الـ slug
+      const quotaData = {
+        firstName: patientInfo.firstName,
+        lastName: patientInfo.lastName,
+        email: patientInfo.email,
+        phoneNumber: patientInfo.phoneNumber,
+        weddingDate: selectedSlot?.date, // نستخدمها كتاريخ الحجز
+        guestCount: appointmentType, // نمرر نوع الموعد هنا
+        weddingDetails: appointmentDetailsText, // وصف كامل
+        businessId: businessId, // Use the businessId from slug lookup
       };
 
-      console.log("Booking submitted:", bookingData);
+      console.log("Submitting quota with businessId:", businessId);
 
-      alert("تم حجز الموعد بنجاح!");
+      const response = await publicRequest.post("/quota", quotaData);
+      console.log("Booking response:", response.data);
+
+      alert("تم حجز الموعد بنجاح! سيتم التواصل معك قريباً.");
+
+      setBookingStep(1);
+      setSelectedSlot(null);
+      setDescribe("");
+      setPatientInfo({
+        email: "",
+        firstName: "",
+        lastName: "",
+        phoneNumber: "",
+      });
     } catch (error) {
       console.error("Booking error:", error);
       alert("حدث خطأ أثناء الحجز. الرجاء المحاولة مرة أخرى.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -746,8 +763,8 @@ const Website = () => {
       patientInfo.email &&
       patientInfo.firstName &&
       patientInfo.lastName &&
-      patientInfo.dob &&
-      patientInfo.sex;
+      patientInfo.phoneNumber &&
+      describe;
 
     return (
       <>
@@ -755,7 +772,7 @@ const Website = () => {
           <PhoneInner>
             <Card>
               <Section>
-                <BackBtn onClick={handleBackToSelection}> العودة</BackBtn>
+                <BackBtn onClick={handleBackToSelection}>← العودة</BackBtn>
               </Section>
 
               <SectionHeader>
@@ -779,7 +796,6 @@ const Website = () => {
                   <SummaryRow>
                     👤 {isNewPatient ? "مراجع جديد" : "مراجع سابق"}
                   </SummaryRow>
-                  <SummaryRow>💳 {insurancePlan}</SummaryRow>
                 </AppointmentSummary>
 
                 <FormGroup>
@@ -820,52 +836,37 @@ const Website = () => {
                 </TwoCol>
 
                 <FormGroup>
-                  <FormLabel>تاريخ الميلاد *</FormLabel>
+                  <FormLabel>رقم الهاتف *</FormLabel>
                   <FormInput
-                    type="date"
-                    value={patientInfo.dob}
-                    onChange={(e) => handleInputChange("dob", e.target.value)}
+                    type="tel"
+                    value={patientInfo.phoneNumber}
+                    onChange={(e) =>
+                      handleInputChange("phoneNumber", e.target.value)
+                    }
+                    placeholder="05xxxxxxxx"
                     required
                   />
                 </FormGroup>
 
-                <FormGroup>
-                  <FormLabel>الجنس *</FormLabel>
-                  <RadioGroup>
-                    <RadioLabel>
-                      <RadioInput
-                        type="radio"
-                        name="sex"
-                        value="male"
-                        checked={patientInfo.sex === "male"}
-                        onChange={(e) =>
-                          handleInputChange("sex", e.target.value)
-                        }
-                      />
-                      ذكر
-                    </RadioLabel>
-                    <RadioLabel>
-                      <RadioInput
-                        type="radio"
-                        name="sex"
-                        value="female"
-                        checked={patientInfo.sex === "female"}
-                        onChange={(e) =>
-                          handleInputChange("sex", e.target.value)
-                        }
-                      />
-                      أنثى
-                    </RadioLabel>
-                  </RadioGroup>
-                </FormGroup>
+                <div>
+                  <Label>وصف الزيارة *</Label>
+                  <TextArea
+                    placeholder="مثال: أعاني من آلام في الركبة منذ أسبوع"
+                    value={describe}
+                    onChange={(e) => setDescribe(e.target.value)}
+                  />
+                </div>
               </Section>
             </Card>
           </PhoneInner>
         </Phone>
 
         <BottomBar>
-          <BookBtn onClick={handleBookingSubmit} disabled={!isFormValid}>
-            تأكيد الحجز
+          <BookBtn
+            onClick={handleBookingSubmit}
+            disabled={!isFormValid || submitting}
+          >
+            {submitting ? "جاري الحجز..." : "تأكيد الحجز"}
           </BookBtn>
         </BottomBar>
       </>
@@ -956,18 +957,6 @@ const Website = () => {
                     <option>أخرى</option>
                   </Select>
                 </SelectWrap>
-              </div>
-
-              <Spacer16 />
-
-              {/* التأمين */}
-              <div>
-                <Label>شركة التأمين والخطة *</Label>
-                <Input
-                  placeholder="مثال: BUPA — Classic"
-                  value={insurancePlan}
-                  onChange={(e) => setInsurancePlan(e.target.value)}
-                />
               </div>
 
               <Spacer16 />
