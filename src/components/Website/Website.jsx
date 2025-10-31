@@ -519,15 +519,15 @@ const Website = () => {
   const [appointmentType, setAppointmentType] = useState("مرض عارض");
   const [describe, setDescribe] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState({}); // Track booked time slots
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
     lastName: "",
     phoneNumber: "",
   });
-  const [businessId, setBusinessId] = useState(null); // Store businessId
+  const [businessId, setBusinessId] = useState(null);
 
-  // حاول أخذ الـ slug من الرابط، وإلّا استخدم قيمة افتراضية
   const getSlugFromUrl = () => {
     try {
       const parts = window.location.pathname.split("/").filter(Boolean);
@@ -557,6 +557,11 @@ const Website = () => {
     return fmt({ weekday: "long", month: "short", day: "numeric" });
   };
 
+  // Check if a time slot is booked
+  const isSlotBooked = (date, time) => {
+    return bookedSlots[date]?.includes(time) || false;
+  };
+
   useEffect(() => {
     const slug = getSlugFromUrl();
     if (!slug) {
@@ -569,17 +574,16 @@ const Website = () => {
       setLoading(true);
       setErr("");
       try {
-        // معلومات المتجر/الطبيب - الـ API يرجع Business document
+        // Fetch store/doctor information
         const storeRes = await publicRequest.get(`/business/store/${slug}`);
         const data = storeRes.data;
 
-        // Extract businessId from the response (_id is the businessId)
         const extractedBusinessId = data?._id;
         if (!extractedBusinessId) {
           throw new Error("Business ID not found in response");
         }
 
-        setBusinessId(extractedBusinessId); // Save businessId to state
+        setBusinessId(extractedBusinessId);
         console.log("Business ID extracted from slug:", extractedBusinessId);
 
         const mapped = {
@@ -600,13 +604,13 @@ const Website = () => {
             data?.storeSettings?.description ? "العيادة" : "زيارة في العيادة",
             "زيارة عبر الفيديو",
           ],
-          businessId: extractedBusinessId, // Store in doctor object too
+          businessId: extractedBusinessId,
         };
 
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
 
-        // التوافر
+        // Fetch availability
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -625,14 +629,44 @@ const Website = () => {
           ? availRes.data.availability
           : [];
 
-        const firstIdx = availability.findIndex(
+        // Fetch booked slots for this business
+        const bookedRes = await publicRequest.get(
+          `/quota/booked-slots/${extractedBusinessId}`,
+          {
+            params: {
+              startDate: startDate.toISOString().split("T")[0],
+              endDate: endDate.toISOString().split("T")[0],
+            },
+          }
+        );
+
+        setBookedSlots(bookedRes.data?.bookedSlots || {});
+
+        // Filter availability to remove booked slots and find first available date
+        const availabilityWithBookings = availability.map((day) => {
+          const availableSlots = (day.availableSlots || []).filter(
+            (slot) => !bookedRes.data?.bookedSlots[day.date]?.includes(slot)
+          );
+
+          return {
+            ...day,
+            availableSlots,
+          };
+        });
+
+        // Find the first day with available slots
+        const firstAvailableIdx = availabilityWithBookings.findIndex(
           (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
         );
 
-        if (firstIdx === -1) {
+        if (firstAvailableIdx === -1) {
           setVisibleDays([]);
         } else {
-          const nextThree = availability.slice(firstIdx, firstIdx + 3);
+          // Show 3 days starting from the first available date
+          const nextThree = availabilityWithBookings.slice(
+            firstAvailableIdx,
+            firstAvailableIdx + 3
+          );
           const normalized = nextThree.map((day) => ({
             date: day.date,
             title: fmtDayTitle(day.date),
@@ -652,6 +686,10 @@ const Website = () => {
   }, []);
 
   const handlePickTime = (date, time) => {
+    // Don't allow selecting booked slots
+    if (isSlotBooked(date, time)) {
+      return;
+    }
     setSelectedSlot({ date, time });
   };
 
@@ -690,6 +728,13 @@ const Website = () => {
       return;
     }
 
+    // Double-check if slot is still available before submitting
+    if (isSlotBooked(selectedSlot?.date, selectedSlot?.time)) {
+      alert("عذراً، هذا الموعد تم حجزه بالفعل. الرجاء اختيار وقت آخر.");
+      setBookingStep(1);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -704,22 +749,30 @@ const Website = () => {
 وصف الزيارة: ${describe}
       `.trim();
 
-      // بيانات مطابقة لنموذج Quota مع businessId من الـ slug
       const quotaData = {
         firstName: patientInfo.firstName,
         lastName: patientInfo.lastName,
         email: patientInfo.email,
         phoneNumber: patientInfo.phoneNumber,
-        weddingDate: selectedSlot?.date, // نستخدمها كتاريخ الحجز
-        guestCount: appointmentType, // نمرر نوع الموعد هنا
-        weddingDetails: appointmentDetailsText, // وصف كامل
-        businessId: businessId, // Use the businessId from slug lookup
+        weddingDate: selectedSlot?.date,
+        guestCount: appointmentType,
+        weddingDetails: appointmentDetailsText,
+        businessId: businessId,
       };
 
       console.log("Submitting quota with businessId:", businessId);
 
       const response = await publicRequest.post("/quota", quotaData);
       console.log("Booking response:", response.data);
+
+      // Update booked slots locally
+      setBookedSlots((prev) => ({
+        ...prev,
+        [selectedSlot.date]: [
+          ...(prev[selectedSlot.date] || []),
+          selectedSlot.time,
+        ],
+      }));
 
       alert("تم حجز الموعد بنجاح! سيتم التواصل معك قريباً.");
 
@@ -734,7 +787,13 @@ const Website = () => {
       });
     } catch (error) {
       console.error("Booking error:", error);
-      alert("حدث خطأ أثناء الحجز. الرجاء المحاولة مرة أخرى.");
+
+      if (error.response?.status === 409) {
+        alert("عذراً، هذا الموعد تم حجزه للتو. الرجاء اختيار وقت آخر.");
+        setBookingStep(1);
+      } else {
+        alert("حدث خطأ أثناء الحجز. الرجاء المحاولة مرة أخرى.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -757,7 +816,7 @@ const Website = () => {
 
   if (!doctor) return null;
 
-  /* ---------- الخطوة 2: بيانات المراجع ---------- */
+  /* ---------- Step 2: Patient Information ---------- */
   if (bookingStep === 2) {
     const isFormValid =
       patientInfo.email &&
@@ -873,12 +932,12 @@ const Website = () => {
     );
   }
 
-  /* ---------- الخطوة 1: اختيار الموعد + بيانات أساسية ---------- */
+  /* ---------- Step 1: Select Appointment Time ---------- */
   return (
     <>
       <Phone>
         <PhoneInner>
-          {/* الترويسة */}
+          {/* Header */}
           <HeaderRow>
             <Avatar src={doctor.avatar} alt="doctor" />
             <div>
@@ -888,7 +947,7 @@ const Website = () => {
             </div>
           </HeaderRow>
 
-          {/* التقييم العام */}
+          {/* Rating */}
           <Card>
             <Section>
               <Row $gap={12} $align="flex-start">
@@ -910,7 +969,7 @@ const Website = () => {
             </Section>
           </Card>
 
-          {/* تبويبات */}
+          {/* Tabs */}
           <TabsBar>
             {[
               "الحجز",
@@ -925,7 +984,7 @@ const Website = () => {
             ))}
           </TabsBar>
 
-          {/* تأمين */}
+          {/* Insurance */}
           <Card>
             <Section>
               <Heading20>شركات التأمين ضمن الشبكة</Heading20>
@@ -934,7 +993,7 @@ const Website = () => {
             </Section>
           </Card>
 
-          {/* بطاقة الحجز */}
+          {/* Booking Card */}
           <Card>
             <SectionHeader>
               <Heading20>احجز موعدًا مجانًا</Heading20>
@@ -942,7 +1001,7 @@ const Website = () => {
             </SectionHeader>
 
             <Section>
-              {/* نوع الموعد */}
+              {/* Appointment Type */}
               <div>
                 <Label>تفاصيل الحجز</Label>
                 <SelectWrap>
@@ -961,7 +1020,7 @@ const Website = () => {
 
               <Spacer16 />
 
-              {/* مراجع جديد/سابق */}
+              {/* Patient Type */}
               <div>
                 <Label>نوع المراجع</Label>
                 <Toggle>
@@ -984,7 +1043,7 @@ const Website = () => {
 
               <Spacer16 />
 
-              {/* الموقع */}
+              {/* Location */}
               <div>
                 <Label>الموقع</Label>
                 <SelectWrap>
@@ -1001,7 +1060,7 @@ const Website = () => {
 
               <Spacer16 />
 
-              {/* التوافر من الباكند: أقرب 3 أيام بدءاً من أول يوم متاح */}
+              {/* Available Time Slots */}
               <div>
                 <Label>المواعيد المتاحة *</Label>
                 <AvailBlock>
@@ -1016,13 +1075,31 @@ const Website = () => {
                             const selected =
                               selectedSlot?.date === day.date &&
                               selectedSlot?.time === t;
+                            const booked = isSlotBooked(day.date, t);
+
                             return (
                               <TimeBtn
                                 key={t}
                                 $selected={selected}
+                                $booked={booked}
                                 onClick={() => handlePickTime(day.date, t)}
                                 type="button"
                                 aria-pressed={selected}
+                                disabled={booked}
+                                style={{
+                                  cursor: booked ? "not-allowed" : "pointer",
+                                  opacity: booked ? 0.5 : 1,
+                                  backgroundColor: booked
+                                    ? "#e0e0e0"
+                                    : selected
+                                    ? "#4b90f2"
+                                    : "#fff",
+                                  color: booked
+                                    ? "#999"
+                                    : selected
+                                    ? "#fff"
+                                    : "#000",
+                                }}
                               >
                                 {t}
                               </TimeBtn>
