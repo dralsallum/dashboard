@@ -998,7 +998,7 @@ const Website = () => {
           {/* Booking Card */}
           <Card>
             <SectionHeader>
-              <Heading20>احجز موعدًا مجانًا</Heading20>
+              <Heading20>احجز موعدك اليوم</Heading20>
               <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
             </SectionHeader>
 
