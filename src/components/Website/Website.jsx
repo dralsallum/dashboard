@@ -1,8 +1,8 @@
-// Website.jsx - Updated to use businessId from slug
 import React, { useEffect, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
-import { Star, ChevronDown, Loader2 } from "lucide-react";
+import { Star, ChevronDown } from "lucide-react";
 import { publicRequest } from "../../requestMethods";
+import { Loader2 } from "lucide-react";
 
 /* ---------- حركة التحميل ---------- */
 const Spin = keyframes`
@@ -241,7 +241,7 @@ const Select = styled.select`
   }
 `;
 
-const TextArea = styled.textarea`
+const Input = styled.input`
   width: 100%;
   background: #fff;
   border: 1px solid ${C.line};
@@ -249,9 +249,6 @@ const TextArea = styled.textarea`
   padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
-  min-height: 100px;
-  resize: vertical;
-  line-height: 1.5;
 
   &::placeholder {
     color: ${C.ink400};
