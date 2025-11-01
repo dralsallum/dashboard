@@ -241,7 +241,7 @@ const Select = styled.select`
   }
 `;
 
-const Input = styled.input`
+const TextArea = styled.textarea`
   width: 100%;
   background: #fff;
   border: 1px solid ${C.line};
@@ -249,6 +249,9 @@ const Input = styled.input`
   padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
+  min-height: 120px; /* 👈 makes it taller */
+  resize: vertical; /* 👈 allows user to resize if needed */
+  line-height: 1.5;
 
   &::placeholder {
     color: ${C.ink400};
@@ -259,7 +262,6 @@ const Input = styled.input`
     box-shadow: 0 0 0 2px ${C.ink900}22;
   }
 `;
-
 const Toggle = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1017,6 +1019,22 @@ const Website = () => {
 
               <Spacer16 />
 
+              {/* Location */}
+              <div>
+                <Label>الموقع</Label>
+                <SelectWrap>
+                  <Select
+                    value={activeLocation}
+                    onChange={(e) => setActiveLocation(e.target.value)}
+                  >
+                    {doctor.locationOptions.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </Select>
+                </SelectWrap>
+              </div>
+              <Spacer16 />
+
               {/* Patient Type */}
               <div>
                 <Label>نوع المراجع</Label>
@@ -1036,23 +1054,6 @@ const Website = () => {
                     مراجع سابق
                   </ToggleBtn>
                 </Toggle>
-              </div>
-
-              <Spacer16 />
-
-              {/* Location */}
-              <div>
-                <Label>الموقع</Label>
-                <SelectWrap>
-                  <Select
-                    value={activeLocation}
-                    onChange={(e) => setActiveLocation(e.target.value)}
-                  >
-                    {doctor.locationOptions.map((o) => (
-                      <option key={o}>{o}</option>
-                    ))}
-                  </Select>
-                </SelectWrap>
               </div>
 
               <Spacer16 />
