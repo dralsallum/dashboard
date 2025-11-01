@@ -58,7 +58,7 @@ const PhoneInner = styled.div`
   width: 100%;
   max-width: 420px;
   background: ${C.cream};
-  padding-bottom: 116px;
+  padding-bottom: ${(p) => (p.$hasBottomBar ? "100px" : "16px")};
   -webkit-overflow-scrolling: touch;
   direction: rtl;
   text-align: right;
@@ -249,8 +249,8 @@ const TextArea = styled.textarea`
   padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
-  min-height: 120px; /* 👈 makes it taller */
-  resize: vertical; /* 👈 allows user to resize if needed */
+  min-height: 120px;
+  resize: vertical;
   line-height: 1.5;
 
   &::placeholder {
@@ -460,7 +460,6 @@ const Spacer16 = styled.div`
 
 /* ---------- شريط الحجز السفلي ---------- */
 const BottomBar = styled.div`
-  overview-y: auto;
   position: fixed;
   left: 0;
   right: 0;
@@ -519,7 +518,7 @@ const Website = () => {
   const [appointmentType, setAppointmentType] = useState("مرض عارض");
   const [describe, setDescribe] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState({}); // Track booked time slots
+  const [bookedSlots, setBookedSlots] = useState({});
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -557,7 +556,6 @@ const Website = () => {
     return fmt({ weekday: "long", month: "short", day: "numeric" });
   };
 
-  // Check if a time slot is booked
   const isSlotBooked = (date, time) => {
     return bookedSlots[date]?.includes(time) || false;
   };
@@ -574,7 +572,6 @@ const Website = () => {
       setLoading(true);
       setErr("");
       try {
-        // Fetch store/doctor information
         const storeRes = await publicRequest.get(`/business/store/${slug}`);
         const data = storeRes.data;
 
@@ -610,7 +607,6 @@ const Website = () => {
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
 
-        // Fetch availability
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -629,7 +625,6 @@ const Website = () => {
           ? availRes.data.availability
           : [];
 
-        // Fetch booked slots for this business
         const bookedRes = await publicRequest.get(
           `/quota/booked-slots/${extractedBusinessId}`,
           {
@@ -642,7 +637,6 @@ const Website = () => {
 
         setBookedSlots(bookedRes.data?.bookedSlots || {});
 
-        // Filter availability to remove booked slots and find first available date
         const availabilityWithBookings = availability.map((day) => {
           const availableSlots = (day.availableSlots || []).filter(
             (slot) => !bookedRes.data?.bookedSlots[day.date]?.includes(slot)
@@ -654,7 +648,6 @@ const Website = () => {
           };
         });
 
-        // Find the first day with available slots
         const firstAvailableIdx = availabilityWithBookings.findIndex(
           (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
         );
@@ -662,7 +655,6 @@ const Website = () => {
         if (firstAvailableIdx === -1) {
           setVisibleDays([]);
         } else {
-          // Show 3 days starting from the first available date
           const nextThree = availabilityWithBookings.slice(
             firstAvailableIdx,
             firstAvailableIdx + 3
@@ -686,7 +678,6 @@ const Website = () => {
   }, []);
 
   const handlePickTime = (date, time) => {
-    // Don't allow selecting booked slots
     if (isSlotBooked(date, time)) {
       return;
     }
@@ -728,7 +719,6 @@ const Website = () => {
       return;
     }
 
-    // Double-check if slot is still available before submitting
     if (isSlotBooked(selectedSlot?.date, selectedSlot?.time)) {
       alert("عذراً، هذا الموعد تم حجزه بالفعل. الرجاء اختيار وقت آخر.");
       setBookingStep(1);
@@ -765,7 +755,6 @@ const Website = () => {
       const response = await publicRequest.post("/quota", quotaData);
       console.log("Booking response:", response.data);
 
-      // Update booked slots locally
       setBookedSlots((prev) => ({
         ...prev,
         [selectedSlot.date]: [
@@ -828,7 +817,7 @@ const Website = () => {
     return (
       <>
         <Phone>
-          <PhoneInner>
+          <PhoneInner $hasBottomBar={true}>
             <Card>
               <Section>
                 <BackBtn onClick={handleBackToSelection}>← العودة</BackBtn>
@@ -936,7 +925,7 @@ const Website = () => {
   return (
     <>
       <Phone>
-        <PhoneInner>
+        <PhoneInner $hasBottomBar={true}>
           {/* Header */}
           <HeaderRow>
             <Avatar src={doctor.avatar} alt="doctor" />
