@@ -47,21 +47,21 @@ const C = {
 
 /* ---------- إطار الهاتف ---------- */
 const Phone = styled.div`
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
+  min-height: 100dvh;
   background: ${C.cream};
+  display: flex;
+  justify-content: center;
   overflow: hidden;
 `;
 
 const PhoneInner = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 420px;
+  background: ${C.cream};
   padding-bottom: 116px;
+  -webkit-overflow-scrolling: touch;
   direction: rtl;
   text-align: right;
-  background: ${C.cream};
 `;
 
 /* ---------- بطاقة ومقاطع ---------- */
@@ -460,11 +460,13 @@ const Spacer16 = styled.div`
 
 /* ---------- شريط الحجز السفلي ---------- */
 const BottomBar = styled.div`
-  position: sticky;
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
   background: ${C.yellow};
   border-top: 1px solid ${C.yellowBorder};
-  padding: 12px;
+  padding: 4px;
   display: flex;
   justify-content: center;
   z-index: 40;
