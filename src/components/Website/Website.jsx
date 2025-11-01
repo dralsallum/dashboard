@@ -588,7 +588,7 @@ const Website = () => {
         const mapped = {
           name:
             data?.firstName && data?.lastName
-              ? `${data?.firstName} ${data?.lastName}`
+              ? `د.${data?.firstName} ${data?.lastName}`
               : data.username,
           specialty: data?.storeName || "طبيب تجميل",
           initials: (data?.username || "طبيب")
