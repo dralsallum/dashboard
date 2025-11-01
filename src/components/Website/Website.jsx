@@ -467,7 +467,7 @@ const BottomBar = styled.div`
   bottom: 0;
   background: ${C.yellow};
   border-top: 1px solid ${C.yellowBorder};
-  padding: 8px;
+  padding: 4px;
   display: flex;
   justify-content: center;
   z-index: 40;
