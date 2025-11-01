@@ -1,1131 +1,1331 @@
-import React, { useEffect, useState } from "react";
-import styled, { css, keyframes } from "styled-components";
-import { Star, ChevronDown } from "lucide-react";
-import { publicRequest } from "../../requestMethods";
-import { Loader2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Dimensions,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  StatusBar,
+  Platform,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Keyboard,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import styled from "styled-components/native";
+import { publicRequest, createUserRequest } from "../../requestMethods";
+import { useSelector } from "react-redux"; // Import Redux selector
+import axios from "axios";
 
-/* ---------- حركة التحميل ---------- */
-const Spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
+const { width } = Dimensions.get("window");
+const STATUSBAR_HEIGHT = Platform.OS === "ios" ? 44 : StatusBar.currentHeight;
+const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
 
-const LoadingWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+// ---------- STYLED COMPONENTS ----------
+const Container = styled.View`
+  flex: 1;
+  background-color: #ffffff;
   direction: rtl;
-  color: #444;
-  background: #f7f2e6;
-  font-size: 1.2rem;
-  font-weight: 600;
-  min-height: 100dvh;
 `;
 
-const Gear = styled(Loader2)`
-  animation: ${Spin} 1.2s linear infinite;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 12px;
-  color: #f6e05e;
-`;
-
-/* ---------- لوحة الألوان ---------- */
-const C = {
-  cream: "#F7F2E6",
-  yellow: "#F6E05E",
-  yellowBorder: "#F2CF5C",
-  ink900: "#111827",
-  ink700: "#374151",
-  ink600: "#4B5563",
-  ink500: "#6B7280",
-  ink400: "#9CA3AF",
-  line: "#E5E7EB",
-  card: "#FFFFFF",
-};
-
-/* ---------- إطار الهاتف ---------- */
-const Phone = styled.div`
-  min-height: 100dvh;
-  background: ${C.cream};
-  display: flex;
+const BackButton = styled.TouchableOpacity`
+  position: absolute;
+  top: ${STATUSBAR_HEIGHT + 30}px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50px;
+  width: 44px;
+  height: 44px;
   justify-content: center;
-  overflow: hidden;
+  align-items: center;
+  z-index: 10;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.2;
+  shadow-radius: 3px;
+  elevation: 5;
 `;
 
-const PhoneInner = styled.div`
+const HeaderButtonsContainer = styled.View`
+  position: absolute;
+  top: ${STATUSBAR_HEIGHT + 30}px;
+  right: 20px;
+  flex-direction: row;
+  z-index: 10;
+`;
+
+const ShareButton = styled.TouchableOpacity`
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50px;
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 12px;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.2;
+  shadow-radius: 3px;
+  elevation: 5;
+`;
+
+const FavoriteButton = styled.TouchableOpacity`
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50px;
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  align-items: center;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.2;
+  shadow-radius: 3px;
+  elevation: 5;
+`;
+
+const CarouselContainer = styled.View`
   width: 100%;
-  max-width: 420px;
-  background: ${C.cream};
-  padding-bottom: 116px;
-  -webkit-overflow-scrolling: touch;
-  direction: rtl;
-  text-align: right;
+  height: 380px;
 `;
 
-/* ---------- بطاقة ومقاطع ---------- */
-const Card = styled.div`
-  background: ${C.card};
-  border: 1px solid ${C.line};
+const CarouselImage = styled.Image`
+  width: ${width}px;
+  height: 380px;
+`;
+
+const OfferBadge = styled.View`
+  position: absolute;
+  top: ${STATUSBAR_HEIGHT + 80}px;
+  left: 20px;
+  background-color: rgba(255, 105, 180, 0.9);
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
-  margin: 16px 12px 0;
+  padding-horizontal: 16px;
+  padding-vertical: 8px;
+  z-index: 6;
 `;
 
-const Section = styled.div`
-  padding: 16px;
-  & + & {
-    border-top: 1px solid ${C.line};
-  }
+const OfferText = styled.Text`
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
 `;
 
-const SectionHeader = styled(Section)`
-  border-bottom: 1px solid ${C.line};
-  color: ${C.ink900};
+const PageDotsContainer = styled.View`
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  z-index: 6;
 `;
 
-/* ---------- صف الترويسة (الصورة + الاسم) ---------- */
-const HeaderRow = styled.div`
-  display: flex;
-  gap: 12px;
+const PageDots = styled.View`
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  padding: 16px 12px 0;
-  margin: 10px 0 0 0;
 `;
 
-const Avatar = styled.img`
-  width: 64px;
-  height: 64px;
-  border-radius: 9999px;
-  object-fit: cover;
+const PageDot = styled.View`
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: ${(props) =>
+    props.active ? "#ffffff" : "rgba(255,255,255,0.5)"};
+  margin-horizontal: 4px;
 `;
 
-const Title = styled.h1`
-  margin: 0;
-  color: ${C.ink900};
-  font-size: 22px;
-  line-height: 1.2;
-  font-weight: 700;
-  word-break: break-word;
+const PageIndicator = styled.View`
+  position: absolute;
+  bottom: 30px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  padding-horizontal: 10px;
+  padding-vertical: 4px;
+  z-index: 6;
 `;
 
-const Subtle = styled.div`
-  color: ${C.ink500};
+const PageIndicatorText = styled.Text`
+  color: white;
   font-size: 14px;
-  margin-top: 2px;
+  font-weight: bold;
+  text-align: left;
 `;
 
-const Tiny = styled.div`
-  color: ${C.ink400};
+const ContentContainer = styled.View`
+  padding-horizontal: 24px;
+  padding-vertical: 24px;
+  flex: 1;
+  padding-bottom: 100px;
+  margin-top: -24px;
+  background-color: white;
+  z-index: 4;
+`;
+
+const VenueTitle = styled.Text`
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: left;
+`;
+
+const VenueSubtitle = styled.Text`
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 20px;
+  text-align: left;
+`;
+
+const LocationRow = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 24px;
+  background-color: #f9f9f9;
+  padding: 12px 16px;
+  border-radius: 12px;
+`;
+
+const LocationText = styled.Text`
+  font-size: 16px;
+  margin-left: 10px;
+  color: #333;
+  text-align: left;
+`;
+
+const InfoCard = styled.View`
+  background-color: #f9f9f9;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+`;
+
+const RatingRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+`;
+
+const RatingLeft = styled.View`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const RatingText = styled.Text`
+  font-size: 22px;
+  font-weight: bold;
+  margin-left: 8px;
+  text-align: left;
+`;
+
+const ReviewLink = styled.TouchableOpacity`
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 20px;
+`;
+
+const ReviewLinkText = styled.Text`
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+  text-align: left;
+`;
+
+const VenueRow = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+`;
+
+const VenueType = styled.View`
+  background-color: #ff69b4;
+  padding: 6px 12px;
+  border-radius: 20px;
+`;
+
+const VenueTypeText = styled.Text`
+  text-transform: uppercase;
   font-size: 12px;
-  margin-top: 2px;
+  letter-spacing: 1px;
+  color: white;
+  font-weight: bold;
+  text-align: left;
 `;
 
-/* ---------- عناصر عامة ---------- */
-const Row = styled.div`
-  display: flex;
-  gap: ${(p) => p.$gap || 0}px;
-  align-items: ${(p) => p.$align || "stretch"};
+const Divider = styled.View`
+  height: 1px;
+  background-color: #eee;
+  margin-vertical: 20px;
 `;
 
-const Grow = styled.div`
+const SectionTitle = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-align: left;
+`;
+
+const PriceRow = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 8px;
+`;
+
+const PriceInfo = styled.View`
+  margin-left: 12px;
+`;
+
+const PriceText = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  text-align: left;
+`;
+
+const PriceDetails = styled.Text`
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+  text-align: left;
+`;
+
+const FeatureRow = styled.View`
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  justify-content: space-between;
+`;
+
+const FeatureItem = styled.View`
+  flex-direction: row;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 10px 14px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  width: 48%;
+`;
+
+const FeatureText = styled.Text`
+  font-size: 14px;
+  margin-left: 8px;
+  color: #555;
+  text-align: left;
+`;
+
+const ResponseTime = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  background-color: #f9f9f9;
+  padding: 12px 16px;
+  border-radius: 24px;
+`;
+
+const ResponseTimeText = styled.Text`
+  font-size: 14px;
+  margin-left: 8px;
+  color: #666;
+  text-align: left;
+`;
+
+const ButtonsRowWrapper = styled.View`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding-horizontal: 24px;
+  padding-vertical: 25px;
+  border-top-width: 1px;
+  border-top-color: #eee;
+  shadow-color: #000;
+  shadow-offset: 0px -2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+  elevation: 8;
+`;
+
+const ButtonsRow = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const CallButton = styled.TouchableOpacity`
+  flex: 1;
+  background-color: white;
+  border-radius: 16px;
+  border-width: 2px;
+  border-color: #ff69b4;
+  padding-vertical: 16px;
+  align-items: center;
+  margin-right: 12px;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 3px;
+  elevation: 2;
+`;
+
+const CallButtonText = styled.Text`
+  color: #ff69b4;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+`;
+
+const QuoteButton = styled.TouchableOpacity`
+  flex: 1.5;
+  background-color: #ff69b4;
+  border-radius: 16px;
+  padding-vertical: 16px;
+  align-items: center;
+  margin-left: 8px;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.2;
+  shadow-radius: 3px;
+  elevation: 4;
+`;
+
+const QuoteButtonText = styled.Text`
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+`;
+
+const LoadingContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+
+// ---------- MODAL STYLES ----------
+const ModalContainer = styled.View`
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalCard = styled.View`
+  width: 90%;
+  max-height: 80%;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+`;
+
+const ModalScrollView = styled.ScrollView`
   flex: 1;
 `;
 
-const Heading20 = styled.h2`
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: ${C.ink900};
-`;
-
-const P = styled.p`
-  margin: 0;
-  color: ${(p) => p.$color || C.ink600};
-  font-size: ${(p) => p.$size || 14}px;
-  line-height: 1.7;
-`;
-
-const LinkText = styled.button`
-  appearance: none;
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-size: 14px;
-  color: ${C.ink900};
-  text-decoration: underline;
-  cursor: pointer;
-`;
-
-/* ---------- التبويبات ---------- */
-const TabsBar = styled.div`
-  display: flex;
-  gap: 24px;
-  padding: 6px 16px 0;
-  margin: 8px 12px 0;
-  border-bottom: 1px solid ${C.line};
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
-const TabBtn = styled.button`
-  background: transparent;
-  border: 0;
-  padding: 12px 0;
-  font-size: 14px;
-  color: ${(p) => (p.$active ? C.ink900 : C.ink500)};
-  position: relative;
-  flex: 0 0 auto;
-  cursor: pointer;
-
-  &:after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 2px;
-    background: ${(p) => (p.$active ? C.ink900 : "transparent")};
-  }
-`;
-
-/* ---------- التقييم ---------- */
-const Big = styled.div`
-  font-size: 44px;
-  font-weight: 700;
-  color: ${C.ink900};
-`;
-
-const Stars = styled.div`
-  display: flex;
-  gap: 4px;
-  color: #f6c81e;
-`;
-
-const StarFill = styled(Star)`
-  fill: currentColor;
-  stroke: currentColor;
-`;
-
-/* ---------- حقول الإدخال ---------- */
-const Label = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: ${C.ink900};
-`;
-
-const SelectWrap = styled.div`
-  position: relative;
-`;
-
-const Select = styled.select`
-  appearance: none;
-  width: 100%;
-  background: ${C.card};
-  border: 1px solid ${C.line};
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 15px;
-  color: ${C.ink900};
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px ${C.ink900}22;
-  }
-`;
-
-const Input = styled.input`
-  width: 100%;
-  background: #fff;
-  border: 1px solid ${C.line};
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 15px;
-  color: ${C.ink900};
-
-  &::placeholder {
-    color: ${C.ink400};
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px ${C.ink900}22;
-  }
-`;
-
-const Toggle = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid ${C.line};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const ToggleBtn = styled.button`
-  padding: 12px;
-  font-weight: 700;
-  font-size: 14px;
-  border: 0;
-  cursor: pointer;
-
-  ${(p) =>
-    p.$active
-      ? css`
-          background: ${C.ink900};
-          color: #fff;
-        `
-      : css`
-          background: #fff;
-          color: ${C.ink900};
-        `}
-`;
-
-/* ---------- التوافر ---------- */
-const AvailBlock = styled.div`
-  display: grid;
-  gap: 12px;
-`;
-
-const DayHeader = styled.div`
+const ModalTitle = styled.Text`
   font-size: 18px;
-  font-weight: 700;
-  color: ${C.ink900};
-  margin-top: 4px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  text-align: center;
+  text-align: left;
 `;
 
-const TimesRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-
-  @media (min-width: 380px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-`;
-
-const TimeBtn = styled.button`
-  padding: 10px 0;
-  border-radius: 10px;
-  border: 2px solid ${(p) => (p.$selected ? C.ink900 : C.yellowBorder)};
-  background: ${(p) => (p.$selected ? "#fff" : C.yellow)};
-  color: ${C.ink900};
-  font-weight: 700;
-  font-size: 15px;
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: ${(p) => (p.$selected ? "#fff" : C.yellowBorder)};
-    transform: translateY(-2px);
-  }
-`;
-
-const MoreBtn = styled(TimeBtn)`
-  background: ${C.yellow};
-  border-style: dashed;
-`;
-
-const OutlineBtn = styled.button`
-  width: 100%;
-  padding: 12px;
-  font-size: 15px;
-  background: #fff;
-  border: 1px solid ${C.ink900};
-  border-radius: 10px;
-  font-weight: 700;
-  color: ${C.ink900};
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: ${C.ink900};
-    color: #fff;
-  }
-`;
-
-/* ---------- Patient Info Form ---------- */
-const FormGroup = styled.div`
-  margin-bottom: 16px;
-`;
-
-const FormLabel = styled.label`
-  display: block;
+const StepIndicator = styled.Text`
   font-size: 14px;
-  font-weight: 600;
-  color: ${C.ink900};
-  margin-bottom: 6px;
+  color: #888;
+  margin-bottom: 16px;
+  text-align: center;
+  text-align: left;
 `;
 
-const FormInput = styled.input`
-  width: 100%;
-  background: #fff;
-  border: 1px solid ${C.line};
+const FormField = styled.TextInput`
+  border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 12px;
-  font-size: 15px;
-  color: ${C.ink900};
-  box-sizing: border-box;
-
-  &::placeholder {
-    color: ${C.ink400};
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px ${C.ink900}22;
-  }
+  padding-horizontal: 12px;
+  padding-vertical: 10px;
+  margin-bottom: 12px;
+  text-align: left;
 `;
 
-const RadioGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+const ModalButtonRow = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 12px;
 `;
 
-const RadioLabel = styled.label`
-  display: flex;
+const ModalButton = styled.TouchableOpacity`
+  flex: 1;
+  margin-horizontal: 8px;
+  background-color: ${(props) => (props.primary ? "#ff69b4" : "#f0f0f0")};
+  padding-vertical: 12px;
+  border-radius: 8px;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  color: ${C.ink900};
-  cursor: pointer;
 `;
 
-const RadioInput = styled.input`
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+const ModalButtonText = styled.Text`
+  color: ${(props) => (props.primary ? "#fff" : "#333")};
+  font-weight: bold;
+  text-align: left;
 `;
 
-const BackBtn = styled.button`
-  background: transparent;
-  border: none;
-  color: ${C.ink900};
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px 0;
-  text-decoration: underline;
-  transition: color 0.2s;
-
-  &:hover {
-    color: ${C.ink700};
-  }
+const CallModalContainer = styled.View`
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: flex-end;
+  align-items: center;
 `;
 
-const AppointmentSummary = styled.div`
-  background: ${C.cream};
-  border: 1px solid ${C.line};
-  border-radius: 8px;
+const CallModalCard = styled.View`
+  width: 100%;
+  background-color: #fff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding: 24px;
+`;
+
+const CallModalTitle = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-align: center;
+`;
+const ErrorText = styled.Text`
+  font-size: 14px;
+  text-align: left;
+  color: #ff1e1e;
+`;
+
+const CallOption = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
   padding: 16px;
-  margin-bottom: 16px;
+  border-bottom-width: 1px;
+  border-bottom-color: #eee;
 `;
 
-const SummaryRow = styled.div`
+const CallOptionText = styled.Text`
+  font-size: 18px;
+  margin-left: 16px;
+  text-align: left;
+`;
+
+const CancelButton = styled.TouchableOpacity`
+  margin-top: 16px;
+  background-color: #f0f0f0;
+  padding: 16px;
+  border-radius: 12px;
+  align-items: center;
+`;
+
+const CancelButtonText = styled.Text`
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  text-align: left;
+`;
+
+const PriceCon = styled.View`
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
-  color: ${C.ink700};
-  font-size: 14px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
 `;
 
-/* ---------- تخطيطات مساعدة ---------- */
-const TwoCol = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-`;
-
-const Spacer16 = styled.div`
-  height: 16px;
-`;
-
-/* ---------- شريط الحجز السفلي ---------- */
-const BottomBar = styled.div`
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: ${C.yellow};
-  border-top: 1px solid ${C.yellowBorder};
-  padding: 8px;
-  display: flex;
+const SuccessContainer = styled.View`
+  align-items: center;
   justify-content: center;
-  z-index: 40;
+  padding: 40px 20px;
+  background-color: #fff;
 `;
 
-const BookBtn = styled.button`
-  width: 100%;
-  max-width: 420px;
-  background: ${C.yellow};
-  color: ${C.ink900};
-  font-weight: 800;
-  font-size: 17px;
-  padding: 14px 16px;
-  border: 2px solid ${C.ink900};
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: ${C.yellowBorder};
-    transform: translateY(-2px);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+const SuccessIcon = styled.View`
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
 `;
 
-const KPI = styled.div`
-  font-size: ${(p) => p.$size || 18}px;
-  font-weight: ${(p) => (p.$bold ? 700 : 600)};
-  color: ${C.ink900};
-  margin-top: ${(p) => p.$mt || 0}px;
+const SuccessTitle = styled.Text`
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff69b4;
+  text-align: center;
+  margin-bottom: 15px;
+  font-family: ${Platform.OS === "ios" ? "System" : "Roboto"};
 `;
 
-/* ===================================================== */
+const SuccessMessage = styled.Text`
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+  line-height: 24px;
+  margin-bottom: 30px;
+  padding: 0 10px;
+  font-family: ${Platform.OS === "ios" ? "System" : "Roboto"};
+`;
 
-const Website = () => {
-  const [doctor, setDoctor] = useState(null);
-  const [activeTab] = useState("الحجز");
-  const [activeLocation, setActiveLocation] = useState("");
-  const [isNewPatient, setIsNewPatient] = useState(true);
+const SuccessButton = styled.TouchableOpacity`
+  background-color: #ff69b4;
+  padding: 15px 30px;
+  border-radius: 8px;
+  min-width: 200px;
+  align-items: center;
+  justify-content: center;
+  elevation: 2;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+`;
+
+const SuccessButtonText = styled.Text`
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  font-family: ${Platform.OS === "ios" ? "System" : "Roboto"};
+`;
+
+const Booking = () => {
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const isAuthenticated = !!currentUser;
+  const userId = currentUser?._id || null;
+  const userTag = useSelector((state) => state.user?.currentUser?.userTag);
+  const [userFavorites, setUserFavorites] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
-  const [visibleDays, setVisibleDays] = useState([]);
-  const [bookingStep, setBookingStep] = useState(1);
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [appointmentType, setAppointmentType] = useState("مرض عارض");
-  const [describe, setDescribe] = useState("");
+  const [error, setError] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [callModalVisible, setCallModalVisible] = useState(false);
+  const [formStep, setFormStep] = useState(1);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [weddingDate, setWeddingDate] = useState("");
+  const [guestCount, setGuestCount] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [weddingDetails, setWeddingDetails] = useState("");
+  const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState({}); // Track booked time slots
-  const [patientInfo, setPatientInfo] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-  });
-  const [businessId, setBusinessId] = useState(null);
 
-  const getSlugFromUrl = () => {
-    try {
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      return parts[parts.length - 1] || "demo-doctor-clinic";
-    } catch {
-      return "demo-doctor-clinic";
-    }
+  // Validation state
+  const [emailError, setEmailError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
+
+  const accessToken = useSelector(
+    (state) => state.user?.currentUser?.accessToken
+  );
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
-  const fmtDayTitle = (dateISO) => {
-    const d = new Date(dateISO + "T00:00:00");
+  const validateDate = (dateString) => {
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    const match = dateString.match(dateRegex);
+
+    if (!match) return false;
+
+    const [, day, month, year] = match;
+    const date = new Date(year, month - 1, day);
+
+    // Check if the date is valid and not in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const dKey = d.toISOString().split("T")[0];
-    const tKey = today.toISOString().split("T")[0];
-    const tmKey = tomorrow.toISOString().split("T")[0];
-
-    const fmt = (opts) => d.toLocaleDateString("ar-SA", opts);
-
-    if (dKey === tKey)
-      return `اليوم، ${fmt({ month: "short", day: "numeric" })}`;
-    if (dKey === tmKey)
-      return `غدًا، ${fmt({ month: "short", day: "numeric" })}`;
-    return fmt({ weekday: "long", month: "short", day: "numeric" });
+    return (
+      date.getDate() == day &&
+      date.getMonth() == month - 1 &&
+      date.getFullYear() == year &&
+      date >= today
+    );
   };
 
-  // Check if a time slot is booked
-  const isSlotBooked = (date, time) => {
-    return bookedSlots[date]?.includes(time) || false;
+  // Handle email input change
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    if (text && !validateEmail(text)) {
+      setEmailError("يرجى إدخال بريد إلكتروني صحيح");
+    } else {
+      setEmailError("");
+    }
   };
 
-  useEffect(() => {
-    const slug = getSlugFromUrl();
-    if (!slug) {
-      setErr("لم يتم العثور على معرف العيادة في الرابط.");
-      setLoading(false);
-      return;
+  // Handle date input change with auto-formatting
+  const handleDateChange = (text) => {
+    // Remove all non-numeric characters
+    const numericOnly = text.replace(/[^0-9]/g, "");
+
+    let formattedDate = numericOnly;
+
+    // Add slashes automatically
+    if (numericOnly.length >= 2) {
+      formattedDate = numericOnly.slice(0, 2);
+      if (numericOnly.length >= 3) {
+        formattedDate += "/" + numericOnly.slice(2, 4);
+        if (numericOnly.length >= 5) {
+          formattedDate += "/" + numericOnly.slice(4, 8);
+        }
+      }
     }
 
-    const fetchAll = async () => {
-      setLoading(true);
-      setErr("");
+    setWeddingDate(formattedDate);
+
+    if (formattedDate.length === 10) {
+      if (!validateDate(formattedDate)) {
+        setDateError("يرجى إدخال تاريخ صحيح (يوم/شهر/سنة) في المستقبل");
+      } else {
+        setDateError("");
+      }
+    } else if (formattedDate.length > 0 && formattedDate.length < 10) {
+      setDateError("يرجى إدخال التاريخ بصيغة يوم/شهر/سنة");
+    } else {
+      setDateError("");
+    }
+  };
+
+  // Validate form step 1
+  const validateStep1 = () => {
+    const errors = {};
+
+    if (!firstName.trim()) {
+      errors.firstName = "الاسم الأول مطلوب";
+    }
+
+    if (!lastName.trim()) {
+      errors.lastName = "اسم العائلة مطلوب";
+    }
+
+    if (!email.trim()) {
+      errors.email = "البريد الإلكتروني مطلوب";
+    } else if (!validateEmail(email)) {
+      errors.email = "يرجى إدخال بريد إلكتروني صحيح";
+    }
+
+    if (!weddingDate.trim()) {
+      errors.weddingDate = "تاريخ الزفاف مطلوب";
+    } else if (!validateDate(weddingDate)) {
+      errors.weddingDate = "يرجى إدخال تاريخ صحيح في المستقبل";
+    }
+
+    if (!guestCount.trim()) {
+      errors.guestCount = "عدد الضيوف مطلوب";
+    } else if (isNaN(guestCount) || parseInt(guestCount) <= 0) {
+      errors.guestCount = "يرجى إدخال رقم صحيح لعدد الضيوف";
+    }
+
+    return errors;
+  };
+
+  // Fetch venue details
+  useEffect(() => {
+    const fetchVenue = async () => {
       try {
-        // Fetch store/doctor information
-        const storeRes = await publicRequest.get(`/business/store/${slug}`);
-        const data = storeRes.data;
-
-        const extractedBusinessId = data?._id;
-        if (!extractedBusinessId) {
-          throw new Error("Business ID not found in response");
-        }
-
-        setBusinessId(extractedBusinessId);
-        console.log("Business ID extracted from slug:", extractedBusinessId);
-
-        const mapped = {
-          name: data?.username || "طبيب",
-          specialty: data?.storeName || "طبيب عام",
-          initials: (data?.username || "طبيب")
-            .split(" ")
-            .map((w) => w[0]?.toUpperCase())
-            .join("")
-            .slice(0, 2),
-          rating: 4.6,
-          reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة.",
-          inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
-          avatar:
-            data?.storeSettings?.logo ||
-            "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=256&q=80",
-          locationOptions: [
-            data?.storeSettings?.description ? "العيادة" : "زيارة في العيادة",
-            "زيارة عبر الفيديو",
-          ],
-          businessId: extractedBusinessId,
-        };
-
-        setDoctor(mapped);
-        setActiveLocation(mapped.locationOptions[0]);
-
-        // Fetch availability
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 30);
-
-        const availRes = await publicRequest.get(
-          `/appointments/available/${slug}`,
-          {
-            params: {
-              startDate: startDate.toISOString().split("T")[0],
-              endDate: endDate.toISOString().split("T")[0],
-            },
-          }
-        );
-
-        const availability = Array.isArray(availRes.data?.availability)
-          ? availRes.data.availability
-          : [];
-
-        // Fetch booked slots for this business
-        const bookedRes = await publicRequest.get(
-          `/quota/booked-slots/${extractedBusinessId}`,
-          {
-            params: {
-              startDate: startDate.toISOString().split("T")[0],
-              endDate: endDate.toISOString().split("T")[0],
-            },
-          }
-        );
-
-        setBookedSlots(bookedRes.data?.bookedSlots || {});
-
-        // Filter availability to remove booked slots and find first available date
-        const availabilityWithBookings = availability.map((day) => {
-          const availableSlots = (day.availableSlots || []).filter(
-            (slot) => !bookedRes.data?.bookedSlots[day.date]?.includes(slot)
-          );
-
-          return {
-            ...day,
-            availableSlots,
-          };
-        });
-
-        // Find the first day with available slots
-        const firstAvailableIdx = availabilityWithBookings.findIndex(
-          (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
-        );
-
-        if (firstAvailableIdx === -1) {
-          setVisibleDays([]);
-        } else {
-          // Show 3 days starting from the first available date
-          const nextThree = availabilityWithBookings.slice(
-            firstAvailableIdx,
-            firstAvailableIdx + 3
-          );
-          const normalized = nextThree.map((day) => ({
-            date: day.date,
-            title: fmtDayTitle(day.date),
-            slots: day.availableSlots,
-          }));
-          setVisibleDays(normalized);
-        }
-      } catch (e) {
-        console.error(e);
-        setErr("تعذر جلب بيانات العيادة أو التوافر.");
+        setLoading(true);
+        const res = await publicRequest.get(`/vendors/${id}`);
+        setVenue(res.data);
+      } catch (err) {
+        setError("فشل في جلب تفاصيل القاعة.");
+        console.log(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAll();
-  }, []);
-
-  const handlePickTime = (date, time) => {
-    // Don't allow selecting booked slots
-    if (isSlotBooked(date, time)) {
-      return;
+    if (id) {
+      fetchVenue();
     }
-    setSelectedSlot({ date, time });
-  };
+  }, [id]);
 
-  const canProceedStep1 = appointmentType && activeLocation && selectedSlot;
+  // Fetch user favorites (if logged in)
+  useEffect(() => {
+    const fetchUserFavorites = async () => {
+      if (!isAuthenticated || !userId) return;
 
-  const goToStep2 = () => {
-    if (!canProceedStep1) return;
-    setBookingStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+      try {
+        const userReq = createUserRequest();
+        const response = await userReq.get(`/users/${userId}/favorites`);
+        if (Array.isArray(response.data)) {
+          const favoriteIds = response.data.map((fav) =>
+            fav._id ? fav._id : fav
+          );
+          setUserFavorites(favoriteIds);
 
-  const handleBackToSelection = () => {
-    setBookingStep(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+          if (id && favoriteIds.includes(id)) {
+            setIsFavorite(true);
+          }
+        }
+      } catch (err) {
+        console.log("خطأ في جلب المفضلات:", err);
+      }
+    };
 
-  const handleInputChange = (field, value) => {
-    setPatientInfo((prev) => ({ ...prev, [field]: value }));
-  };
+    fetchUserFavorites();
+  }, [isAuthenticated, userId, id]);
 
-  const handleBookingSubmit = async () => {
-    const isFormValid =
-      patientInfo.email &&
-      patientInfo.firstName &&
-      patientInfo.lastName &&
-      patientInfo.phoneNumber &&
-      describe;
-
-    if (!isFormValid) {
-      alert("الرجاء ملء جميع الحقول المطلوبة");
+  // Toggle favorite functionality
+  const toggleFavorite = async () => {
+    if (!isAuthenticated) {
+      router.push("/sign-in");
       return;
     }
 
-    if (!businessId) {
-      alert("خطأ: لم يتم العثور على معرف العيادة");
-      return;
-    }
+    if (!id) return;
 
-    // Double-check if slot is still available before submitting
-    if (isSlotBooked(selectedSlot?.date, selectedSlot?.time)) {
-      alert("عذراً، هذا الموعد تم حجزه بالفعل. الرجاء اختيار وقت آخر.");
-      setBookingStep(1);
+    try {
+      const userReq = createUserRequest();
+      setIsFavorite(!isFavorite);
+
+      if (isFavorite) {
+        setUserFavorites((prev) => prev.filter((item) => item !== id));
+        await userReq.delete(`/users/${userId}/favorites/${id}`);
+      } else {
+        setUserFavorites((prev) => [...prev, id]);
+        await userReq.post(`/users/${userId}/favorites`, { vendorId: id });
+      }
+    } catch (err) {
+      console.log("خطأ في تبديل المفضلة:", err);
+      setIsFavorite(!isFavorite);
+    }
+  };
+
+  const onScrollEnd = (e) => {
+    let contentOffset = e.nativeEvent.contentOffset.x;
+    let index = Math.round(contentOffset / width);
+    setCurrentIndex(index);
+  };
+
+  const handleOpenQuoteModal = () => {
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setWeddingDate("");
+    setGuestCount("");
+    setPhoneNumber("");
+    setWeddingDetails("");
+    setFormStep(1);
+    setEmailError("");
+    setDateError("");
+    setFormErrors({});
+    setSuccess(false);
+    setSubmitting(false);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setFormErrors({});
+    setEmailError("");
+    setDateError("");
+    setSuccess(false);
+    setSubmitting(false);
+    setFormStep(1);
+  };
+
+  const handleNextStep = () => {
+    if (formStep === 1) {
+      const errors = validateStep1();
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
+      setFormErrors({});
+      setFormStep(2);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (formStep === 2) {
+      setFormStep(1);
+    }
+  };
+
+  const handleSubmitForm = async (e) => {
+    e.preventDefault();
+
+    const step1Errors = validateStep1();
+    if (Object.keys(step1Errors).length > 0) {
+      setFormErrors(step1Errors);
+      setFormStep(1);
       return;
     }
 
     setSubmitting(true);
-
     try {
-      const appointmentDetailsText = `
-نوع الموعد: ${appointmentType}
-الموقع: ${activeLocation}
-نوع المراجع: ${isNewPatient ? "مراجع جديد" : "مراجع سابق"}
-التاريخ: ${fmtDayTitle(selectedSlot?.date)}
-الوقت: ${selectedSlot?.time}
-الطبيب: ${doctor?.name}
-التخصص: ${doctor?.specialty}
-وصف الزيارة: ${describe}
-      `.trim();
-
-      const quotaData = {
-        firstName: patientInfo.firstName,
-        lastName: patientInfo.lastName,
-        email: patientInfo.email,
-        phoneNumber: patientInfo.phoneNumber,
-        weddingDate: selectedSlot?.date,
-        guestCount: appointmentType,
-        weddingDetails: appointmentDetailsText,
-        businessId: businessId,
-      };
-
-      console.log("Submitting quota with businessId:", businessId);
-
-      const response = await publicRequest.post("/quota", quotaData);
-      console.log("Booking response:", response.data);
-
-      // Update booked slots locally
-      setBookedSlots((prev) => ({
-        ...prev,
-        [selectedSlot.date]: [
-          ...(prev[selectedSlot.date] || []),
-          selectedSlot.time,
-        ],
-      }));
-
-      alert("تم حجز الموعد بنجاح! سيتم التواصل معك قريباً.");
-
-      setBookingStep(1);
-      setSelectedSlot(null);
-      setDescribe("");
-      setPatientInfo({
-        email: "",
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-      });
-    } catch (error) {
-      console.error("Booking error:", error);
-
-      if (error.response?.status === 409) {
-        alert("عذراً، هذا الموعد تم حجزه للتو. الرجاء اختيار وقت آخر.");
-        setBookingStep(1);
-      } else {
-        alert("حدث خطأ أثناء الحجز. الرجاء المحاولة مرة أخرى.");
-      }
+      const res = await axios.post(
+        `${BASE_URL}/quota/vendor`,
+        {
+          firstName: firstName,
+          lastName: lastName,
+          vendor: id,
+          email: email,
+          phoneNumber: phoneNumber,
+          weddingDate: weddingDate,
+          weddingDetails: weddingDetails,
+          userTag,
+          guestCount: parseInt(guestCount),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      setSuccess(true);
+      setFormStep(3);
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "An error occurred"
+      );
+      console.error(err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading)
+  const handleCloseSuccessModal = () => {
+    setModalVisible(false);
+    setSuccess(false);
+    setFormStep(1);
+    // Navigate to home
+    router.push("/");
+  };
+
+  // Call logic functions
+  const handleOpenCallModal = () => {
+    setCallModalVisible(true);
+  };
+
+  const handleCloseCallModal = () => {
+    setCallModalVisible(false);
+  };
+
+  const handleMakeCall = async (phoneNum) => {
+    const numberToCall = phoneNum || venue?.phone || "1234567890";
+    const phoneUrl = `tel:${numberToCall}`;
+
+    try {
+      const supported = await Linking.canOpenURL(phoneUrl);
+
+      if (supported) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert(
+          "لا يمكن إجراء المكالمة",
+          "جهازك لا يدعم إجراء المكالمات الهاتفية أو لا يوجد تطبيق هاتف متاح.",
+          [{ text: "موافق" }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        "خطأ",
+        "حدث خطأ أثناء محاولة إجراء المكالمة. يرجى المحاولة مرة أخرى.",
+        [{ text: "موافق" }]
+      );
+      console.error("خطأ في إجراء المكالمة:", error);
+    } finally {
+      handleCloseCallModal();
+    }
+  };
+
+  if (loading) {
     return (
-      <LoadingWrapper>
-        <Gear />
-        جاري التحميل…
-      </LoadingWrapper>
-    );
-
-  if (err)
-    return (
-      <div style={{ padding: 24, color: "crimson", direction: "rtl" }}>
-        {err}
-      </div>
-    );
-
-  if (!doctor) return null;
-
-  /* ---------- Step 2: Patient Information ---------- */
-  if (bookingStep === 2) {
-    const isFormValid =
-      patientInfo.email &&
-      patientInfo.firstName &&
-      patientInfo.lastName &&
-      patientInfo.phoneNumber &&
-      describe;
-
-    return (
-      <>
-        <Phone>
-          <PhoneInner>
-            <Card>
-              <Section>
-                <BackBtn onClick={handleBackToSelection}>← العودة</BackBtn>
-              </Section>
-
-              <SectionHeader>
-                <Heading20>أخبرنا قليلاً عنك</Heading20>
-                <P>لحجز موعدك، نحتاج للتحقق من بعض المعلومات.</P>
-              </SectionHeader>
-
-              <Section>
-                <AppointmentSummary>
-                  <DayHeader style={{ fontSize: 16, marginBottom: 12 }}>
-                    تفاصيل الموعد
-                  </DayHeader>
-                  <SummaryRow>
-                    <strong>{doctor.name}</strong> - {doctor.specialty}
-                  </SummaryRow>
-                  <SummaryRow>
-                    📅 {fmtDayTitle(selectedSlot?.date)} في {selectedSlot?.time}
-                  </SummaryRow>
-                  <SummaryRow>📍 {activeLocation}</SummaryRow>
-                  <SummaryRow>📝 {appointmentType}</SummaryRow>
-                  <SummaryRow>
-                    👤 {isNewPatient ? "مراجع جديد" : "مراجع سابق"}
-                  </SummaryRow>
-                </AppointmentSummary>
-
-                <FormGroup>
-                  <FormLabel>البريد الإلكتروني *</FormLabel>
-                  <FormInput
-                    type="email"
-                    value={patientInfo.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="example@email.com"
-                    required
-                  />
-                </FormGroup>
-
-                <TwoCol>
-                  <FormGroup>
-                    <FormLabel>الاسم الأول *</FormLabel>
-                    <FormInput
-                      value={patientInfo.firstName}
-                      onChange={(e) =>
-                        handleInputChange("firstName", e.target.value)
-                      }
-                      placeholder="الاسم الأول"
-                      required
-                    />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <FormLabel>اسم العائلة *</FormLabel>
-                    <FormInput
-                      value={patientInfo.lastName}
-                      onChange={(e) =>
-                        handleInputChange("lastName", e.target.value)
-                      }
-                      placeholder="اسم العائلة"
-                      required
-                    />
-                  </FormGroup>
-                </TwoCol>
-
-                <FormGroup>
-                  <FormLabel>رقم الهاتف *</FormLabel>
-                  <FormInput
-                    type="tel"
-                    value={patientInfo.phoneNumber}
-                    onChange={(e) =>
-                      handleInputChange("phoneNumber", e.target.value)
-                    }
-                    placeholder="05xxxxxxxx"
-                    required
-                  />
-                </FormGroup>
-
-                <div>
-                  <Label>وصف الزيارة *</Label>
-                  <TextArea
-                    placeholder="مثال: أعاني من آلام في الركبة منذ أسبوع"
-                    value={describe}
-                    onChange={(e) => setDescribe(e.target.value)}
-                  />
-                </div>
-              </Section>
-            </Card>
-          </PhoneInner>
-        </Phone>
-
-        <BottomBar>
-          <BookBtn
-            onClick={handleBookingSubmit}
-            disabled={!isFormValid || submitting}
-          >
-            {submitting ? "جاري الحجز..." : "تأكيد الحجز"}
-          </BookBtn>
-        </BottomBar>
-      </>
+      <LoadingContainer>
+        <ActivityIndicator size="large" color="#ff69b4" />
+      </LoadingContainer>
     );
   }
 
-  /* ---------- Step 1: Select Appointment Time ---------- */
+  if (error || !venue) {
+    return (
+      <LoadingContainer>
+        <Text>{error || "حدث خطأ ما."}</Text>
+        <TouchableOpacity
+          style={{
+            marginTop: 20,
+            padding: 10,
+            backgroundColor: "#ff69b4",
+            borderRadius: 8,
+          }}
+          onPress={() => router.back()}
+        >
+          <Text style={{ color: "white" }}>العودة</Text>
+        </TouchableOpacity>
+      </LoadingContainer>
+    );
+  }
+
+  const images =
+    venue.images && venue.images.length > 0
+      ? venue.images.map((img) => ({ uri: img }))
+      : [
+          { uri: venue.imgUrl || "https://via.placeholder.com/400x600/cccccc" },
+          { uri: "https://via.placeholder.com/400x600/dddddd" },
+          { uri: "https://via.placeholder.com/400x600/eeeeee" },
+        ];
+
+  const features = [
+    { icon: "users", text: "حتى 300 ضيف" },
+    { icon: "calendar", text: "متاح في نهاية الأسبوع" },
+    { icon: "coffee", text: "يشمل الطعام" },
+    { icon: "music", text: "الموسيقى الحية مسموحة" },
+  ];
+
+  const venuePhoneNumbers = [
+    { type: "المكتب الرئيسي", number: venue.phone || "555-123-4567" },
+    { type: "فريق المبيعات", number: venue.salesPhone || "555-987-6543" },
+  ];
+
   return (
-    <>
-      <Phone>
-        <PhoneInner>
-          {/* Header */}
-          <HeaderRow>
-            <Avatar src={doctor.avatar} alt="doctor" />
-            <div>
-              <Title>{doctor.name}</Title>
-              <Subtle>{doctor.specialty}</Subtle>
-              <Tiny>{doctor.initials}</Tiny>
-            </div>
-          </HeaderRow>
+    <Container>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
 
-          {/* Rating */}
-          <Card>
-            <Section>
-              <Row $gap={12} $align="flex-start">
-                <Big>{doctor.rating.toFixed(2)}</Big>
-                <Grow>
-                  <KPI $mt={4} $size={0}>
-                    <Stars>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <StarFill key={i} width={20} height={20} />
-                      ))}
-                    </Stars>
-                  </KPI>
-                  <P $size={14}>{doctor.reviewHighlight}</P>
-                  <LinkText style={{ marginTop: 8 }}>
-                    عرض جميع التقييمات
-                  </LinkText>
-                </Grow>
-              </Row>
-            </Section>
-          </Card>
+      <BackButton onPress={() => router.back()}>
+        <Feather name="arrow-right" size={22} color="#000" />
+      </BackButton>
 
-          {/* Tabs */}
-          <TabsBar>
-            {[
-              "الحجز",
-              "عن الطبيب",
-              "التأمين",
-              "التقييمات",
-              "الأسئلة الشائعة",
-            ].map((t) => (
-              <TabBtn key={t} $active={t === activeTab}>
-                {t}
-              </TabBtn>
+      <HeaderButtonsContainer>
+        <ShareButton>
+          <Feather name="share" size={20} color="#000" />
+        </ShareButton>
+        <FavoriteButton onPress={toggleFavorite}>
+          <Feather
+            name="heart"
+            size={20}
+            color={isFavorite ? "#ff69b4" : "#000"}
+          />
+        </FavoriteButton>
+      </HeaderButtonsContainer>
+
+      <ScrollView>
+        <CarouselContainer>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            onMomentumScrollEnd={onScrollEnd}
+            showsHorizontalScrollIndicator={false}
+          >
+            {images.map((img, idx) => (
+              <CarouselImage key={idx} source={img} resizeMode="cover" />
             ))}
-          </TabsBar>
+          </ScrollView>
 
-          {/* Insurance */}
-          <Card>
-            <Section>
-              <Heading20>شركات التأمين ضمن الشبكة</Heading20>
-              <P>{doctor.inNetwork}</P>
-              <LinkText>(+200) خطط أخرى ضمن الشبكة</LinkText>
-            </Section>
-          </Card>
+          {venue.hasOffers && (
+            <OfferBadge>
+              <OfferText>عروض زفاف 2026</OfferText>
+            </OfferBadge>
+          )}
 
-          {/* Booking Card */}
-          <Card>
-            <SectionHeader>
-              <Heading20>احجز موعدًا مجانًا</Heading20>
-              <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
-            </SectionHeader>
+          <PageIndicator>
+            <PageIndicatorText>
+              {`${currentIndex + 1}/${images.length}`}
+            </PageIndicatorText>
+          </PageIndicator>
 
-            <Section>
-              {/* Appointment Type */}
-              <div>
-                <Label>تفاصيل الحجز</Label>
-                <SelectWrap>
-                  <Select
-                    value={appointmentType}
-                    onChange={(e) => setAppointmentType(e.target.value)}
-                  >
-                    <option>مرض عارض</option>
-                    <option>مراجعة متابعة</option>
-                    <option>فحص سنوي</option>
-                    <option>استشارة</option>
-                    <option>أخرى</option>
-                  </Select>
-                </SelectWrap>
-              </div>
+          <PageDotsContainer>
+            <PageDots>
+              {images.map((_, i) => (
+                <PageDot key={i} active={i === currentIndex} />
+              ))}
+            </PageDots>
+          </PageDotsContainer>
+        </CarouselContainer>
 
-              <Spacer16 />
+        <ContentContainer>
+          <VenueTitle>{venue.name}</VenueTitle>
+          <VenueSubtitle>
+            {venue.tagline || "قاعة زفافك المثالية"}
+          </VenueSubtitle>
 
-              {/* Patient Type */}
-              <div>
-                <Label>نوع المراجع</Label>
-                <Toggle>
-                  <ToggleBtn
-                    $active={isNewPatient}
-                    onClick={() => setIsNewPatient(true)}
-                    type="button"
-                  >
-                    مراجع جديد
-                  </ToggleBtn>
-                  <ToggleBtn
-                    $active={!isNewPatient}
-                    onClick={() => setIsNewPatient(false)}
-                    type="button"
-                  >
-                    مراجع سابق
-                  </ToggleBtn>
-                </Toggle>
-              </div>
+          <LocationRow>
+            <Feather name="map-pin" size={20} color="#ff69b4" />
+            <LocationText>{venue.location || "الموقع غير متاح"}</LocationText>
+          </LocationRow>
 
-              <Spacer16 />
+          <InfoCard>
+            <RatingRow>
+              <RatingLeft>
+                <Feather name="star" size={22} color="#FFD700" />
+                <RatingText>{venue.rating}</RatingText>
+              </RatingLeft>
+              <ReviewLink>
+                <ReviewLinkText>{venue.numReviews || 0} تقييم</ReviewLinkText>
+              </ReviewLink>
+            </RatingRow>
 
-              {/* Location */}
-              <div>
-                <Label>الموقع</Label>
-                <SelectWrap>
-                  <Select
-                    value={activeLocation}
-                    onChange={(e) => setActiveLocation(e.target.value)}
-                  >
-                    {doctor.locationOptions.map((o) => (
-                      <option key={o}>{o}</option>
-                    ))}
-                  </Select>
-                </SelectWrap>
-              </div>
+            <VenueRow>
+              <VenueType>
+                <VenueTypeText>{venue.category || "قاعة أفراح"}</VenueTypeText>
+              </VenueType>
+              {venue.logoUrl && (
+                <Image
+                  source={{ uri: venue.logoUrl }}
+                  style={{ width: 60, height: 60, borderRadius: 30 }}
+                />
+              )}
+            </VenueRow>
+          </InfoCard>
 
-              <Spacer16 />
+          <SectionTitle>الأسعار</SectionTitle>
+          <PriceRow>
+            <Feather name="dollar-sign" size={24} color="#ff69b4" />
+            <PriceInfo>
+              <PriceCon>
+                <PriceText>{venue.prePrice} ريال</PriceText>
+                <Text>-</Text>
+                <PriceText>{venue.postPrice} ريال</PriceText>
+              </PriceCon>
+              <PriceDetails>اضغط لتفاصيل الأسعار كاملة</PriceDetails>
+            </PriceInfo>
+          </PriceRow>
 
-              {/* Available Time Slots */}
-              <div>
-                <Label>المواعيد المتاحة *</Label>
-                <AvailBlock>
-                  {visibleDays.length === 0 ? (
-                    <P>لا توجد مواعيد متاحة حاليًا.</P>
-                  ) : (
-                    visibleDays.map((day, idx) => (
-                      <div key={day.date + idx}>
-                        <DayHeader>{day.title}</DayHeader>
-                        <TimesRow>
-                          {day.slots.slice(0, 7).map((t) => {
-                            const selected =
-                              selectedSlot?.date === day.date &&
-                              selectedSlot?.time === t;
-                            const booked = isSlotBooked(day.date, t);
+          <Divider />
 
-                            return (
-                              <TimeBtn
-                                key={t}
-                                $selected={selected}
-                                $booked={booked}
-                                onClick={() => handlePickTime(day.date, t)}
-                                type="button"
-                                aria-pressed={selected}
-                                disabled={booked}
-                                style={{
-                                  cursor: booked ? "not-allowed" : "pointer",
-                                  opacity: booked ? 0.5 : 1,
-                                  backgroundColor: booked
-                                    ? "#e0e0e0"
-                                    : selected
-                                    ? "#4b90f2"
-                                    : "#fff",
-                                  color: booked
-                                    ? "#999"
-                                    : selected
-                                    ? "#fff"
-                                    : "#000",
-                                }}
-                              >
-                                {t}
-                              </TimeBtn>
-                            );
-                          })}
-                          {day.slots.length > 7 && (
-                            <MoreBtn type="button">المزيد</MoreBtn>
-                          )}
-                        </TimesRow>
-                      </div>
-                    ))
-                  )}
-                  {visibleDays.length > 0 && (
-                    <OutlineBtn type="button">عرض المزيد من التوافر</OutlineBtn>
-                  )}
-                </AvailBlock>
-              </div>
-            </Section>
-          </Card>
-        </PhoneInner>
-      </Phone>
+          <SectionTitle>مميزات القاعة</SectionTitle>
+          <FeatureRow>
+            {features.map((feature, index) => (
+              <FeatureItem key={index}>
+                <Feather name={feature.icon} size={16} color="#ff69b4" />
+                <FeatureText>{feature.text}</FeatureText>
+              </FeatureItem>
+            ))}
+          </FeatureRow>
 
-      <BottomBar>
-        <BookBtn onClick={goToStep2} disabled={!canProceedStep1}>
-          احجز الموعد الآن
-        </BookBtn>
-      </BottomBar>
-    </>
+          <ResponseTime>
+            <Feather name="clock" size={16} color="#ff69b4" />
+            <ResponseTimeText>
+              {venue.responseTime || "عادة ما يرد خلال 24 ساعة"}
+            </ResponseTimeText>
+          </ResponseTime>
+        </ContentContainer>
+      </ScrollView>
+
+      <ButtonsRowWrapper>
+        <ButtonsRow>
+          <CallButton onPress={handleOpenCallModal}>
+            <CallButtonText>اتصال</CallButtonText>
+          </CallButton>
+          <QuoteButton onPress={handleOpenQuoteModal}>
+            <QuoteButtonText>طلب عرض سعر</QuoteButtonText>
+          </QuoteButton>
+        </ButtonsRow>
+      </ButtonsRowWrapper>
+
+      {/* Enhanced 3-STEP MODAL with Validation, Success, and Keyboard-aware behavior */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseModal}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <ModalContainer>
+            <ModalCard>
+              <ModalScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                {formStep === 1 ? (
+                  <>
+                    <ModalTitle>معلومات التواصل</ModalTitle>
+                    <StepIndicator>الخطوة 1 من 2</StepIndicator>
+                    {formErrors.firstName && (
+                      <ErrorText>{formErrors.firstName}</ErrorText>
+                    )}
+                    {formErrors.lastName && (
+                      <ErrorText>{formErrors.lastName}</ErrorText>
+                    )}
+
+                    {(formErrors.email || emailError) && (
+                      <ErrorText>{formErrors.email || emailError}</ErrorText>
+                    )}
+                    {(formErrors.weddingDate || dateError) && (
+                      <ErrorText>
+                        {formErrors.weddingDate || dateError}
+                      </ErrorText>
+                    )}
+                    {formErrors.guestCount && (
+                      <ErrorText>{formErrors.guestCount}</ErrorText>
+                    )}
+                    <FormField
+                      placeholder="الاسم الأول"
+                      value={firstName}
+                      onChangeText={setFirstName}
+                      style={{
+                        borderColor: formErrors.firstName ? "#ff6b6b" : "#ddd",
+                      }}
+                    />
+
+                    <FormField
+                      placeholder="اسم العائلة"
+                      value={lastName}
+                      onChangeText={setLastName}
+                      style={{
+                        borderColor: formErrors.lastName ? "#ff6b6b" : "#ddd",
+                      }}
+                    />
+
+                    <FormField
+                      placeholder="البريد الإلكتروني"
+                      value={email}
+                      onChangeText={handleEmailChange}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      style={{
+                        borderColor:
+                          formErrors.email || emailError ? "#ff6b6b" : "#ddd",
+                      }}
+                    />
+
+                    <FormField
+                      placeholder="تاريخ الزفاف المتوقع (17/02/2027)"
+                      value={weddingDate}
+                      onChangeText={handleDateChange}
+                      keyboardType="number-pad"
+                      maxLength={10}
+                      style={{
+                        borderColor:
+                          formErrors.weddingDate || dateError
+                            ? "#ff6b6b"
+                            : "#ddd",
+                      }}
+                    />
+
+                    <FormField
+                      placeholder="عدد الضيوف المتوقع"
+                      value={guestCount}
+                      onChangeText={setGuestCount}
+                      keyboardType="numeric"
+                      style={{
+                        borderColor: formErrors.guestCount ? "#ff6b6b" : "#ddd",
+                      }}
+                    />
+
+                    <FormField
+                      placeholder="رقم الهاتف (اختياري)"
+                      value={phoneNumber}
+                      onChangeText={setPhoneNumber}
+                      keyboardType="phone-pad"
+                    />
+
+                    <ModalButtonRow>
+                      <ModalButton onPress={handleCloseModal}>
+                        <ModalButtonText>إلغاء</ModalButtonText>
+                      </ModalButton>
+                      <ModalButton onPress={handleNextStep} primary>
+                        <ModalButtonText primary>التالي</ModalButtonText>
+                      </ModalButton>
+                    </ModalButtonRow>
+                  </>
+                ) : formStep === 2 ? (
+                  <>
+                    <ModalTitle>حول زفافك</ModalTitle>
+                    <StepIndicator>الخطوة 2 من 2</StepIndicator>
+
+                    <FormField
+                      placeholder="صف ما هو مهم لزفافك..."
+                      value={weddingDetails}
+                      onChangeText={setWeddingDetails}
+                      multiline
+                      style={{ height: 100, textAlignVertical: "top" }}
+                    />
+
+                    <ModalButtonRow>
+                      <ModalButton onPress={handlePreviousStep}>
+                        <ModalButtonText>السابق</ModalButtonText>
+                      </ModalButton>
+                      <ModalButton
+                        onPress={handleSubmitForm}
+                        primary
+                        disabled={submitting}
+                      >
+                        <ModalButtonText primary>
+                          {submitting ? "جاري الإرسال..." : "إرسال"}
+                        </ModalButtonText>
+                      </ModalButton>
+                    </ModalButtonRow>
+                  </>
+                ) : (
+                  <>
+                    <SuccessContainer>
+                      <SuccessIcon>
+                        <Feather
+                          name="check-circle"
+                          size={60}
+                          color="#ff69b4"
+                        />
+                      </SuccessIcon>
+                      <SuccessTitle>تم إرسال طلبك بنجاح!</SuccessTitle>
+                      <SuccessMessage>
+                        شكراً لك! تم إرسال طلب عرض السعر بنجاح. سيتم التواصل معك
+                        قريباً من قبل فريق {venue.name}.
+                      </SuccessMessage>
+                      <SuccessButton onPress={handleCloseSuccessModal}>
+                        <SuccessButtonText>العودة للرئيسية</SuccessButtonText>
+                      </SuccessButton>
+                    </SuccessContainer>
+                  </>
+                )}
+              </ModalScrollView>
+            </ModalCard>
+          </ModalContainer>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* CALL MODAL */}
+      <Modal
+        visible={callModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={handleCloseCallModal}
+      >
+        <CallModalContainer>
+          <CallModalCard>
+            <CallModalTitle>الاتصال بـ {venue.name}</CallModalTitle>
+
+            {venuePhoneNumbers.map((phoneInfo, index) => (
+              <CallOption
+                key={index}
+                onPress={() => handleMakeCall(phoneInfo.number)}
+              >
+                <Feather name="phone" size={24} color="#ff69b4" />
+                <CallOptionText>
+                  {phoneInfo.type}: {phoneInfo.number}
+                </CallOptionText>
+              </CallOption>
+            ))}
+
+            <CancelButton onPress={handleCloseCallModal}>
+              <CancelButtonText>إلغاء</CancelButtonText>
+            </CancelButton>
+          </CallModalCard>
+        </CallModalContainer>
+      </Modal>
+    </Container>
   );
 };
 
-export default Website;
+export default Booking;
