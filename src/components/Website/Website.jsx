@@ -47,21 +47,21 @@ const C = {
 
 /* ---------- إطار الهاتف ---------- */
 const Phone = styled.div`
-  min-height: 100dvh;
-  background: ${C.cream};
+  height: 100dvh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  background: ${C.cream};
   overflow: hidden;
 `;
 
 const PhoneInner = styled.div`
-  width: 100%;
-  max-width: 420px;
-  background: ${C.cream};
-  padding-bottom: ${(p) => (p.$hasBottomBar ? "100px" : "16px")};
+  flex: 1;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: 116px;
   direction: rtl;
   text-align: right;
+  background: ${C.cream};
 `;
 
 /* ---------- بطاقة ومقاطع ---------- */
@@ -249,8 +249,8 @@ const TextArea = styled.textarea`
   padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
-  min-height: 120px;
-  resize: vertical;
+  min-height: 120px; /* 👈 makes it taller */
+  resize: vertical; /* 👈 allows user to resize if needed */
   line-height: 1.5;
 
   &::placeholder {
@@ -460,13 +460,11 @@ const Spacer16 = styled.div`
 
 /* ---------- شريط الحجز السفلي ---------- */
 const BottomBar = styled.div`
-  position: fixed;
-  left: 0;
-  right: 0;
+  position: sticky;
   bottom: 0;
   background: ${C.yellow};
   border-top: 1px solid ${C.yellowBorder};
-  padding: 4px;
+  padding: 12px;
   display: flex;
   justify-content: center;
   z-index: 40;
@@ -518,7 +516,7 @@ const Website = () => {
   const [appointmentType, setAppointmentType] = useState("مرض عارض");
   const [describe, setDescribe] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState({});
+  const [bookedSlots, setBookedSlots] = useState({}); // Track booked time slots
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -556,6 +554,7 @@ const Website = () => {
     return fmt({ weekday: "long", month: "short", day: "numeric" });
   };
 
+  // Check if a time slot is booked
   const isSlotBooked = (date, time) => {
     return bookedSlots[date]?.includes(time) || false;
   };
@@ -572,6 +571,7 @@ const Website = () => {
       setLoading(true);
       setErr("");
       try {
+        // Fetch store/doctor information
         const storeRes = await publicRequest.get(`/business/store/${slug}`);
         const data = storeRes.data;
 
@@ -607,6 +607,7 @@ const Website = () => {
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
 
+        // Fetch availability
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -625,6 +626,7 @@ const Website = () => {
           ? availRes.data.availability
           : [];
 
+        // Fetch booked slots for this business
         const bookedRes = await publicRequest.get(
           `/quota/booked-slots/${extractedBusinessId}`,
           {
@@ -637,6 +639,7 @@ const Website = () => {
 
         setBookedSlots(bookedRes.data?.bookedSlots || {});
 
+        // Filter availability to remove booked slots and find first available date
         const availabilityWithBookings = availability.map((day) => {
           const availableSlots = (day.availableSlots || []).filter(
             (slot) => !bookedRes.data?.bookedSlots[day.date]?.includes(slot)
@@ -648,6 +651,7 @@ const Website = () => {
           };
         });
 
+        // Find the first day with available slots
         const firstAvailableIdx = availabilityWithBookings.findIndex(
           (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
         );
@@ -655,6 +659,7 @@ const Website = () => {
         if (firstAvailableIdx === -1) {
           setVisibleDays([]);
         } else {
+          // Show 3 days starting from the first available date
           const nextThree = availabilityWithBookings.slice(
             firstAvailableIdx,
             firstAvailableIdx + 3
@@ -678,6 +683,7 @@ const Website = () => {
   }, []);
 
   const handlePickTime = (date, time) => {
+    // Don't allow selecting booked slots
     if (isSlotBooked(date, time)) {
       return;
     }
@@ -719,6 +725,7 @@ const Website = () => {
       return;
     }
 
+    // Double-check if slot is still available before submitting
     if (isSlotBooked(selectedSlot?.date, selectedSlot?.time)) {
       alert("عذراً، هذا الموعد تم حجزه بالفعل. الرجاء اختيار وقت آخر.");
       setBookingStep(1);
@@ -755,6 +762,7 @@ const Website = () => {
       const response = await publicRequest.post("/quota", quotaData);
       console.log("Booking response:", response.data);
 
+      // Update booked slots locally
       setBookedSlots((prev) => ({
         ...prev,
         [selectedSlot.date]: [
@@ -817,7 +825,7 @@ const Website = () => {
     return (
       <>
         <Phone>
-          <PhoneInner $hasBottomBar={true}>
+          <PhoneInner>
             <Card>
               <Section>
                 <BackBtn onClick={handleBackToSelection}>← العودة</BackBtn>
@@ -925,7 +933,7 @@ const Website = () => {
   return (
     <>
       <Phone>
-        <PhoneInner $hasBottomBar={true}>
+        <PhoneInner>
           {/* Header */}
           <HeaderRow>
             <Avatar src={doctor.avatar} alt="doctor" />
