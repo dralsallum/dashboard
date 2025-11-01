@@ -586,8 +586,11 @@ const Website = () => {
         console.log("Business ID extracted from slug:", extractedBusinessId);
 
         const mapped = {
-          name: data?.username || "طبيب",
-          specialty: data?.storeName || "طبيب عام",
+          name:
+            data?.firstName && data?.lastName
+              ? `${data?.firstName} ${data?.lastName}`
+              : data.username,
+          specialty: data?.storeName || "طبيب تجميل",
           initials: (data?.username || "طبيب")
             .split(" ")
             .map((w) => w[0]?.toUpperCase())
