@@ -460,6 +460,7 @@ const Spacer16 = styled.div`
 
 /* ---------- شريط الحجز السفلي ---------- */
 const BottomBar = styled.div`
+  overview-y: auto;
   position: fixed;
   left: 0;
   right: 0;
