@@ -505,7 +505,6 @@ const KPI = styled.div`
 `;
 
 /* ===================================================== */
-
 const Website = () => {
   const { slug } = useParams();
   const [doctor, setDoctor] = useState(null);
@@ -523,6 +522,10 @@ const Website = () => {
   const [bookedSlots, setBookedSlots] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
 
+  // NEW: State to track how many days to show and all available days
+  const [daysToShow, setDaysToShow] = useState(3);
+  const [allAvailableDays, setAllAvailableDays] = useState([]);
+
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -530,8 +533,7 @@ const Website = () => {
     phoneNumber: "",
   });
   const [businessId, setBusinessId] = useState(null);
-  const [more, setMore] = useState(7);
-  const [something, setSomething] = useState("المزيد");
+
   const handleMore = (dateKey) => {
     setExpandedDays((prev) => ({
       ...prev,
@@ -564,6 +566,21 @@ const Website = () => {
   // Check if a time slot is booked
   const isSlotBooked = (date, time) => {
     return bookedSlots[date]?.includes(time) || false;
+  };
+
+  // NEW: Function to show more days
+  const handleShowMoreDays = () => {
+    const newDaysToShow = daysToShow + 3; // Show 3 more days each time
+    setDaysToShow(newDaysToShow);
+
+    // Update visible days from all available days
+    const nextDays = allAvailableDays.slice(0, newDaysToShow);
+    const normalized = nextDays.map((day) => ({
+      date: day.date,
+      title: fmtDayTitle(day.date),
+      slots: day.availableSlots,
+    }));
+    setVisibleDays(normalized);
   };
 
   useEffect(() => {
@@ -658,6 +675,12 @@ const Website = () => {
             availableSlots,
           };
         });
+
+        // NEW: Store all available days (only days with available slots)
+        const daysWithSlots = availabilityWithBookings.filter(
+          (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
+        );
+        setAllAvailableDays(daysWithSlots);
 
         // Find the first day with available slots
         const firstAvailableIdx = availabilityWithBookings.findIndex(
@@ -762,6 +785,7 @@ const Website = () => {
         weddingDate: selectedSlot?.date,
         guestCount: appointmentType,
         weddingDetails: appointmentDetailsText,
+        visitTime: selectedSlot?.time,
         businessId: businessId,
       };
 
@@ -1120,9 +1144,13 @@ const Website = () => {
                       </div>
                     ))
                   )}
-                  {visibleDays.length > 0 && (
-                    <OutlineBtn type="button">عرض المزيد من التوافر</OutlineBtn>
-                  )}
+                  {/* NEW: Only show button if there are more days to display */}
+                  {visibleDays.length > 0 &&
+                    visibleDays.length < allAvailableDays.length && (
+                      <OutlineBtn type="button" onClick={handleShowMoreDays}>
+                        عرض المزيد من التوافر
+                      </OutlineBtn>
+                    )}
                 </AvailBlock>
               </div>
             </Section>
