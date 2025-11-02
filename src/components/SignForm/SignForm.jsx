@@ -24,8 +24,17 @@ const SignForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleChange = (e) =>
-    setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Capitalize first letter if it's the username field
+    const processedValue =
+      name === "username" && value.length > 0
+        ? value.charAt(0).toUpperCase() + value.slice(1)
+        : value;
+
+    setInputs((prev) => ({ ...prev, [name]: processedValue }));
+  };
 
   const getArabicErrorMessage = (msg) => {
     switch (msg) {
@@ -64,6 +73,7 @@ const SignForm = () => {
           <LoginSignInput
             name="username"
             placeholder="اسم المستخدم"
+            value={inputs.username || ""}
             onChange={handleChange}
             required
           />
@@ -73,6 +83,7 @@ const SignForm = () => {
             name="email"
             type="email"
             placeholder="example@domain.com"
+            value={inputs.email || ""}
             onChange={handleChange}
             required
           />
@@ -82,6 +93,7 @@ const SignForm = () => {
             type="password"
             name="password"
             placeholder="••••••••"
+            value={inputs.password || ""}
             onChange={handleChange}
             required
           />

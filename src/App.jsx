@@ -46,6 +46,7 @@ const App = () => {
           <Route path="/appointment/:slug" element={<Appointment />} />
           <Route path="/quota/:id" element={<Quota />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/practice" element={<Practice />} />
           <Route
             path="/control"
             element={user ? <Control /> : <Navigate to="/signup" replace />}

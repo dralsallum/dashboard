@@ -3,6 +3,7 @@ import styled, { css, keyframes } from "styled-components";
 import { Star, ChevronDown } from "lucide-react";
 import { publicRequest } from "../../requestMethods";
 import { Loader2 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 /* ---------- حركة التحميل ---------- */
 const Spin = keyframes`
@@ -506,6 +507,7 @@ const KPI = styled.div`
 /* ===================================================== */
 
 const Website = () => {
+  const { slug } = useParams();
   const [doctor, setDoctor] = useState(null);
   const [activeTab] = useState("الحجز");
   const [activeLocation, setActiveLocation] = useState("");
@@ -518,7 +520,9 @@ const Website = () => {
   const [appointmentType, setAppointmentType] = useState("مرض عارض");
   const [describe, setDescribe] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState({}); // Track booked time slots
+  const [bookedSlots, setBookedSlots] = useState({});
+  const [expandedDays, setExpandedDays] = useState({});
+
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -526,14 +530,13 @@ const Website = () => {
     phoneNumber: "",
   });
   const [businessId, setBusinessId] = useState(null);
-
-  const getSlugFromUrl = () => {
-    try {
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      return parts[parts.length - 1] || "demo-doctor-clinic";
-    } catch {
-      return "demo-doctor-clinic";
-    }
+  const [more, setMore] = useState(7);
+  const [something, setSomething] = useState("المزيد");
+  const handleMore = (dateKey) => {
+    setExpandedDays((prev) => ({
+      ...prev,
+      [dateKey]: !prev[dateKey],
+    }));
   };
 
   const fmtDayTitle = (dateISO) => {
@@ -547,7 +550,9 @@ const Website = () => {
     const tKey = today.toISOString().split("T")[0];
     const tmKey = tomorrow.toISOString().split("T")[0];
 
-    const fmt = (opts) => d.toLocaleDateString("ar-SA", opts);
+    // Use Arabic language with Gregorian calendar
+    const fmt = (opts) =>
+      d.toLocaleDateString("ar", { ...opts, calendar: "gregory" });
 
     if (dKey === tKey)
       return `اليوم، ${fmt({ month: "short", day: "numeric" })}`;
@@ -562,7 +567,6 @@ const Website = () => {
   };
 
   useEffect(() => {
-    const slug = getSlugFromUrl();
     if (!slug) {
       setErr("لم يتم العثور على معرف العيادة في الرابط.");
       setLoading(false);
@@ -583,7 +587,6 @@ const Website = () => {
         }
 
         setBusinessId(extractedBusinessId);
-        console.log("Business ID extracted from slug:", extractedBusinessId);
 
         const mapped = {
           name:
@@ -762,10 +765,7 @@ const Website = () => {
         businessId: businessId,
       };
 
-      console.log("Submitting quota with businessId:", businessId);
-
       const response = await publicRequest.post("/quota", quotaData);
-      console.log("Booking response:", response.data);
 
       // Update booked slots locally
       setBookedSlots((prev) => ({
@@ -1072,42 +1072,49 @@ const Website = () => {
                       <div key={day.date + idx}>
                         <DayHeader>{day.title}</DayHeader>
                         <TimesRow>
-                          {day.slots.slice(0, 7).map((t) => {
-                            const selected =
-                              selectedSlot?.date === day.date &&
-                              selectedSlot?.time === t;
-                            const booked = isSlotBooked(day.date, t);
+                          {day.slots
+                            .slice(0, expandedDays[day.date] ? 20 : 7)
+                            .map((t) => {
+                              const selected =
+                                selectedSlot?.date === day.date &&
+                                selectedSlot?.time === t;
+                              const booked = isSlotBooked(day.date, t);
 
-                            return (
-                              <TimeBtn
-                                key={t}
-                                $selected={selected}
-                                $booked={booked}
-                                onClick={() => handlePickTime(day.date, t)}
-                                type="button"
-                                aria-pressed={selected}
-                                disabled={booked}
-                                style={{
-                                  cursor: booked ? "not-allowed" : "pointer",
-                                  opacity: booked ? 0.5 : 1,
-                                  backgroundColor: booked
-                                    ? "#e0e0e0"
-                                    : selected
-                                    ? "#4b90f2"
-                                    : "#fff",
-                                  color: booked
-                                    ? "#999"
-                                    : selected
-                                    ? "#fff"
-                                    : "#000",
-                                }}
-                              >
-                                {t}
-                              </TimeBtn>
-                            );
-                          })}
+                              return (
+                                <TimeBtn
+                                  key={t}
+                                  $selected={selected}
+                                  $booked={booked}
+                                  onClick={() => handlePickTime(day.date, t)}
+                                  type="button"
+                                  aria-pressed={selected}
+                                  disabled={booked}
+                                  style={{
+                                    cursor: booked ? "not-allowed" : "pointer",
+                                    opacity: booked ? 0.5 : 1,
+                                    backgroundColor: booked
+                                      ? "#e0e0e0"
+                                      : selected
+                                      ? "#4b90f2"
+                                      : "#fff",
+                                    color: booked
+                                      ? "#999"
+                                      : selected
+                                      ? "#fff"
+                                      : "#000",
+                                  }}
+                                >
+                                  {t}
+                                </TimeBtn>
+                              );
+                            })}
                           {day.slots.length > 7 && (
-                            <MoreBtn type="button">المزيد</MoreBtn>
+                            <MoreBtn
+                              type="button"
+                              onClick={() => handleMore(day.date)}
+                            >
+                              {expandedDays[day.date] ? "إخفاء" : "المزيد"}
+                            </MoreBtn>
                           )}
                         </TimesRow>
                       </div>

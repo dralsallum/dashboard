@@ -26,7 +26,15 @@ const SignLog = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setInputs((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+
+    // Capitalize first letter if it's the username field
+    const processedValue =
+      name === "username" && value.length > 0
+        ? value.charAt(0).toUpperCase() + value.slice(1)
+        : value;
+
+    setInputs((prev) => ({ ...prev, [name]: processedValue }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,6 +60,7 @@ const SignLog = () => {
           <LoginSignInput
             name="username"
             placeholder="ادخل اسم المستخدم"
+            value={inputs.username || ""}
             onChange={handleChange}
           />
 
@@ -60,6 +69,7 @@ const SignLog = () => {
             type="password"
             name="password"
             placeholder="••••••••"
+            value={inputs.password || ""}
             onChange={handleChange}
           />
 
