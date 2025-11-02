@@ -93,7 +93,7 @@ const HeaderRow = styled.div`
   gap: 12px;
   align-items: center;
   padding: 16px 12px 0;
-  margin: 10px 0 0 0;
+  margin: 15px 0 0 0;
 `;
 
 const Avatar = styled.img`
@@ -520,7 +520,7 @@ const Website = () => {
   const [describe, setDescribe] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [bookedSlots, setBookedSlots] = useState({});
-  const [expandedDays, setExpandedDays] = useState({});
+  const [slotsToShowPerDay, setSlotsToShowPerDay] = useState({});
 
   // NEW: State to track how many days to show and all available days
   const [daysToShow, setDaysToShow] = useState(3);
@@ -535,9 +535,9 @@ const Website = () => {
   const [businessId, setBusinessId] = useState(null);
 
   const handleMore = (dateKey) => {
-    setExpandedDays((prev) => ({
+    setSlotsToShowPerDay((prev) => ({
       ...prev,
-      [dateKey]: !prev[dateKey],
+      [dateKey]: (prev[dateKey] || 8) + 8, // Show 8 more slots each time
     }));
   };
 
@@ -1092,13 +1092,15 @@ const Website = () => {
                   {visibleDays.length === 0 ? (
                     <P>لا توجد مواعيد متاحة حاليًا.</P>
                   ) : (
-                    visibleDays.map((day, idx) => (
-                      <div key={day.date + idx}>
-                        <DayHeader>{day.title}</DayHeader>
-                        <TimesRow>
-                          {day.slots
-                            .slice(0, expandedDays[day.date] ? 20 : 7)
-                            .map((t) => {
+                    visibleDays.map((day, idx) => {
+                      const slotsToShow = slotsToShowPerDay[day.date] || 8;
+                      const hasMoreSlots = day.slots.length > slotsToShow;
+
+                      return (
+                        <div key={day.date + idx}>
+                          <DayHeader>{day.title}</DayHeader>
+                          <TimesRow>
+                            {day.slots.slice(0, slotsToShow).map((t) => {
                               const selected =
                                 selectedSlot?.date === day.date &&
                                 selectedSlot?.time === t;
@@ -1132,17 +1134,18 @@ const Website = () => {
                                 </TimeBtn>
                               );
                             })}
-                          {day.slots.length > 7 && (
-                            <MoreBtn
-                              type="button"
-                              onClick={() => handleMore(day.date)}
-                            >
-                              {expandedDays[day.date] ? "إخفاء" : "المزيد"}
-                            </MoreBtn>
-                          )}
-                        </TimesRow>
-                      </div>
-                    ))
+                            {hasMoreSlots && (
+                              <MoreBtn
+                                type="button"
+                                onClick={() => handleMore(day.date)}
+                              >
+                                المزيد
+                              </MoreBtn>
+                            )}
+                          </TimesRow>
+                        </div>
+                      );
+                    })
                   )}
                   {/* NEW: Only show button if there are more days to display */}
                   {visibleDays.length > 0 &&
