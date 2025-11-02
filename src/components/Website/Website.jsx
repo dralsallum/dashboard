@@ -93,7 +93,7 @@ const HeaderRow = styled.div`
   gap: 12px;
   align-items: center;
   padding: 16px 12px 0;
-  margin: 15px 0 0 0;
+  margin: 12px 0 0 0;
 `;
 
 const Avatar = styled.img`

@@ -462,7 +462,8 @@ const QuotaDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "غير محدد";
     try {
-      return new Date(dateString).toLocaleDateString("ar-SA", {
+      // Use en-GB for Gregorian calendar with day/month/year format
+      return new Date(dateString).toLocaleDateString("ar-GB", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -647,7 +648,7 @@ const QuotaDetail = () => {
             </InfoIcon>
             <InfoContent>
               <InfoLabel>وقت الحفل</InfoLabel>
-              <InfoValue>{quotaData.weddingTime || "غير محدد"}</InfoValue>
+              <InfoValue>{quotaData.visitTime || "غير محدد"}</InfoValue>
             </InfoContent>
           </InfoItem>
         </InfoGrid>
