@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { updateBusinessProfile } from "../../redux/userRedux";
-import styled, { keyframes } from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { setStoreName } from "../../redux/tabRedux";
 import NavSide from "../NavSide/NavSide";
@@ -489,6 +488,7 @@ import {
 import axios from "axios";
 
 import { Star, MapPin, Plus, Trash2, Upload } from "lucide-react";
+import { userRequest } from "../../requestMethods";
 
 const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
 
@@ -627,13 +627,12 @@ const Dashboard = () => {
     formData.append("image", file);
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/business/upload/profile-image`,
+      const response = await userRequest.post(
+        `/business/upload/profile-image`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${currentUser?.accessToken}`,
           },
         }
       );
@@ -823,12 +822,6 @@ const Dashboard = () => {
     >
       <Star size={18} style={{ color: "#f59e0b" }} />
       {value.toFixed(2)} · {reviews.toLocaleString()} reviews
-    </span>
-  );
-
-  const AddressLine = ({ distance, addr }) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      <MapPin size={18} /> {distance} · {addr}
     </span>
   );
 
