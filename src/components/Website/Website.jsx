@@ -574,6 +574,38 @@ const LocImg = styled.img`
   opacity: 0.8;
 `;
 
+const SuccessWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: #2e7d32;
+  font-family: "system-ui", sans-serif;
+  background-color: #f8fff8;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+`;
+
+const SuccessIcon = styled.img`
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+`;
+
+const SuccessTitle = styled.h2`
+  font-size: 1.8rem;
+  margin: 0 0 12px 0;
+`;
+
+const SuccessMessage = styled.p`
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0;
+`;
+
 /* ===================================================== */
 const Website = () => {
   const { slug } = useParams();
@@ -596,6 +628,7 @@ const Website = () => {
   const [businessId, setBusinessId] = useState(null);
   const [paymentSettings, setPaymentSettings] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -891,8 +924,6 @@ ${
         ],
       }));
 
-      alert("تم حجز الموعد بنجاح! سيتم التواصل معك قريباً.");
-
       setBookingStep(1);
       setSelectedSlot(null);
       setDescribe("");
@@ -903,6 +934,7 @@ ${
         lastName: "",
         phoneNumber: "",
       });
+      setIsSuccess(true);
     } catch (error) {
       console.error("Booking error:", error);
 
@@ -923,6 +955,20 @@ ${
         <Gear />
         جاري التحميل…
       </LoadingWrapper>
+    );
+
+  if (isSuccess)
+    return (
+      <SuccessWrapper>
+        <SuccessIcon
+          src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
+          alt="Success"
+        />
+        <SuccessTitle>تم حجز موعدك بنجاح </SuccessTitle>
+        <SuccessMessage>
+          ستصلك رسالة تأكيد الموعد على بريدك الإلكتروني وواتساب قريبًا.
+        </SuccessMessage>
+      </SuccessWrapper>
     );
 
   if (err)
