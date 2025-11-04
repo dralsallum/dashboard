@@ -1074,15 +1074,6 @@ const Website = () => {
             ))}
           </TabsBar>
 
-          {/* Insurance */}
-          <Card>
-            <Section>
-              <Heading20>شركات التأمين ضمن الشبكة</Heading20>
-              <P>{doctor.inNetwork}</P>
-              <LinkText>(+200) خطط أخرى ضمن الشبكة</LinkText>
-            </Section>
-          </Card>
-
           {/* Booking Card */}
           <Card>
             <SectionHeader>
