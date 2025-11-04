@@ -120,10 +120,16 @@ const Subtle = styled.div`
   margin-top: 2px;
 `;
 
-const Tiny = styled.div`
-  color: ${C.ink400};
-  font-size: 12px;
+const LocationDiv = styled.div`
+  display: flex;
+  align-items: center;
+  color: ${C.ink500};
+  font-size: 14px;
   margin-top: 2px;
+`;
+
+const Tiny = styled.div`
+  color: ${C.ink500};
 `;
 
 /* ---------- عناصر عامة ---------- */
@@ -969,7 +975,7 @@ const Website = () => {
             <div>
               <Title>{doctor.name}</Title>
               <Subtle>{doctor.specialty}</Subtle>
-              <Subtle
+              <LocationDiv
                 style={{ cursor: "pointer", color: "#4b90f2" }}
                 onClick={() => {
                   const query = encodeURIComponent(doctor.location);
@@ -981,7 +987,7 @@ const Website = () => {
               >
                 <LocImg src={Location} alt="" />
                 اضغط هنا للموقع
-              </Subtle>
+              </LocationDiv>
             </div>
           </HeaderRow>
 
