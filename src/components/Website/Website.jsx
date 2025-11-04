@@ -608,6 +608,33 @@ const SuccessMessage = styled.p`
   margin: 0;
 `;
 
+const StarReview = ({ fillPercentage = 0, size = 20 }) => {
+  const starId = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id={starId} x1="1" x2="0" y1="0" y2="0">
+          <stop offset={`${fillPercentage * 100}%`} stopColor="#FFB800" />
+          <stop offset={`${fillPercentage * 100}%`} stopColor="#ddd" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+        fill={`url(#${starId})`}
+        stroke="#ddd"
+        strokeWidth="0.5"
+      />
+    </svg>
+  );
+};
+
 /* ===================================================== */
 const Website = () => {
   const { slug } = useParams();
@@ -1248,52 +1275,19 @@ ${
                 <Big>{doctor.rating.toFixed(2)}</Big>
                 <Grow>
                   <KPI $mt={4} $size={0}>
-                    <Stars>
+                    <Stars style={{ display: "flex", gap: "2px" }}>
                       {Array.from({ length: 5 }).map((_, i) => {
                         const fillPercentage = Math.min(
                           Math.max(doctor.rating - i, 0),
                           1
                         );
-
-                        if (fillPercentage === 1) {
-                          return <StarFill key={i} width={20} height={20} />;
-                        } else if (fillPercentage > 0) {
-                          return (
-                            <div
-                              key={i}
-                              style={{
-                                position: "relative",
-                                display: "inline-block",
-                              }}
-                            >
-                              <BsStar
-                                width={20}
-                                height={20}
-                                style={{ color: "#ddd" }}
-                              />
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: 0,
-                                  left: 0,
-                                  overflow: "hidden",
-                                  width: `${fillPercentage * 100}%`,
-                                }}
-                              >
-                                <BsStarFill width={20} height={20} />
-                              </div>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <BsStar
-                              key={i}
-                              width={20}
-                              height={20}
-                              style={{ color: "#ddd" }}
-                            />
-                          );
-                        }
+                        return (
+                          <StarReview
+                            key={i}
+                            fillPercentage={fillPercentage}
+                            size={20}
+                          />
+                        );
                       })}
                     </Stars>
                   </KPI>

@@ -4260,3 +4260,410 @@ export const ButtonRedirect = styled.button`
     background-color: #000;
   }
 `;
+
+export const PageWrapper = styled.div`
+  min-height: 100vh;
+  background: #f9fafb;
+  padding: 2rem;
+`;
+
+export const MainContentArea = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
+`;
+
+export const TopHeaderSection = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+`;
+
+export const HeaderFlexRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const MainTitle = styled.h1`
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0;
+`;
+
+export const SaveButton = styled.button`
+  background: #1d4ed8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
+`;
+
+export const TwoColumnGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+`;
+
+export const LeftColumnWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+export const WhiteCard = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+`;
+
+export const CardHeading = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+`;
+
+export const TwoFieldGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: ${(props) => props.$marginBottom || "1rem"};
+`;
+
+export const InputFieldWrapper = styled.div`
+  margin-bottom: ${(props) => props.$marginBottom || "0"};
+`;
+
+export const FieldLabel = styled.label`
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+`;
+
+export const TextInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #4f4f4f;
+`;
+
+export const ProfileImageRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+`;
+
+export const ProfileImagePreview = styled.img`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e5e7eb;
+`;
+
+export const ImagePlaceholder = styled.div`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ImageUploadArea = styled.div`
+  flex: 1;
+`;
+
+export const UploadLabel = styled.label`
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #f3f4f6;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px dashed #d1d5db;
+`;
+
+export const UploadHintText = styled.p`
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+`;
+
+export const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+export const SmallFieldLabel = styled.label`
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 0.25rem;
+`;
+
+export const SelectDropdown = styled.select`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #4f4f4f;
+`;
+
+export const TimeInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #4f4f4f;
+`;
+
+export const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+`;
+
+export const CheckboxInput = styled.input`
+  width: 18px;
+  height: 18px;
+  background: #4f4f4f;
+`;
+
+export const CheckboxText = styled.span`
+  font-weight: ${(props) => (props.$bold ? 700 : 400)};
+`;
+
+export const NumberInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #4f4f4f;
+`;
+
+export const CheckboxGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+export const HolidayInputRow = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+export const DateInputWrapper = styled.div`
+  flex: 1;
+`;
+
+export const DateInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #4f4f4f;
+`;
+
+export const DescriptionInputWrapper = styled.div`
+  flex: 2;
+`;
+
+export const AddButton = styled.button`
+  align-self: flex-end;
+  padding: 0.75rem 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const HolidayListSection = styled.div`
+  margin-top: 1rem;
+`;
+
+export const HolidayListTitle = styled.h3`
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+`;
+
+export const HolidayItemsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+export const HolidayItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+`;
+
+export const HolidayInfo = styled.div``;
+
+export const HolidayName = styled.span`
+  font-weight: 700;
+`;
+
+export const HolidayDate = styled.span`
+  color: #6b7280;
+  margin-right: 1rem;
+`;
+
+export const DeleteButton = styled.button`
+  padding: 0.5rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+`;
+
+export const RightColumnSticky = styled.div`
+  position: sticky;
+  top: 2rem;
+  background: white;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+`;
+
+export const PhonePreviewFrame = styled.div`
+  background: #f9fafb;
+  border-radius: 20px;
+  padding: 1rem;
+  max-height: 700px;
+  overflow-y: auto;
+`;
+
+export const PreviewSection = styled.div`
+  padding: ${(props) => props.$padding || "8px 12px"};
+`;
+
+export const PreviewTitle = styled.h2`
+  font-weight: 900;
+  font-size: 24px;
+  margin: 8px 0;
+`;
+
+export const DoctorInfoRow = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+export const DoctorAvatar = styled.img`
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  object-fit: cover;
+`;
+
+export const DoctorDetails = styled.div``;
+
+export const DoctorName = styled.div`
+  font-weight: 900;
+`;
+
+export const DoctorSpecialty = styled.div`
+  color: #6b7280;
+`;
+
+export const RatingRow = styled.div`
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+
+export const ScheduleHeading = styled.div`
+  font-weight: 900;
+  margin: 6px 0;
+`;
+
+export const ReasonBox = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const ReasonText = styled.div`
+  font-weight: 700;
+`;
+
+export const FeeBox = styled.div`
+  margin-top: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 700;
+`;
+
+export const NoWorkDaysAlert = styled.div`
+  color: #ef4444;
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  background: #fff1f2;
+  font-weight: 700;
+`;
+
+export const DateSlotSection = styled.div`
+  margin-top: 12px;
+`;
+
+export const DateTitle = styled.div`
+  font-weight: 900;
+  margin-top: 6px;
+`;
+
+export const NoSlotsMessage = styled.div`
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px dashed #e5e7eb;
+  border-radius: 10px;
+  color: #6b7280;
+  font-weight: 700;
+`;
+
+export const TimeSlotGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+`;
+
+export const TimeSlotButton = styled.button`
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 900;
+  outline: ${(props) => (props.$selected ? "3px solid #1d4ed8" : "none")};
+  cursor: pointer;
+`;

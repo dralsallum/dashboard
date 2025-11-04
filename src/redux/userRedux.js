@@ -32,6 +32,19 @@ export const login = createAsyncThunk(
   }
 );
 
+export const updateBusinessProfile = createAsyncThunk(
+  "user/updateBusinessProfile",
+  async ({ id, updateData }, thunkAPI) => {
+    try {
+      const response = await userRequest.put(`/business/${id}`, updateData);
+      return response.data;
+    } catch (error) {
+      let message = error.response?.data?.message || error.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const updateStoreName = createAsyncThunk(
   "user/updateStoreName",
   async ({ id, storeName }, thunkAPI) => {
@@ -143,6 +156,23 @@ export const userSlice = createSlice({
         state.errorMessage = "";
       })
       .addCase(updateStoreName.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.isError = true;
+        state.errorMessage = action.payload;
+      })
+      .addCase(updateBusinessProfile.pending, (state) => {
+        state.isUpdating = true;
+        state.isError = false;
+      })
+      .addCase(updateBusinessProfile.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        state.isSuccess = true;
+        // Merge the updated data with current user
+        state.currentUser = { ...state.currentUser, ...action.payload };
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(updateBusinessProfile.rejected, (state, action) => {
         state.isUpdating = false;
         state.isError = true;
         state.errorMessage = action.payload;
