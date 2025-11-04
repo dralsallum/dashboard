@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { BsStarFill, BsStar } from "react-icons/bs";
 import styled, { css, keyframes } from "styled-components";
 import { Star, ChevronDown } from "lucide-react";
 import { publicRequest } from "../../requestMethods";
 import { Loader2 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import Location from "../../assets/location.png";
 
 /* ---------- حركة التحميل ---------- */
 const Spin = keyframes`
@@ -504,6 +506,12 @@ const KPI = styled.div`
   margin-top: ${(p) => p.$mt || 0}px;
 `;
 
+const LocImg = styled.img`
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+`;
+
 /* ===================================================== */
 const Website = () => {
   const { slug } = useParams();
@@ -604,16 +612,12 @@ const Website = () => {
 
         const mapped = {
           name:
-            data?.firstName && data?.lastName
-              ? `د.${data?.firstName} ${data?.lastName}`
+            data?.docFirstName && data?.docLastName
+              ? `د.${data?.docFirstName} ${data?.docLastName}`
               : data.username,
           specialty: data?.storeName || "طبيب تجميل",
-          initials: (data?.username || "طبيب")
-            .split(" ")
-            .map((w) => w[0]?.toUpperCase())
-            .join("")
-            .slice(0, 2),
-          rating: 4.6,
+          location: data?.location || "الرياض",
+          rating: data.rating,
           reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة.",
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
           avatar:
@@ -706,7 +710,6 @@ const Website = () => {
         setLoading(false);
       }
     };
-
     fetchAll();
   }, []);
 
@@ -966,7 +969,19 @@ const Website = () => {
             <div>
               <Title>{doctor.name}</Title>
               <Subtle>{doctor.specialty}</Subtle>
-              <Tiny>{doctor.initials}</Tiny>
+              <Subtle
+                style={{ cursor: "pointer", color: "#4b90f2" }}
+                onClick={() => {
+                  const query = encodeURIComponent(doctor.location);
+                  window.open(
+                    `https://www.google.com/maps/search/?api=1&query=${query}`,
+                    "_blank"
+                  );
+                }}
+              >
+                <LocImg src={Location} alt="" />
+                اضغط هنا للموقع
+              </Subtle>
             </div>
           </HeaderRow>
 
@@ -978,9 +993,55 @@ const Website = () => {
                 <Grow>
                   <KPI $mt={4} $size={0}>
                     <Stars>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <StarFill key={i} width={20} height={20} />
-                      ))}
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const fillPercentage = Math.min(
+                          Math.max(doctor.rating - i, 0),
+                          1
+                        );
+
+                        if (fillPercentage === 1) {
+                          // Full star
+                          return <StarFill key={i} width={20} height={20} />;
+                        } else if (fillPercentage > 0) {
+                          // Partial star - you'll need to implement this component
+                          return (
+                            <div
+                              key={i}
+                              style={{
+                                position: "relative",
+                                display: "inline-block",
+                              }}
+                            >
+                              <BsStar
+                                width={20}
+                                height={20}
+                                style={{ color: "#ddd" }}
+                              />
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: 0,
+                                  left: 0,
+                                  overflow: "hidden",
+                                  width: `${fillPercentage * 100}%`,
+                                }}
+                              >
+                                <BsStarFill width={20} height={20} />
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          // Empty star
+                          return (
+                            <BsStar
+                              key={i}
+                              width={20}
+                              height={20}
+                              style={{ color: "#ddd" }}
+                            />
+                          );
+                        }
+                      })}
                     </Stars>
                   </KPI>
                   <P $size={14}>{doctor.reviewHighlight}</P>
