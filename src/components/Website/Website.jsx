@@ -572,6 +572,8 @@ const LocImg = styled.img`
   width: 14px;
   height: 14px;
   opacity: 0.8;
+  margin: 0 0 0 2px;
+  padding: 0;
 `;
 
 const SuccessWrapper = styled.div`
@@ -711,10 +713,10 @@ const Website = () => {
             data?.docFirstName && data?.docLastName
               ? `د.${data?.docFirstName} ${data?.docLastName}`
               : data.username,
-          specialty: data?.storeName || "طبيب تجميل",
+          specialty: data?.major || "طبيب تجميل",
           location: data?.location || "الرياض",
           rating: data.rating,
-          reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة.",
+          reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة",
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
           avatar:
             data?.profileImg ||
@@ -1112,7 +1114,7 @@ ${
 
               <SectionHeader>
                 <Heading20>أخبرنا قليلاً عنك</Heading20>
-                <P>لحجز موعدك، نحتاج للتحقق من بعض المعلومات.</P>
+                <P>لحجز موعدك، نحتاج للتحقق من بعض المعلومات</P>
               </SectionHeader>
 
               <Section>
@@ -1235,7 +1237,7 @@ ${
                 }}
               >
                 <LocImg src={Location} alt="" />
-                اضغط هنا للموقع
+                موقع العيادة
               </LocationDiv>
             </div>
           </HeaderRow>
