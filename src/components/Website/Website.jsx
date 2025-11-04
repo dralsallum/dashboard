@@ -521,18 +521,15 @@ const Website = () => {
   const [submitting, setSubmitting] = useState(false);
   const [bookedSlots, setBookedSlots] = useState({});
   const [slotsToShowPerDay, setSlotsToShowPerDay] = useState({});
-
-  // NEW: State to track how many days to show and all available days
   const [daysToShow, setDaysToShow] = useState(3);
   const [allAvailableDays, setAllAvailableDays] = useState([]);
-
+  const [businessId, setBusinessId] = useState(null);
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
     lastName: "",
     phoneNumber: "",
   });
-  const [businessId, setBusinessId] = useState(null);
 
   const handleMore = (dateKey) => {
     setSlotsToShowPerDay((prev) => ({
@@ -620,7 +617,7 @@ const Website = () => {
           reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة.",
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
           avatar:
-            data?.storeSettings?.logo ||
+            data?.profileImg ||
             "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=256&q=80",
           locationOptions: [
             data?.storeSettings?.description ? "العيادة" : "زيارة في العيادة",

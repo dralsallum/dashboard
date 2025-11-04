@@ -778,7 +778,7 @@ const Dashboard = () => {
   });
 
   // Generate available dates (next 14 days)
-  // Generate available dates (next 14 days)
+
   const availableDates = useMemo(() => {
     const dates = [];
     const today = new Date();
