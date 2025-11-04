@@ -258,8 +258,8 @@ const TextArea = styled.textarea`
   padding: 12px;
   font-size: 15px;
   color: ${C.ink900};
-  min-height: 120px; /* 👈 makes it taller */
-  resize: vertical; /* 👈 allows user to resize if needed */
+  min-height: 120px;
+  resize: vertical;
   line-height: 1.5;
 
   &::placeholder {
@@ -271,6 +271,7 @@ const TextArea = styled.textarea`
     box-shadow: 0 0 0 2px ${C.ink900}22;
   }
 `;
+
 const Toggle = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -456,6 +457,61 @@ const SummaryRow = styled.div`
   }
 `;
 
+/* ---------- Payment Method Cards ---------- */
+const PaymentMethodCard = styled.button`
+  width: 100%;
+  background: #fff;
+  border: 2px solid ${(p) => (p.$selected ? C.ink900 : C.line)};
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: right;
+  margin-bottom: 12px;
+
+  &:hover {
+    border-color: ${C.ink900};
+    transform: translateY(-2px);
+  }
+`;
+
+const PaymentMethodTitle = styled.div`
+  font-size: 16px;
+  font-weight: 700;
+  color: ${C.ink900};
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const PaymentMethodDesc = styled.div`
+  font-size: 14px;
+  color: ${C.ink600};
+  line-height: 1.5;
+`;
+
+const PriceHighlight = styled.div`
+  background: ${C.yellow};
+  border: 2px solid ${C.yellowBorder};
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+`;
+
+const PriceAmount = styled.div`
+  font-size: 32px;
+  font-weight: 800;
+  color: ${C.ink900};
+  margin-bottom: 4px;
+`;
+
+const PriceLabel = styled.div`
+  font-size: 14px;
+  color: ${C.ink700};
+`;
+
 /* ---------- تخطيطات مساعدة ---------- */
 const TwoCol = styled.div`
   display: grid;
@@ -538,6 +594,8 @@ const Website = () => {
   const [daysToShow, setDaysToShow] = useState(3);
   const [allAvailableDays, setAllAvailableDays] = useState([]);
   const [businessId, setBusinessId] = useState(null);
+  const [paymentSettings, setPaymentSettings] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [patientInfo, setPatientInfo] = useState({
     email: "",
     firstName: "",
@@ -548,7 +606,7 @@ const Website = () => {
   const handleMore = (dateKey) => {
     setSlotsToShowPerDay((prev) => ({
       ...prev,
-      [dateKey]: (prev[dateKey] || 8) + 8, // Show 8 more slots each time
+      [dateKey]: (prev[dateKey] || 8) + 8,
     }));
   };
 
@@ -563,7 +621,6 @@ const Website = () => {
     const tKey = today.toISOString().split("T")[0];
     const tmKey = tomorrow.toISOString().split("T")[0];
 
-    // Use Arabic language with Gregorian calendar
     const fmt = (opts) =>
       d.toLocaleDateString("ar", { ...opts, calendar: "gregory" });
 
@@ -574,17 +631,14 @@ const Website = () => {
     return fmt({ weekday: "long", month: "short", day: "numeric" });
   };
 
-  // Check if a time slot is booked
   const isSlotBooked = (date, time) => {
     return bookedSlots[date]?.includes(time) || false;
   };
 
-  // NEW: Function to show more days
   const handleShowMoreDays = () => {
-    const newDaysToShow = daysToShow + 3; // Show 3 more days each time
+    const newDaysToShow = daysToShow + 3;
     setDaysToShow(newDaysToShow);
 
-    // Update visible days from all available days
     const nextDays = allAvailableDays.slice(0, newDaysToShow);
     const normalized = nextDays.map((day) => ({
       date: day.date,
@@ -605,7 +659,6 @@ const Website = () => {
       setLoading(true);
       setErr("");
       try {
-        // Fetch store/doctor information
         const storeRes = await publicRequest.get(`/business/store/${slug}`);
         const data = storeRes.data;
 
@@ -615,6 +668,10 @@ const Website = () => {
         }
 
         setBusinessId(extractedBusinessId);
+
+        // Store payment settings
+        const paymentConfig = data?.appointmentSettings?.paymentSettings;
+        setPaymentSettings(paymentConfig);
 
         const mapped = {
           name:
@@ -639,7 +696,6 @@ const Website = () => {
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
 
-        // Fetch availability
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -658,7 +714,6 @@ const Website = () => {
           ? availRes.data.availability
           : [];
 
-        // Fetch booked slots for this business
         const bookedRes = await publicRequest.get(
           `/quota/booked-slots/${extractedBusinessId}`,
           {
@@ -671,7 +726,6 @@ const Website = () => {
 
         setBookedSlots(bookedRes.data?.bookedSlots || {});
 
-        // Filter availability to remove booked slots and find first available date
         const availabilityWithBookings = availability.map((day) => {
           const availableSlots = (day.availableSlots || []).filter(
             (slot) => !bookedRes.data?.bookedSlots[day.date]?.includes(slot)
@@ -683,13 +737,11 @@ const Website = () => {
           };
         });
 
-        // NEW: Store all available days (only days with available slots)
         const daysWithSlots = availabilityWithBookings.filter(
           (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
         );
         setAllAvailableDays(daysWithSlots);
 
-        // Find the first day with available slots
         const firstAvailableIdx = availabilityWithBookings.findIndex(
           (d) => Array.isArray(d.availableSlots) && d.availableSlots.length > 0
         );
@@ -697,7 +749,6 @@ const Website = () => {
         if (firstAvailableIdx === -1) {
           setVisibleDays([]);
         } else {
-          // Show 3 days starting from the first available date
           const nextThree = availabilityWithBookings.slice(
             firstAvailableIdx,
             firstAvailableIdx + 3
@@ -717,10 +768,9 @@ const Website = () => {
       }
     };
     fetchAll();
-  }, []);
+  }, [slug]);
 
   const handlePickTime = (date, time) => {
-    // Don't allow selecting booked slots
     if (isSlotBooked(date, time)) {
       return;
     }
@@ -740,11 +790,21 @@ const Website = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleBackToPatientInfo = () => {
+    setBookingStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleInputChange = (field, value) => {
     setPatientInfo((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleBookingSubmit = async () => {
+  // Check if payment step should be shown
+  const shouldShowPaymentStep = () => {
+    return paymentSettings?.enabled && paymentSettings?.appointmentFee > 0;
+  };
+
+  const goToStep3 = () => {
     const isFormValid =
       patientInfo.email &&
       patientInfo.firstName &&
@@ -757,12 +817,28 @@ const Website = () => {
       return;
     }
 
+    // If payment is enabled and fee > 0, go to payment step
+    if (shouldShowPaymentStep()) {
+      setBookingStep(3);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      // Skip payment step and submit directly
+      handleBookingSubmit();
+    }
+  };
+
+  const handleBookingSubmit = async () => {
+    // If on step 3 (payment), validate payment method selection
+    if (bookingStep === 3 && !paymentMethod) {
+      alert("الرجاء اختيار طريقة الدفع");
+      return;
+    }
+
     if (!businessId) {
       alert("خطأ: لم يتم العثور على معرف العيادة");
       return;
     }
 
-    // Double-check if slot is still available before submitting
     if (isSlotBooked(selectedSlot?.date, selectedSlot?.time)) {
       alert("عذراً، هذا الموعد تم حجزه بالفعل. الرجاء اختيار وقت آخر.");
       setBookingStep(1);
@@ -781,6 +857,12 @@ const Website = () => {
 الطبيب: ${doctor?.name}
 التخصص: ${doctor?.specialty}
 وصف الزيارة: ${describe}
+${paymentMethod ? `طريقة الدفع: ${paymentMethod}` : ""}
+${
+  shouldShowPaymentStep()
+    ? `قيمة الموعد: ${paymentSettings.appointmentFee} ريال`
+    : ""
+}
       `.trim();
 
       const quotaData = {
@@ -793,11 +875,14 @@ const Website = () => {
         weddingDetails: appointmentDetailsText,
         visitTime: selectedSlot?.time,
         businessId: businessId,
+        paymentMethod: paymentMethod || "غير محدد",
+        appointmentFee: shouldShowPaymentStep()
+          ? paymentSettings.appointmentFee
+          : 0,
       };
 
       const response = await publicRequest.post("/quota", quotaData);
 
-      // Update booked slots locally
       setBookedSlots((prev) => ({
         ...prev,
         [selectedSlot.date]: [
@@ -811,6 +896,7 @@ const Website = () => {
       setBookingStep(1);
       setSelectedSlot(null);
       setDescribe("");
+      setPaymentMethod("");
       setPatientInfo({
         email: "",
         firstName: "",
@@ -847,6 +933,118 @@ const Website = () => {
     );
 
   if (!doctor) return null;
+
+  /* ---------- Step 3: Payment Method ---------- */
+  if (bookingStep === 3) {
+    const canProceed = paymentMethod !== "";
+
+    return (
+      <>
+        <Phone>
+          <PhoneInner>
+            <Card>
+              <Section>
+                <BackBtn onClick={handleBackToPatientInfo}>← العودة</BackBtn>
+              </Section>
+
+              <SectionHeader>
+                <Heading20>اختر طريقة الدفع</Heading20>
+                <P>اختر كيف تريد الدفع مقابل موعدك</P>
+              </SectionHeader>
+
+              <Section>
+                <AppointmentSummary>
+                  <DayHeader style={{ fontSize: 16, marginBottom: 12 }}>
+                    ملخص الموعد
+                  </DayHeader>
+                  <SummaryRow>
+                    <strong>{doctor.name}</strong> - {doctor.specialty}
+                  </SummaryRow>
+                  <SummaryRow>
+                    📅 {fmtDayTitle(selectedSlot?.date)} في {selectedSlot?.time}
+                  </SummaryRow>
+                  <SummaryRow>📍 {activeLocation}</SummaryRow>
+                  <SummaryRow>📝 {appointmentType}</SummaryRow>
+                </AppointmentSummary>
+
+                <PriceHighlight>
+                  <PriceAmount>
+                    {paymentSettings?.appointmentFee} ريال
+                  </PriceAmount>
+                  <PriceLabel>قيمة الموعد</PriceLabel>
+                </PriceHighlight>
+
+                <div>
+                  {paymentSettings?.allowOnlinePayment && (
+                    <PaymentMethodCard
+                      type="button"
+                      $selected={paymentMethod === "تحويل بنكي"}
+                      onClick={() => setPaymentMethod("تحويل بنكي")}
+                    >
+                      <PaymentMethodTitle>
+                        💳 الدفع عبر التحويل البنكي
+                      </PaymentMethodTitle>
+                      <PaymentMethodDesc>
+                        قم بتحويل المبلغ الآن وسيتم تأكيد موعدك فوراً
+                      </PaymentMethodDesc>
+                    </PaymentMethodCard>
+                  )}
+
+                  {paymentSettings?.allowPayOnArrival && (
+                    <PaymentMethodCard
+                      type="button"
+                      $selected={paymentMethod === "الدفع عند الحضور"}
+                      onClick={() => setPaymentMethod("الدفع عند الحضور")}
+                    >
+                      <PaymentMethodTitle>
+                        🏥 الدفع عند الحضور
+                      </PaymentMethodTitle>
+                      <PaymentMethodDesc>
+                        ادفع عندما تصل إلى العيادة في يوم موعدك
+                      </PaymentMethodDesc>
+                    </PaymentMethodCard>
+                  )}
+                </div>
+
+                {paymentMethod === "تحويل بنكي" && (
+                  <AppointmentSummary style={{ marginTop: 16 }}>
+                    <DayHeader style={{ fontSize: 14, marginBottom: 8 }}>
+                      معلومات التحويل البنكي
+                    </DayHeader>
+                    <P style={{ marginBottom: 8 }}>
+                      يرجى التحويل إلى الحساب التالي:
+                    </P>
+                    <SummaryRow>
+                      <strong>اسم البنك:</strong> البنك الأهلي
+                    </SummaryRow>
+                    <SummaryRow>
+                      <strong>رقم الحساب:</strong> SA1234567890
+                    </SummaryRow>
+                    <SummaryRow>
+                      <strong>المبلغ:</strong> {paymentSettings?.appointmentFee}{" "}
+                      ريال
+                    </SummaryRow>
+                    <P style={{ marginTop: 12, fontSize: 13, color: C.ink500 }}>
+                      ملاحظة: يرجى إرسال إثبات التحويل عبر الواتساب بعد الحجز
+                    </P>
+                  </AppointmentSummary>
+                )}
+              </Section>
+            </Card>
+          </PhoneInner>
+        </Phone>
+
+        <BottomBar>
+          <BookBtn
+            onClick={handleBookingSubmit}
+            disabled={!canProceed || submitting}
+          >
+            {submitting ? "جاري الحجز..." : "تأكيد الحجز"}
+          </BookBtn>
+        </BottomBar>
+      </>
+    );
+  }
 
   /* ---------- Step 2: Patient Information ---------- */
   if (bookingStep === 2) {
@@ -887,6 +1085,11 @@ const Website = () => {
                   <SummaryRow>
                     👤 {isNewPatient ? "مراجع جديد" : "مراجع سابق"}
                   </SummaryRow>
+                  {shouldShowPaymentStep() && (
+                    <SummaryRow>
+                      💰 قيمة الموعد: {paymentSettings.appointmentFee} ريال
+                    </SummaryRow>
+                  )}
                 </AppointmentSummary>
 
                 <FormGroup>
@@ -953,11 +1156,12 @@ const Website = () => {
         </Phone>
 
         <BottomBar>
-          <BookBtn
-            onClick={handleBookingSubmit}
-            disabled={!isFormValid || submitting}
-          >
-            {submitting ? "جاري الحجز..." : "تأكيد الحجز"}
+          <BookBtn onClick={goToStep3} disabled={!isFormValid || submitting}>
+            {shouldShowPaymentStep()
+              ? "التالي: الدفع"
+              : submitting
+              ? "جاري الحجز..."
+              : "تأكيد الحجز"}
           </BookBtn>
         </BottomBar>
       </>
@@ -969,7 +1173,6 @@ const Website = () => {
     <>
       <Phone>
         <PhoneInner>
-          {/* Header */}
           <HeaderRow>
             <Avatar src={doctor.avatar} alt="doctor" />
             <div>
@@ -991,7 +1194,6 @@ const Website = () => {
             </div>
           </HeaderRow>
 
-          {/* Rating */}
           <Card>
             <Section>
               <Row $gap={12} $align="flex-start">
@@ -1006,10 +1208,8 @@ const Website = () => {
                         );
 
                         if (fillPercentage === 1) {
-                          // Full star
                           return <StarFill key={i} width={20} height={20} />;
                         } else if (fillPercentage > 0) {
-                          // Partial star - you'll need to implement this component
                           return (
                             <div
                               key={i}
@@ -1037,7 +1237,6 @@ const Website = () => {
                             </div>
                           );
                         } else {
-                          // Empty star
                           return (
                             <BsStar
                               key={i}
@@ -1059,7 +1258,6 @@ const Website = () => {
             </Section>
           </Card>
 
-          {/* Tabs */}
           <TabsBar>
             {[
               "الحجز",
@@ -1074,7 +1272,6 @@ const Website = () => {
             ))}
           </TabsBar>
 
-          {/* Booking Card */}
           <Card>
             <SectionHeader>
               <Heading20>احجز موعدك اليوم</Heading20>
@@ -1082,7 +1279,6 @@ const Website = () => {
             </SectionHeader>
 
             <Section>
-              {/* Appointment Type */}
               <div>
                 <Label>تفاصيل الحجز</Label>
                 <SelectWrap>
@@ -1101,7 +1297,6 @@ const Website = () => {
 
               <Spacer16 />
 
-              {/* Location */}
               <div>
                 <Label>الموقع</Label>
                 <SelectWrap>
@@ -1117,7 +1312,6 @@ const Website = () => {
               </div>
               <Spacer16 />
 
-              {/* Patient Type */}
               <div>
                 <Label>نوع المراجع</Label>
                 <Toggle>
@@ -1140,7 +1334,6 @@ const Website = () => {
 
               <Spacer16 />
 
-              {/* Available Time Slots */}
               <div>
                 <Label>المواعيد المتاحة *</Label>
                 <AvailBlock>
@@ -1202,7 +1395,6 @@ const Website = () => {
                       );
                     })
                   )}
-                  {/* NEW: Only show button if there are more days to display */}
                   {visibleDays.length > 0 &&
                     visibleDays.length < allAvailableDays.length && (
                       <OutlineBtn type="button" onClick={handleShowMoreDays}>
