@@ -687,6 +687,7 @@ const Website = () => {
   const [activeLocation, setActiveLocation] = useState("");
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [reviewToggle, setReviewToggle] = useState(false);
   const [err, setErr] = useState("");
   const [visibleDays, setVisibleDays] = useState([]);
   const [bookingStep, setBookingStep] = useState(1);
@@ -1072,7 +1073,7 @@ ${
           <PhoneInner>
             <Card>
               <Section>
-                <BackBtn onClick={handleBackToPatientInfo}>← العودة</BackBtn>
+                <BackBtn onClick={handleBackToPatientInfo}>العودة→</BackBtn>
               </Section>
 
               <SectionHeader>
@@ -1321,37 +1322,38 @@ ${
               </LocationDiv>
             </div>
           </HeaderRow>
-
-          <Card>
-            <Section>
-              <Row $gap={12} $align="flex-start">
-                <Big>{doctor.rating.toFixed(2)}</Big>
-                <Grow>
-                  <KPI $mt={4} $size={0}>
-                    <Stars style={{ display: "flex", gap: "2px" }}>
-                      {Array.from({ length: 5 }).map((_, i) => {
-                        const fillPercentage = Math.min(
-                          Math.max(doctor.rating - i, 0),
-                          1
-                        );
-                        return (
-                          <StarReview
-                            key={i}
-                            fillPercentage={fillPercentage}
-                            size={20}
-                          />
-                        );
-                      })}
-                    </Stars>
-                  </KPI>
-                  <P $size={14}>{doctor.reviewHighlight}</P>
-                  <LinkText style={{ marginTop: 8 }}>
-                    عرض جميع التقييمات
-                  </LinkText>
-                </Grow>
-              </Row>
-            </Section>
-          </Card>
+          {reviewToggle ? (
+            <Card>
+              <Section>
+                <Row $gap={12} $align="flex-start">
+                  <Big>{doctor.rating.toFixed(2)}</Big>
+                  <Grow>
+                    <KPI $mt={4} $size={0}>
+                      <Stars style={{ display: "flex", gap: "2px" }}>
+                        {Array.from({ length: 5 }).map((_, i) => {
+                          const fillPercentage = Math.min(
+                            Math.max(doctor.rating - i, 0),
+                            1
+                          );
+                          return (
+                            <StarReview
+                              key={i}
+                              fillPercentage={fillPercentage}
+                              size={20}
+                            />
+                          );
+                        })}
+                      </Stars>
+                    </KPI>
+                    <P $size={14}>{doctor.reviewHighlight}</P>
+                    <LinkText style={{ marginTop: 8 }}>
+                      عرض جميع التقييمات
+                    </LinkText>
+                  </Grow>
+                </Row>
+              </Section>
+            </Card>
+          ) : null}
 
           <TabsBar>
             {[
