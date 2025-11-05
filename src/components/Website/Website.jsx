@@ -623,7 +623,7 @@ const SuccessMessage = styled.p`
 `;
 
 const SuccessBtn = styled.button`
-  background-color: #4caf50;
+  background-color: #f7e05e;
   color: white;
   padding: 12px 32px;
   font-size: 16px;
@@ -636,7 +636,7 @@ const SuccessBtn = styled.button`
   margin: 10px 0 0 0;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #ffdf2dff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
   }
