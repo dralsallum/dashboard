@@ -8,9 +8,14 @@ import { useParams } from "react-router-dom";
 import Location from "../../assets/location.png";
 
 /* ---------- حركة التحميل ---------- */
-const Spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+
+const Increase = keyframes`
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
 `;
 
 const LoadingWrapper = styled.div`
@@ -26,14 +31,23 @@ const LoadingWrapper = styled.div`
   min-height: 100dvh;
 `;
 
-const Gear = styled(Loader2)`
-  animation: ${Spin} 1.2s linear infinite;
-  width: 48px;
-  height: 48px;
+const LoadingBar = styled.div`
+  width: 200px;
+  height: 8px;
+  background-color: rgba(246, 224, 94, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
   margin-bottom: 12px;
-  color: #f6e05e;
+  position: relative;
 `;
 
+const LoadingBarFill = styled.div`
+  height: 100%;
+  background-color: #f6e05e;
+  border-radius: 4px;
+  animation: ${Increase} 3s ease-out forwards;
+  width: 0%;
+`;
 /* ---------- لوحة الألوان ---------- */
 const C = {
   cream: "#F7F2E6",
@@ -981,7 +995,9 @@ ${
   if (loading)
     return (
       <LoadingWrapper>
-        <Gear />
+        <LoadingBar>
+          <LoadingBarFill />
+        </LoadingBar>
         جاري التحميل…
       </LoadingWrapper>
     );
