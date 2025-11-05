@@ -988,9 +988,19 @@ ${
         alert("حدث خطأ أثناء الحجز. الرجاء المحاولة مرة أخرى.");
       }
     } finally {
-      setSubmitting(false);
+      setIsSuccess(true);
     }
   };
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    const timer = setTimeout(() => {
+      setIsSuccess(false);
+    }, 5000);
+
+    return () => clearTimeout(timer); // Cleanup
+  }, [isSuccess]);
 
   if (loading)
     return (
@@ -1004,16 +1014,18 @@ ${
 
   if (isSuccess)
     return (
-      <SuccessWrapper>
-        <SuccessIcon
-          src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
-          alt="Success"
-        />
-        <SuccessTitle>تم حجز موعدك بنجاح </SuccessTitle>
-        <SuccessMessage>
-          ستصلك رسالة تأكيد الموعد على بريدك الإلكتروني وواتساب قريبًا.
-        </SuccessMessage>
-      </SuccessWrapper>
+      <LoadingWrapper>
+        <SuccessWrapper>
+          <SuccessIcon
+            src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
+            alt="Success"
+          />
+          <SuccessTitle>تم حجز موعدك بنجاح </SuccessTitle>
+          <SuccessMessage>
+            ستصلك رسالة تأكيد الموعد على بريدك الإلكتروني وواتساب قريبًا.
+          </SuccessMessage>
+        </SuccessWrapper>
+      </LoadingWrapper>
     );
 
   if (err)
