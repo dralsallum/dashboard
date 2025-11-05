@@ -622,6 +622,36 @@ const SuccessMessage = styled.p`
   margin: 0;
 `;
 
+const SuccessBtn = styled.button`
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px 0 0 0;
+
+  &:hover {
+    background-color: #45a049;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+  }
+`;
+
 const StarReview = ({ fillPercentage = 0, size = 20 }) => {
   const starId = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -992,15 +1022,9 @@ ${
     }
   };
 
-  useEffect(() => {
-    if (!isSuccess) return;
-
-    const timer = setTimeout(() => {
-      setIsSuccess(false);
-    }, 5000);
-
-    return () => clearTimeout(timer); // Cleanup
-  }, [isSuccess]);
+  const handleSuccess = () => {
+    setIsSuccess(false);
+  };
 
   if (loading)
     return (
@@ -1024,6 +1048,7 @@ ${
           <SuccessMessage>
             ستصلك رسالة تأكيد الموعد على بريدك الإلكتروني وواتساب قريبًا.
           </SuccessMessage>
+          <SuccessBtn onClick={handleSuccess}>الرجوع للحجز</SuccessBtn>
         </SuccessWrapper>
       </LoadingWrapper>
     );
