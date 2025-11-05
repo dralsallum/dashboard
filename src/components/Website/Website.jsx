@@ -590,6 +590,10 @@ const LocImg = styled.img`
   padding: 0;
 `;
 
+const LocationSp = styled.span`
+  color: #000;
+`;
+
 const SuccessWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -1318,7 +1322,7 @@ ${
                 }}
               >
                 <LocImg src={Location} alt="" />
-                موقع العيادة
+                <span>موقع العيادة</span>
               </LocationDiv>
             </div>
           </HeaderRow>
