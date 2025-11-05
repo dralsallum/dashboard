@@ -529,8 +529,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { currentUser } = useSelector(userSelector);
 
-  const [isAdmin, setIsAdmin] = useState(true); // Toggle for demo
-
   // Admin configuration state
   const [workingDays, setWorkingDays] = useState({
     0: false, // Sunday
@@ -572,7 +570,7 @@ const Dashboard = () => {
     }
 
     return dates.slice(0, 5); // Show first 5 available days
-  }, [workingHours.startDay, workingHours.endDay, workingDays]);
+  }, [workingHours.startDay, workingHours.endDay]);
 
   useEffect(() => {
     if (currentUser) {
@@ -594,17 +592,45 @@ const Dashboard = () => {
 
       // Initialize working hours if available
       if (currentUser.appointmentSettings?.workingHours) {
-        // Extract start/end day from working hours
-        // This is a simplified version - you may need to adjust based on your exact data structure
-        setWorkingHours((prev) => ({
-          ...prev,
-          start:
-            currentUser.appointmentSettings.workingHours.monday?.slots?.[0]
-              ?.startTime || "09:00",
-          end:
-            currentUser.appointmentSettings.workingHours.monday?.slots?.[0]
-              ?.endTime || "17:00",
-        }));
+        // Find the first and last open days
+        const days = [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+        ];
+        const workingDaysSettings =
+          currentUser.appointmentSettings.workingHours;
+
+        let firstOpenDay = null;
+        let lastOpenDay = null;
+        let startTime = "09:00";
+        let endTime = "17:00";
+
+        days.forEach((day, index) => {
+          if (workingDaysSettings[day]?.isOpen) {
+            if (firstOpenDay === null) {
+              firstOpenDay = index;
+              // Get time from first open day
+              if (workingDaysSettings[day].slots?.[0]) {
+                startTime =
+                  workingDaysSettings[day].slots[0].startTime || "09:00";
+                endTime = workingDaysSettings[day].slots[0].endTime || "17:00";
+              }
+            }
+            lastOpenDay = index;
+          }
+        });
+
+        setWorkingHours({
+          start: startTime,
+          end: endTime,
+          startDay: firstOpenDay !== null ? String(firstOpenDay) : "0",
+          endDay: lastOpenDay !== null ? String(lastOpenDay) : "4",
+        });
       }
     }
   }, [currentUser]);
@@ -676,10 +702,23 @@ const Dashboard = () => {
         } catch (uploadError) {
           console.error("Image upload failed:", uploadError);
           alert("فشل رفع الصورة. سيتم حفظ التغييرات الأخرى.");
-          // Continue with the old image URL if upload fails
           uploadedImageUrl = profileImg;
         }
       }
+
+      // Helper function to check if a day is within working range
+      const isDayInWorkingRange = (dayIndex) => {
+        const startDay = parseInt(workingHours.startDay ?? 0);
+        const endDay = parseInt(workingHours.endDay ?? 6);
+
+        if (startDay <= endDay) {
+          // Normal range (e.g., Monday to Friday)
+          return dayIndex >= startDay && dayIndex <= endDay;
+        } else {
+          // Wrapped range (e.g., Friday to Tuesday)
+          return dayIndex >= startDay || dayIndex <= endDay;
+        }
+      };
 
       // Prepare the complete update data
       const updateData = {
@@ -694,46 +733,45 @@ const Dashboard = () => {
 
         // Appointment Settings
         appointmentSettings: {
-          // ... rest of your appointment settings
           workingHours: {
             sunday: {
-              isOpen: workingHours.startDay <= 0 && 0 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(0),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
             },
             monday: {
-              isOpen: workingHours.startDay <= 1 && 1 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(1),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
             },
             tuesday: {
-              isOpen: workingHours.startDay <= 2 && 2 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(2),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
             },
             wednesday: {
-              isOpen: workingHours.startDay <= 3 && 3 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(3),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
             },
             thursday: {
-              isOpen: workingHours.startDay <= 4 && 4 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(4),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
             },
             friday: {
-              isOpen: workingHours.startDay <= 5 && 5 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(5),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
             },
             saturday: {
-              isOpen: workingHours.startDay <= 6 && 6 <= workingHours.endDay,
+              isOpen: isDayInWorkingRange(6),
               slots: [
                 { startTime: workingHours.start, endTime: workingHours.end },
               ],
@@ -837,80 +875,6 @@ const Dashboard = () => {
 
   const businessId = currentUser?._id;
   const accessToken = currentUser?.accessToken;
-
-  const handleSaveWorkingHours = async () => {
-    if (!currentUser?._id) {
-      console.error("User ID not found");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      // Prepare the update data
-      const updateData = {
-        appointmentSettings: {
-          workingHours: {
-            sunday: {
-              isOpen: workingHours.startDay <= 0 && 0 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            monday: {
-              isOpen: workingHours.startDay <= 1 && 1 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            tuesday: {
-              isOpen: workingHours.startDay <= 2 && 2 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            wednesday: {
-              isOpen: workingHours.startDay <= 3 && 3 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            thursday: {
-              isOpen: workingHours.startDay <= 4 && 4 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            friday: {
-              isOpen: workingHours.startDay <= 5 && 5 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            saturday: {
-              isOpen: workingHours.startDay <= 6 && 6 <= workingHours.endDay,
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-          },
-        },
-      };
-
-      await dispatch(
-        updateBusinessProfile({
-          id: currentUser._id,
-          updateData,
-        })
-      ).unwrap();
-
-      console.log("Working hours updated successfully");
-    } catch (error) {
-      console.error("Failed to update working hours:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const onOrderClick = (quotaId) => {
     if (quotaId) {

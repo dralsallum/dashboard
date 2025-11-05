@@ -4255,6 +4255,7 @@ export const ButtonRedirect = styled.button`
   font-size: 16px;
   border-radius: 12px;
   cursor: pointer;
+  z-index: 999999;
   transition: background 0.3s ease;
   &:hover {
     background-color: #000;
@@ -4292,7 +4293,7 @@ export const MainTitle = styled.h1`
 `;
 
 export const SaveButton = styled.button`
-  background: #1d4ed8;
+  background: #000;
   color: white;
   border: none;
   border-radius: 8px;
