@@ -37,8 +37,11 @@ const LoadingBar = styled.div`
   background-color: rgba(246, 224, 94, 0.2);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 12px;
+
   position: relative;
+`;
+const LoadingSp = styled.span`
+  margin-bottom: 12px;
 `;
 
 const LoadingBarFill = styled.div`
@@ -806,7 +809,9 @@ const Website = () => {
 
         setDoctor(mapped);
         setActiveLocation(mapped.locationOptions[0]);
-
+        if (data.rating) {
+          setReviewToggle(true);
+        }
         const startDate = new Date();
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
@@ -1034,10 +1039,10 @@ ${
   if (loading)
     return (
       <LoadingWrapper>
+        <LoadingSp>جاري التحميل…</LoadingSp>
         <LoadingBar>
           <LoadingBarFill />
         </LoadingBar>
-        جاري التحميل…
       </LoadingWrapper>
     );
 
