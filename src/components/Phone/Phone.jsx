@@ -25,22 +25,21 @@ const Phone = () => {
 
   const articles = [
     {
-      text: "احجز موعدك في ثوانٍ",
-      subText:
-        "من الأطباء إلى صالونات التجميل والاستشارات، احجز موعدك بكل سهولة وفي أي وقت.",
-      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/appointment1.png",
+      text: "طور مستواك خطوة بخطوة",
+      subText: "احرص على تطوير مهاراتك في اللغة الإنجليزية بشكل تدريجي ومتقدم.",
+      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/educationDiet.png",
     },
     {
-      text: "كل خدماتك في مكان واحد",
+      text: "تعلم الإنجليزي بطريقة تفاعلية",
       subText:
-        "تصفح، اختر، واحجز من خلال منصة واحدة تجمع أفضل مقدمي الخدمات حولك.",
-      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/appointment2.png",
+        "استمتع بتجربة تعلم تفاعلية وفعالة تضمن لك التقدم السريع والملحوظ.",
+      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/start.png",
     },
     {
-      text: "بدون مكالمات أو انتظار",
+      text: "تعلم من القصص",
       subText:
-        "وفر وقتك واحجز مباشرة عبر التطبيق مع تأكيد فوري للمواعيد وإشعارات تذكير.",
-      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/appointment3.png",
+        "استمتع بقراءة القصص الممتعة وتعلم اللغة الإنجليزية من خلال السرد.",
+      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/report.png",
     },
   ];
 
@@ -81,12 +80,11 @@ const Phone = () => {
                 <br />
                 <ArSp>{article.subText}</ArSp>
               </ArPa>
-              <ArImg src={article.imgSrc} alt="عرض المواعيد" />
+              <ArImg src={article.imgSrc} alt="" />
             </ArCont>
           ))}
         </ArSub>
       </ArCon>
-
       <ButWr>
         <ButLe onClick={handlePrevious}>
           <ButSp>‹</ButSp>
@@ -95,7 +93,6 @@ const Phone = () => {
           <ButSp>›</ButSp>
         </ButRi>
       </ButWr>
-
       <DotWr>
         {articles.map((_, index) => (
           <DotLi
@@ -107,13 +104,12 @@ const Phone = () => {
           />
         ))}
       </DotWr>
-
       <AtWr>
         <AtAA href="">
-          <AtImg src={Appstore} alt="App Store" />
+          <AtImg src={Appstore} alt="" />
         </AtAA>
         <AtAA href="">
-          <AtImg src={Googlestore} alt="Google Play" />
+          <AtImg src={Googlestore} alt="" />
         </AtAA>
       </AtWr>
     </ArWra>
