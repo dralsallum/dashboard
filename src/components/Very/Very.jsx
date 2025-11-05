@@ -241,34 +241,36 @@ const Very = () => {
           <ContentSection>
             <LeftDiv>
               <MainHeading>
-                اكتشف خطتك الصحية
+                احجز موعدك
                 <br />
-                المصممة خصيصًا
-                <br />
-                لاجلك
+                بسهولة وسرعة
               </MainHeading>
 
               <SubText>
-                رشيق يجعل من السهل وبأسعار معقولة
+                منصتنا تجمع كل ما تحتاجه في مكان واحد —
                 <br />
-                تحقيق أهدافك الصحية مع خطة غذائية <br /> وشخصية عبر الإنترنت
+                لتحصل على موعدك بسعولة وبسرعة،
+                <br />
+                احجز موعدك في ثوانٍ الان
               </SubText>
 
               <ButtonContainer>
                 <ButtonSubContainer>
-                  <ButtonAt to={"/recommendation"}>هل أنا مشمول؟</ButtonAt>
+                  <ButtonAt to={"/recommendation"}>ابدأ الآن</ButtonAt>
                   <ArrowContainer></ArrowContainer>
                 </ButtonSubContainer>
               </ButtonContainer>
 
               <StatText>
                 <ArrowImg src={ArrowCurve} alt="" />
-                <ArrowPara>94% من مستخدمي رشيق يعربون عن رضاهم عنه !</ArrowPara>
+                <ArrowPara>
+                  ٩٤٪ من المستخدمين قالوا إن الحجز أصبح أسهل معهم!
+                </ArrowPara>
               </StatText>
             </LeftDiv>
           </ContentSection>
           <ImgContainer>
-            <ImageSection src={Header} alt="أخصائية تغذية" />
+            <ImageSection src={Header} alt="منصة حجز مواعيد" />
           </ImgContainer>
         </MaAll>
       </MaSec>

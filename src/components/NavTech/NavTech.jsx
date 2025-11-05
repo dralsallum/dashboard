@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo1.png";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/userRedux";
 
@@ -13,7 +13,6 @@ const Header = styled.header`
   align-items: center;
   padding: 1rem 2rem;
   background: #f8f6f2;
-  direction: rtl;
 
   @media (max-width: 768px) {
     padding: 1rem;
