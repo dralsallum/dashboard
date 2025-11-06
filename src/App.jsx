@@ -18,6 +18,7 @@ import Pay from "./pages/pay";
 import Quota from "./pages/Quota";
 import Upload from "./pages/Upload";
 import Appointment from "./pages/Appointment";
+import PostHog from "./pages/Posthog";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -28,6 +29,7 @@ const App = () => {
       <div style={{ width: "100%", overflow: "hidden" }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/desktop" element={<PostHog />} />
           <Route path="/test" element={<Test />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/login" element={<Login />} />
