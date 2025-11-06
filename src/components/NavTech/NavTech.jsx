@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo1.png";
+import logo from "../../assets/logoWa.png";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/userRedux";
 
