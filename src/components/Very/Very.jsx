@@ -10,7 +10,7 @@ const MaFirst = styled.div`
   font-family: "Tajawal", "Arial", sans-serif;
 
   @media screen and (max-width: 768px) {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 `;
 
