@@ -9,6 +9,10 @@ export const CategoryContainer = styled.div`
     "Helvetica Neue", Arial, sans-serif;
   direction: rtl;
   text-align: right;
+
+  @media (max-width: 768px) {
+    padding: 30px 20px;
+  }
 `;
 
 export const CategoryHeader = styled.div`
