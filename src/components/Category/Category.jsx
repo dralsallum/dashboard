@@ -42,18 +42,18 @@ const Category = () => {
 
   const specialties = [
     {
-      name: "الرعاية الأولية",
+      name: "طبيب اسرة",
       icon: PrimaryCare,
-      dir: "/reservation/primaryCare",
+      dir: "/reservation/طبيب اسرة",
     },
     { name: "طبيب أسنان", icon: Dentist, dir: "/reservation/dentist" },
     { name: "طبيب نساء وولادة", icon: ObGyn, dir: "/reservation/ObGyn" },
     {
       name: "طبيب جلدية",
       icon: Dermatologist,
-      dir: "/reservation/Dermatologist",
+      dir: "/reservation/طبيب جلدية",
     },
-    { name: "طبيب نفسي", icon: Psychiatrist, dir: "/reservation/Psychiatrist" },
+    { name: "طبيب نفسي", icon: Psychiatrist, dir: "/reservation/طبيب نفسي" },
     { name: "طبيب عيون", icon: EyeDoctor, dir: "/reservation/EyeDoctor" },
   ];
 

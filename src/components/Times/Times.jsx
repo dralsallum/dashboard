@@ -52,7 +52,7 @@ const Times = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const category = useParams();
+  const { major } = useParams();
 
   const handleNavigate = (dir) => {
     navigate(dir);
@@ -201,11 +201,17 @@ const Times = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          "https://theknot-30278e2ff419.herokuapp.com/api/business"
-        );
 
-        // Map backend data to frontend format
+        // Build URL with query parameter
+        const url = major
+          ? `https://theknot-30278e2ff419.herokuapp.com/api/business/category?major=${encodeURIComponent(
+              major
+            )}`
+          : "https://theknot-30278e2ff419.herokuapp.com/api/business/category";
+
+        const response = await axios.get(url);
+
+        // Map backend data to frontend format (no filtering needed)
         const mappedClinicians = mapCliniciansData(response.data);
         setClinicians(mappedClinicians);
       } catch (error) {
@@ -217,7 +223,7 @@ const Times = () => {
     };
 
     fetchData();
-  }, []);
+  }, [major]); // Re-fetch when major changes
 
   if (loading)
     return (
