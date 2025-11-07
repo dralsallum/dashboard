@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Very, Footer, NavTech, Phone, Article } from "../components";
+import { Very, Footer, NavTech, Phone, Article, Category } from "../components";
 
 const Home = () => {
   useEffect(() => {
@@ -9,6 +9,7 @@ const Home = () => {
     <>
       <NavTech />
       <Very />
+      <Category />
       <Article />
       <Phone />
       <Footer />

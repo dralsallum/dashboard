@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AdCon,
@@ -51,7 +50,86 @@ import {
   TmInLab,
   TmInSpan,
   TmInSubCon,
+  WaitingSp,
 } from "./Apply.elements";
+
+// Animated Counter Component
+const AnimatedCounter = ({ targetValue, duration = 1500 }) => {
+  const [displayValue, setDisplayValue] = useState(0); // Start from 0
+  const previousValueRef = useRef(0); // Start from 0
+  const animationFrameRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const isInitialMount = useRef(true); // Track initial mount
+
+  useEffect(() => {
+    const startValue = isInitialMount.current ? 0 : previousValueRef.current;
+    const difference = targetValue - startValue;
+
+    if (difference === 0) return;
+
+    const animate = (currentTime) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = currentTime;
+      }
+
+      const elapsed = currentTime - startTimeRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Easing function for smooth animation (easeOutQuad)
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const currentValue = Math.floor(startValue + difference * easedProgress);
+
+      setDisplayValue(currentValue);
+
+      if (progress < 1) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        previousValueRef.current = targetValue;
+        startTimeRef.current = null;
+        isInitialMount.current = false; // Mark as no longer initial mount
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [targetValue, duration]);
+
+  return <WaitingSp>{displayValue}</WaitingSp>;
+};
+
+// Loading Spinner Component
+const LoadingSpinner = () => (
+  <div
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+    }}
+  >
+    <div
+      style={{
+        width: "16px",
+        height: "16px",
+        border: "2px solid #ffffff40",
+        borderTop: "2px solid #ffffff",
+        borderRadius: "50%",
+        animation: "spin 1s linear infinite",
+      }}
+    />
+    <span>جاري الإرسال...</span>
+    <style>{`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+);
 
 const Apply = () => {
   const [isMasterOneVisible, setIsMasterOneVisible] = useState(true);
@@ -64,11 +142,13 @@ const Apply = () => {
   const [discipline, setDiscipline] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [otherSpecialty, setOtherSpecialty] = useState("");
-  const [salaryRange, setSalaryRange] = useState(""); // New state for salary range
+  const [salaryRange, setSalaryRange] = useState("");
   const [disciplineOptions, setDisciplineOptions] = useState([]);
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [waitingList, setWaitingList] = useState(1272);
+
   const navigate = useNavigate();
 
   const professionOptions = {
@@ -87,7 +167,6 @@ const Apply = () => {
     اعصاب: ["Stroke Care", "Epilepsy"],
   };
 
-  // Salary range options
   const salaryRanges = [
     "أقل من 5,000 ريال",
     "5,000 - 10,000 ريال",
@@ -96,6 +175,30 @@ const Apply = () => {
     "20,000 - 30,000 ريال",
     "أكثر من 30,000 ريال",
   ];
+
+  // Animated counter effect - increments by 13 every 2 seconds up to maximum of 1325
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setWaitingList((prev) => {
+        const newValue = prev + 8;
+        return newValue >= 1325 ? 1325 : newValue;
+      });
+    }, 4500);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    if (profession) {
+      setDisciplineOptions(professionOptions[profession] || []);
+    }
+  }, [profession]);
+
+  useEffect(() => {
+    if (discipline) {
+      setSpecialtyOptions(disciplineOptionsMapping[discipline] || []);
+    }
+  }, [discipline]);
 
   const submitApplication = async () => {
     setIsLoading(true);
@@ -108,11 +211,10 @@ const Apply = () => {
       discipline,
       specialty,
       otherSpecialty,
-      salaryRange, // Include salary range in submission
+      salaryRange,
     };
 
     try {
-      // Make the API call to submit the application
       const response = await fetch(
         "https://theknot-30278e2ff419.herokuapp.com/api/applies",
         {
@@ -128,13 +230,10 @@ const Apply = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Handle the response
       const result = await response.json();
       console.log(result);
-      // Maybe show a success message or redirect the user
       navigate("/");
     } catch (error) {
-      // Handle any errors
       console.error("There was a problem with the fetch operation:", error);
     } finally {
       setIsLoading(false);
@@ -154,30 +253,23 @@ const Apply = () => {
     if (emailError) setEmailError("");
   };
 
-  // Handle specialty selection with locking logic
   const handleSpecialtyChange = (e) => {
     const value = e.target.value;
     setSpecialty(value);
-
-    // If a main specialty is selected, clear other specialty
     if (value) {
       setOtherSpecialty("");
     }
   };
 
-  // Handle other specialty selection with locking logic
   const handleOtherSpecialtyChange = (e) => {
     const value = e.target.value;
     setOtherSpecialty(value);
-
-    // If other specialty is selected, clear main specialty
     if (value) {
       setSpecialty("");
     }
   };
 
   const validateEmail = (email) => {
-    // Regex for basic email validation
     return /\S+@\S+\.\S+/.test(email);
   };
 
@@ -186,348 +278,304 @@ const Apply = () => {
       setEmailError("Please enter a valid email.");
       return;
     }
-
     setIsMasterOneVisible(!isMasterOneVisible);
   };
 
-  useEffect(() => {
-    if (profession) {
-      setDisciplineOptions(professionOptions[profession] || []);
-    }
-  }, [profession]);
-
-  useEffect(() => {
-    if (discipline) {
-      setSpecialtyOptions(disciplineOptionsMapping[discipline] || []);
-    }
-  }, [discipline]);
-
-  // Loading spinner component
-  const LoadingSpinner = () => (
-    <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "8px",
-      }}
-    >
-      <div
-        style={{
-          width: "16px",
-          height: "16px",
-          border: "2px solid #ffffff40",
-          borderTop: "2px solid #ffffff",
-          borderRadius: "50%",
-          animation: "spin 1s linear infinite",
-        }}
-      />
-      <span>جاري الإرسال...</span>
-      <style jsx>{`
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
-    </div>
-  );
-
   return (
-    <>
-      <ApWrap>
-        <ApSubWrap>
-          <ApConOn>
-            <ApHe>حان الوقت للارتقاء بمستوى مهنتك إلى المستوى التالي</ApHe>
-            <ApHeBe>
-              بغض النظر عن المكان الذي ترغب في الذهاب إليه، لدينا فرص في مواقع
-              متعددة في جميع أنحاء البلاد
-            </ApHeBe>
-            <ApHeDi></ApHeDi>
-          </ApConOn>
-          <ApConTw>
-            <AqCon></AqCon>
-            <AqMain>
-              <AqSec>
-                <AqSubSec>
-                  <AqAra>
-                    <AqAraOne>
-                      <AqAraOnePa>
-                        خُذ الخطوة الأولى لبدء مسيرتك المهنية الجديدة
-                      </AqAraOnePa>
-                    </AqAraOne>
-                    <AqAraTwo>
-                      <ApFo onSubmit={(e) => e.preventDefault()}>
-                        <ApFoIn type="text" />
-                        <ApFoIn type="text" />
-                        <ApFoIn type="text" />
-                        <ApFoIn type="text" />
-                        <ApFoIn type="text" />
-                        <ApFoInput type="text" />
-                        <ApFoNo>
-                          <ApNo></ApNo>
-                        </ApFoNo>
-                        <AdCon>
-                          <AdConSec>
-                            {isMasterOneVisible && (
-                              <MasterOne>
-                                <TmCon>
-                                  <ConOn>
-                                    <svg></svg>
-                                  </ConOn>
-                                  <ConTo>
-                                    <svg></svg>
-                                  </ConTo>
-                                  <ConTh>
-                                    <svg></svg>
-                                  </ConTh>
-                                  <ConFo>
-                                    <svg></svg>
-                                  </ConFo>
-                                  <ConFi>
-                                    <svg></svg>
-                                  </ConFi>
-                                  <TmEq>
-                                    <TmInCon>
-                                      <TmInSubCon>
-                                        <TmInLab htmlFor="emailInput"></TmInLab>
-                                        <TmIn
-                                          id="emailInput"
-                                          type="email"
-                                          placeholder="ايميل *"
-                                          value={email}
-                                          onChange={handleEmailChange}
-                                        />
-                                        {emailError && (
-                                          <TmInSpan>{emailError}</TmInSpan>
-                                        )}
-                                      </TmInSubCon>
-                                    </TmInCon>
-                                    <TmBut onClick={handleButtonClick}>
-                                      ابدا
-                                    </TmBut>
-                                  </TmEq>
-                                  <a href=""></a>
-                                  <a href=""></a>
-                                  <a href=""></a>
-                                </TmCon>
-                              </MasterOne>
-                            )}
-                            {!isMasterOneVisible && (
-                              <MasterTwo>
-                                <HiWraOn>
-                                  <HiOnLa htmlFor="">ايميل *</HiOnLa>
-                                  <HiOnIn
-                                    id="email"
-                                    type="email"
-                                    placeholder="Email"
-                                    value={email}
-                                    onChange={(e) =>
-                                      handleInputChange(e, setEmail)
-                                    }
-                                    disabled={isLoading}
-                                  />
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiTwLa htmlFor="">رقم الجوال *</HiTwLa>
-                                  <HiOnIn
-                                    id="phone"
-                                    type="text"
-                                    placeholder="رقم الجوال"
-                                    value={phone}
-                                    onChange={(e) =>
-                                      handleInputChange(e, setPhone)
-                                    }
-                                    disabled={isLoading}
-                                  />
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiTwLa htmlFor="">الاسم الاول *</HiTwLa>
-                                  <HiOnIn
-                                    id="firstName"
-                                    type="text"
-                                    placeholder="الاسم الاول"
-                                    value={firstName}
-                                    onChange={(e) =>
-                                      handleInputChange(e, setFirstName)
-                                    }
-                                    disabled={isLoading}
-                                  />
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiTwLa htmlFor="">اسم العائلة *</HiTwLa>
-                                  <HiOnIn
-                                    id="LastName"
-                                    type="text"
-                                    placeholder="اسم العائلة"
-                                    value={lastName}
-                                    onChange={(e) =>
-                                      handleInputChange(e, setLastName)
-                                    }
-                                    disabled={isLoading}
-                                  />
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiFiLa>المهنة *</HiFiLa>
-                                  <HiFiSel
-                                    id="profession"
-                                    value={profession}
-                                    onChange={(e) =>
-                                      handleSelectChange(e, setProfession)
-                                    }
-                                    disabled={isLoading}
-                                  >
-                                    <HiFiOp value="">-- اختر المهنة --</HiFiOp>
-                                    {Object.keys(professionOptions).map(
-                                      (key) => (
-                                        <HiFiOp key={key} value={key}>
-                                          {key}
-                                        </HiFiOp>
-                                      )
-                                    )}
-                                  </HiFiSel>
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiFiLa>الشهادة *</HiFiLa>
-                                  <HiFiSel
-                                    id="discipline"
-                                    value={discipline}
-                                    onChange={(e) =>
-                                      handleSelectChange(e, setDiscipline)
-                                    }
-                                    disabled={!profession || isLoading}
-                                  >
-                                    <HiFiOp value="">-- اختر الشهادة --</HiFiOp>
-                                    {disciplineOptions.map((option) => (
-                                      <HiFiOp key={option} value={option}>
-                                        {option}
-                                      </HiFiOp>
-                                    ))}
-                                  </HiFiSel>
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiFiLa>التخصص *</HiFiLa>
-                                  <HiFiSel
-                                    id="specialty"
-                                    value={specialty}
-                                    onChange={handleSpecialtyChange}
-                                    disabled={
-                                      !discipline ||
-                                      isLoading ||
-                                      otherSpecialty !== ""
-                                    }
-                                  >
-                                    <HiFiOp value="">-- اختر التخصص --</HiFiOp>
-                                    {specialtyOptions.map((option) => (
-                                      <HiFiOp key={option} value={option}>
-                                        {option}
-                                      </HiFiOp>
-                                    ))}
-                                  </HiFiSel>
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiFiLa>تخصصات اخرى *</HiFiLa>
-                                  <HiFiSel
-                                    id="otherSpecialty"
-                                    value={otherSpecialty}
-                                    onChange={handleOtherSpecialtyChange}
-                                    disabled={isLoading || specialty !== ""}
-                                  >
-                                    <HiFiOp value="">-- تخصصات اخرى --</HiFiOp>
-                                    <HiFiOp value="nursing">تمريض</HiFiOp>
-                                    <HiFiOp value="allies">استقبال</HiFiOp>
-                                    <HiFiOp value="physician">طبيب</HiFiOp>
-                                    <HiFiOp value="leadership">اداري</HiFiOp>
-                                    <HiFiOp value="dentist">طبيب اسنان</HiFiOp>
-                                    <HiFiOp value="language">فني</HiFiOp>
-                                  </HiFiSel>
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiFiLa>النطاق المرتب المطلوب *</HiFiLa>
-                                  <HiFiSel
-                                    id="salaryRange"
-                                    value={salaryRange}
-                                    onChange={(e) =>
-                                      handleSelectChange(e, setSalaryRange)
-                                    }
-                                    disabled={isLoading}
-                                  >
-                                    <HiFiOp value="">
-                                      -- اختر النطاق المرتبي --
+    <ApWrap>
+      <ApSubWrap>
+        <ApConOn>
+          <ApHe>
+            <span>
+              {" "}
+              <AnimatedCounter targetValue={waitingList} />
+            </span>
+            <span> مسجل في قائمة الانتظار</span>
+          </ApHe>
+          <ApHeBe>
+            شريكك التقني الذي يساعدك على النمو والوصول إلى أكبر عدد ممكن من
+            العملاء في أي مكان
+          </ApHeBe>
+          <ApHeDi></ApHeDi>
+        </ApConOn>
+        <ApConTw>
+          <AqCon></AqCon>
+          <AqMain>
+            <AqSec>
+              <AqSubSec>
+                <AqAra>
+                  <AqAraOne>
+                    <AqAraOnePa>
+                      عبّر عن اهتمامك وانضم إلى قائمة الانتظار
+                    </AqAraOnePa>
+                  </AqAraOne>
+                  <AqAraTwo>
+                    <ApFo onSubmit={(e) => e.preventDefault()}>
+                      <ApFoIn type="text" />
+                      <ApFoIn type="text" />
+                      <ApFoIn type="text" />
+                      <ApFoIn type="text" />
+                      <ApFoIn type="text" />
+                      <ApFoInput type="text" />
+                      <ApFoNo>
+                        <ApNo></ApNo>
+                      </ApFoNo>
+                      <AdCon>
+                        <AdConSec>
+                          {isMasterOneVisible && (
+                            <MasterOne>
+                              <TmCon>
+                                <ConOn>
+                                  <svg></svg>
+                                </ConOn>
+                                <ConTo>
+                                  <svg></svg>
+                                </ConTo>
+                                <ConTh>
+                                  <svg></svg>
+                                </ConTh>
+                                <ConFo>
+                                  <svg></svg>
+                                </ConFo>
+                                <ConFi>
+                                  <svg></svg>
+                                </ConFi>
+                                <TmEq>
+                                  <TmInCon>
+                                    <TmInSubCon>
+                                      <TmInLab htmlFor="emailInput"></TmInLab>
+                                      <TmIn
+                                        id="emailInput"
+                                        type="email"
+                                        placeholder="ايميل *"
+                                        value={email}
+                                        onChange={handleEmailChange}
+                                      />
+                                      {emailError && (
+                                        <TmInSpan>{emailError}</TmInSpan>
+                                      )}
+                                    </TmInSubCon>
+                                  </TmInCon>
+                                  <TmBut onClick={handleButtonClick}>
+                                    ابدا
+                                  </TmBut>
+                                </TmEq>
+                                <a href=""></a>
+                                <a href=""></a>
+                                <a href=""></a>
+                              </TmCon>
+                            </MasterOne>
+                          )}
+                          {!isMasterOneVisible && (
+                            <MasterTwo>
+                              <HiWraOn>
+                                <HiOnLa htmlFor="">ايميل *</HiOnLa>
+                                <HiOnIn
+                                  id="email"
+                                  type="email"
+                                  placeholder="Email"
+                                  value={email}
+                                  onChange={(e) =>
+                                    handleInputChange(e, setEmail)
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiTwLa htmlFor="">رقم الجوال *</HiTwLa>
+                                <HiOnIn
+                                  id="phone"
+                                  type="text"
+                                  placeholder="رقم الجوال"
+                                  value={phone}
+                                  onChange={(e) =>
+                                    handleInputChange(e, setPhone)
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiTwLa htmlFor="">الاسم الاول *</HiTwLa>
+                                <HiOnIn
+                                  id="firstName"
+                                  type="text"
+                                  placeholder="الاسم الاول"
+                                  value={firstName}
+                                  onChange={(e) =>
+                                    handleInputChange(e, setFirstName)
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiTwLa htmlFor="">اسم العائلة *</HiTwLa>
+                                <HiOnIn
+                                  id="LastName"
+                                  type="text"
+                                  placeholder="اسم العائلة"
+                                  value={lastName}
+                                  onChange={(e) =>
+                                    handleInputChange(e, setLastName)
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiFiLa>المهنة *</HiFiLa>
+                                <HiFiSel
+                                  id="profession"
+                                  value={profession}
+                                  onChange={(e) =>
+                                    handleSelectChange(e, setProfession)
+                                  }
+                                  disabled={isLoading}
+                                >
+                                  <HiFiOp value="">-- اختر المهنة --</HiFiOp>
+                                  {Object.keys(professionOptions).map((key) => (
+                                    <HiFiOp key={key} value={key}>
+                                      {key}
                                     </HiFiOp>
-                                    {salaryRanges.map((range, index) => (
-                                      <HiFiOp key={index} value={range}>
-                                        {range}
-                                      </HiFiOp>
-                                    ))}
-                                  </HiFiSel>
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <HiTwLa htmlFor="">السيرة *</HiTwLa>
-                                  <HiOnIn
-                                    id="resume"
-                                    type="file"
-                                    placeholder="resume"
-                                    onChange={(e) => setFile(e.target.files[0])}
-                                    disabled={isLoading}
-                                  />
-                                  <HiOnSp></HiOnSp>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <AgCon>
-                                    <AgPa>* حقول اجبارية</AgPa>
-                                    <AgPa></AgPa>
-                                    <AgPa>
-                                      "أوافق على استلام البريد الإلكتروني،
-                                      والرسائل النصية الآلية والمكالمات الهاتفية
-                                      (بما في ذلك المكالمات التي تحتوي على محتوى
-                                      مُسجل مُسبقًا) من ونيابةً عن اللميديكال،
-                                      والشركات التابعة لها."
-                                      <a href="">اريني المزيد</a>
-                                    </AgPa>
-                                  </AgCon>
-                                </HiWraOn>
-                                <HiWraOn>
-                                  <AgBut
-                                    type="button"
-                                    onClick={submitApplication}
-                                    disabled={isLoading}
-                                    style={{
-                                      opacity: isLoading ? 0.7 : 1,
-                                      cursor: isLoading
-                                        ? "not-allowed"
-                                        : "pointer",
-                                    }}
-                                  >
-                                    {isLoading ? <LoadingSpinner /> : "ارسال!"}
-                                  </AgBut>
-                                </HiWraOn>
-                              </MasterTwo>
-                            )}
-                          </AdConSec>
-                        </AdCon>
-                      </ApFo>
-                    </AqAraTwo>
-                  </AqAra>
-                </AqSubSec>
-              </AqSec>
-            </AqMain>
-            <AqSubCon></AqSubCon>
-          </ApConTw>
-        </ApSubWrap>
-      </ApWrap>
-    </>
+                                  ))}
+                                </HiFiSel>
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiFiLa>الشهادة *</HiFiLa>
+                                <HiFiSel
+                                  id="discipline"
+                                  value={discipline}
+                                  onChange={(e) =>
+                                    handleSelectChange(e, setDiscipline)
+                                  }
+                                  disabled={!profession || isLoading}
+                                >
+                                  <HiFiOp value="">-- اختر الشهادة --</HiFiOp>
+                                  {disciplineOptions.map((option) => (
+                                    <HiFiOp key={option} value={option}>
+                                      {option}
+                                    </HiFiOp>
+                                  ))}
+                                </HiFiSel>
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiFiLa>التخصص *</HiFiLa>
+                                <HiFiSel
+                                  id="specialty"
+                                  value={specialty}
+                                  onChange={handleSpecialtyChange}
+                                  disabled={
+                                    !discipline ||
+                                    isLoading ||
+                                    otherSpecialty !== ""
+                                  }
+                                >
+                                  <HiFiOp value="">-- اختر التخصص --</HiFiOp>
+                                  {specialtyOptions.map((option) => (
+                                    <HiFiOp key={option} value={option}>
+                                      {option}
+                                    </HiFiOp>
+                                  ))}
+                                </HiFiSel>
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiFiLa>تخصصات اخرى *</HiFiLa>
+                                <HiFiSel
+                                  id="otherSpecialty"
+                                  value={otherSpecialty}
+                                  onChange={handleOtherSpecialtyChange}
+                                  disabled={isLoading || specialty !== ""}
+                                >
+                                  <HiFiOp value="">-- تخصصات اخرى --</HiFiOp>
+                                  <HiFiOp value="nursing">تمريض</HiFiOp>
+                                  <HiFiOp value="allies">استقبال</HiFiOp>
+                                  <HiFiOp value="physician">طبيب</HiFiOp>
+                                  <HiFiOp value="leadership">اداري</HiFiOp>
+                                  <HiFiOp value="dentist">طبيب اسنان</HiFiOp>
+                                  <HiFiOp value="language">فني</HiFiOp>
+                                </HiFiSel>
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiFiLa>النطاق المرتب المطلوب *</HiFiLa>
+                                <HiFiSel
+                                  id="salaryRange"
+                                  value={salaryRange}
+                                  onChange={(e) =>
+                                    handleSelectChange(e, setSalaryRange)
+                                  }
+                                  disabled={isLoading}
+                                >
+                                  <HiFiOp value="">
+                                    -- اختر النطاق المرتبي --
+                                  </HiFiOp>
+                                  {salaryRanges.map((range, index) => (
+                                    <HiFiOp key={index} value={range}>
+                                      {range}
+                                    </HiFiOp>
+                                  ))}
+                                </HiFiSel>
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiTwLa htmlFor="">السيرة *</HiTwLa>
+                                <HiOnIn
+                                  id="resume"
+                                  type="file"
+                                  placeholder="resume"
+                                  onChange={(e) => setFile(e.target.files[0])}
+                                  disabled={isLoading}
+                                />
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <AgCon>
+                                  <AgPa>* حقول اجبارية</AgPa>
+                                  <AgPa></AgPa>
+                                  <AgPa>
+                                    "أوافق على استلام البريد الإلكتروني،
+                                    والرسائل النصية الآلية والمكالمات الهاتفية
+                                    (بما في ذلك المكالمات التي تحتوي على محتوى
+                                    مُسجل مُسبقًا) من ونيابةً عن اللميديكال،
+                                    والشركات التابعة لها."
+                                    <a href="">اريني المزيد</a>
+                                  </AgPa>
+                                </AgCon>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <AgBut
+                                  type="button"
+                                  onClick={submitApplication}
+                                  disabled={isLoading}
+                                  style={{
+                                    opacity: isLoading ? 0.7 : 1,
+                                    cursor: isLoading
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  }}
+                                >
+                                  {isLoading ? <LoadingSpinner /> : "ارسال!"}
+                                </AgBut>
+                              </HiWraOn>
+                            </MasterTwo>
+                          )}
+                        </AdConSec>
+                      </AdCon>
+                    </ApFo>
+                  </AqAraTwo>
+                </AqAra>
+              </AqSubSec>
+            </AqSec>
+          </AqMain>
+          <AqSubCon></AqSubCon>
+        </ApConTw>
+      </ApSubWrap>
+    </ApWrap>
   );
 };
 

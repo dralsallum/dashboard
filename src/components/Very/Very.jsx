@@ -70,6 +70,7 @@ const SubText = styled.p`
     text-align: center;
     padding-left: 0;
     font-size: 1.25rem;
+    margin-bottom: 1rem;
   }
 `;
 
@@ -101,7 +102,7 @@ const ButtonAt = styled(Link)`
   color: #fff;
   text-align: center;
   white-space: nowrap;
-  background-color: #fe6a36;
+  background-color: #fecc04ff;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-family: "Tajawal", "Arial", sans-serif;
@@ -112,7 +113,6 @@ const ButtonAt = styled(Link)`
   cursor: pointer;
   font-weight: 800;
 
-  /* keep text white even when the link is hovered, focused, active, or visited */
   &:hover,
   &:focus,
   &:active,
@@ -247,7 +247,7 @@ const Very = () => {
               </MainHeading>
 
               <SubText>
-                منصتنا تجمع كل ما تحتاجه في مكان واحد —
+                منصتنا تجمع كل ما تحتاجه في مكان واحد
                 <br />
                 لتحصل على موعدك بسعولة وبسرعة،
                 <br />

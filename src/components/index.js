@@ -23,3 +23,4 @@ export { default as QuotaDetail } from "./QuotaDetail/QuotaDetail";
 export { default as Apply } from "./Apply/Apply";
 export { default as Website } from "./Website/Website";
 export { default as Desktop } from "./Desktop/Desktop";
+export { default as Category } from "./Category/Category";

@@ -42,7 +42,7 @@ export const ApConTw = styled.div`
 export const ApHe = styled.h1`
   font-size: 38px;
   line-height: 38px;
-  color: #ff7043;
+  color: #fcc605;
   font-family: Raleway;
   font-size: 40px;
   font-weight: 700;
@@ -50,7 +50,7 @@ export const ApHe = styled.h1`
   margin-bottom: 15px;
   text-align: center;
   @media screen and (max-width: 768px) {
-    color: #ff7043;
+    color: #fcc605;
     font-family: Raleway;
     font-size: 26px;
     font-weight: 700;
@@ -290,7 +290,7 @@ export const TmCon = styled.div`
   }
 `;
 export const TmBut = styled.button`
-  background-color: #ff7043;
+  background-color: #fcc605;
   border-radius: 8px;
   color: rgba(255, 255, 255);
   display: inline-block;
@@ -444,7 +444,7 @@ export const HiWraOn = styled.div`
 `;
 export const HiOnLa = styled.label`
   background-color: #fff;
-  color: #ff7043;
+  color: #fcc605;
   font-size: 14px;
   top: -12px;
   font-family: Helvetica Now Text Regular;
@@ -508,7 +508,7 @@ export const HiOnSp = styled.span`
 `;
 export const HiFiLa = styled.label`
   background-color: #fff;
-  color: #ff7043;
+  color: #fcc605;
   font-size: 14px;
   top: -12px;
   left: 10px;
@@ -603,7 +603,7 @@ export const AgBut = styled.button`
   cursor: pointer;
   overflow: visible;
   width: 100%;
-  background-color: #ff7043;
+  background-color: #fcc605;
   @media screen and (max-width: 768px) {
   }
 `;
@@ -613,5 +613,13 @@ export const MasterOne = styled.div`
 `;
 export const MasterTwo = styled.div`
   @media screen and (max-width: 768px) {
+  }
+`;
+export const WaitingSp = styled.span`
+  font-weight: 600;
+  font-size: 52px;
+  color: #000;
+  @media screen and (max-width: 768px) {
+    font-size: 40px;
   }
 `;

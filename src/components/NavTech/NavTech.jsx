@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo1.png";
+import logo from "../../assets/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/userRedux";
 
@@ -30,12 +30,12 @@ const Logo = styled(Link)`
 `;
 
 const LogoImage = styled.img`
-  width: 200px;
+  width: 150px;
   height: auto;
   margin-right: 0.5rem;
   background-color: #f8f6f1;
   @media (max-width: 768px) {
-    width: 150px;
+    width: 120px;
   }
 `;
 
@@ -59,7 +59,7 @@ const NavLinkStyled = styled(Link)`
 `;
 
 const SubscribeButton = styled(Link)`
-  background: #ff7143;
+  background: #fece04;
   color: #fff;
   padding: 0.6rem 1.2rem;
   border-radius: 999px;
@@ -90,7 +90,7 @@ const MenuButton = styled.button`
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #ff7143;
+    background: #fece04;
     color: #fff;
     border: none;
     width: 48px;
