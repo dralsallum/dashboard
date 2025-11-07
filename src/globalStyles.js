@@ -143,7 +143,7 @@ export const MobileText = styled.div`
 
 export const Button = styled.button`
   border-radius: 4px;
-  background: #ff7143;
+  background: #fff0bb;
   white-space: nowrap;
   padding: 10px 15px;
   color: #fff;
@@ -155,7 +155,7 @@ export const Button = styled.button`
   &:hover {
     transition: all 0.3s ease-out;
     background: #fff;
-    background: #ff7143;
+    background: #fff0bb;
   }
 
   @media screen and (max-width: 960px) {
