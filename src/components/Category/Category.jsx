@@ -41,12 +41,20 @@ const Category = () => {
   ];
 
   const specialties = [
-    { name: "الرعاية الأولية", icon: PrimaryCare, dir: "/upload" },
-    { name: "طبيب أسنان", icon: Dentist, dir: "/admin" },
-    { name: "طبيب نساء وولادة", icon: ObGyn, dir: "/" },
-    { name: "طبيب جلدية", icon: Dermatologist, dir: "/" },
-    { name: "طبيب نفسي", icon: Psychiatrist, dir: "/" },
-    { name: "طبيب عيون", icon: EyeDoctor, dir: "/" },
+    {
+      name: "الرعاية الأولية",
+      icon: PrimaryCare,
+      dir: "/reservation/primaryCare",
+    },
+    { name: "طبيب أسنان", icon: Dentist, dir: "/reservation/dentist" },
+    { name: "طبيب نساء وولادة", icon: ObGyn, dir: "/reservation/ObGyn" },
+    {
+      name: "طبيب جلدية",
+      icon: Dermatologist,
+      dir: "/reservation/Dermatologist",
+    },
+    { name: "طبيب نفسي", icon: Psychiatrist, dir: "/reservation/Psychiatrist" },
+    { name: "طبيب عيون", icon: EyeDoctor, dir: "/reservation/EyeDoctor" },
   ];
 
   const handleNavigate = (nav) => navigate(nav);
