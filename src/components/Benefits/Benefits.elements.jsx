@@ -77,8 +77,8 @@ export const BenefitCard = styled.div`
 `;
 
 export const IconWrapper = styled.div`
-  width: 180px;
-  height: 180px;
+  width: 220px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,8 +88,8 @@ export const IconWrapper = styled.div`
   transform: translateX(-50%);
 
   @media screen and (max-width: 480px) {
-    width: 140px;
-    height: 140px;
+    width: 180px;
+    height: 180px;
     top: -50px;
   }
 `;
