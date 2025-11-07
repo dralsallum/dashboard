@@ -1,5 +1,12 @@
 import React, { useEffect } from "react";
-import { Very, Footer, NavTech, Phone, Article, Category } from "../components";
+import {
+  Very,
+  Footer,
+  NavTech,
+  Phone,
+  Category,
+  Benefits,
+} from "../components";
 
 const Home = () => {
   useEffect(() => {
@@ -10,7 +17,7 @@ const Home = () => {
       <NavTech />
       <Very />
       <Category />
-      <Article />
+      <Benefits />
       <Phone />
       <Footer />
     </>
