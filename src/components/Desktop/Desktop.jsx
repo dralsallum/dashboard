@@ -2,7 +2,7 @@ import React from "react";
 import Html from "../../assets/page.png";
 import styled from "styled-components";
 import Animals from "../../assets/fun.png";
-import Ask from "../../assets/Ask.png";
+import Ask from "../../assets/ask.png";
 import Folder from "../../assets/folder.png";
 import Calculator from "../../assets/cal.png";
 import Demo from "../../assets/demo.png";
