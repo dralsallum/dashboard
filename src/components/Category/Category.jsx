@@ -41,12 +41,12 @@ const Category = () => {
   ];
 
   const specialties = [
-    { name: "الرعاية الأولية", icon: PrimaryCare },
-    { name: "طبيب أسنان", icon: Dentist },
-    { name: "طبيب نساء وولادة", icon: ObGyn },
-    { name: "طبيب جلدية", icon: Dermatologist },
-    { name: "طبيب نفسي", icon: Psychiatrist },
-    { name: "طبيب عيون", icon: EyeDoctor },
+    { name: "الرعاية الأولية", icon: PrimaryCare, dir: "/upload" },
+    { name: "طبيب أسنان", icon: Dentist, dir: "/admin" },
+    { name: "طبيب نساء وولادة", icon: ObGyn, dir: "/" },
+    { name: "طبيب جلدية", icon: Dermatologist, dir: "/" },
+    { name: "طبيب نفسي", icon: Psychiatrist, dir: "/" },
+    { name: "طبيب عيون", icon: EyeDoctor, dir: "/" },
   ];
 
   const handleNavigate = (nav) => navigate(nav);
@@ -57,7 +57,10 @@ const Category = () => {
         <SpecialtiesTitle>التخصصات الأكثر بحثاً</SpecialtiesTitle>
         <SpecialtiesGrid>
           {specialties.map((specialty, index) => (
-            <SpecialtyCard key={index}>
+            <SpecialtyCard
+              key={index}
+              onClick={() => handleNavigate(specialty.dir)}
+            >
               <SpecialtyIcon src={specialty.icon} alt={specialty.name} />
               <SpecialtyName>{specialty.name}</SpecialtyName>
             </SpecialtyCard>
