@@ -19,6 +19,7 @@ import Quota from "./pages/Quota";
 import Upload from "./pages/Upload";
 import Appointment from "./pages/Appointment";
 import PostHog from "./pages/Posthog";
+import Reservation from "./pages/Reservation";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -30,6 +31,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/desktop" element={<PostHog />} />
+          <Route path="/reservation/:category" element={<Reservation />} />
           <Route path="/test" element={<Test />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/login" element={<Login />} />
