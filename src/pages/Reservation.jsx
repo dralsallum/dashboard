@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavTech, Times } from "../components";
+import { Footer, NavTech, Times } from "../components";
 
 const Reservation = () => {
   useEffect(() => {
@@ -9,6 +9,7 @@ const Reservation = () => {
     <>
       <NavTech />
       <Times />
+      <Footer />
     </>
   );
 };
