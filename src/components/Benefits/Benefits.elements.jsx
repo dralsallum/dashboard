@@ -43,7 +43,7 @@ export const BenefitsGrid = styled.div`
 
   @media screen and (max-width: 968px) {
     grid-template-columns: 1fr;
-    gap: 80px;
+    gap: 90px;
   }
 `;
 
@@ -66,7 +66,7 @@ export const BenefitCard = styled.div`
   }
 
   @media screen and (max-width: 480px) {
-    padding: 100px 20px 28px 20px;
+    padding: 120px 24px 32px 24px;
     min-height: 280px;
     border-radius: 12px;
   }
