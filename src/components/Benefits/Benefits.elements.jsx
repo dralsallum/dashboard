@@ -2,14 +2,14 @@ import styled from "styled-components";
 
 export const BenefitsContainer = styled.section`
   background: linear-gradient(180deg, #fff0bb 0%, #fffaed 100%);
-  padding: 40px 16px 40px;
+  padding: 60px 16px 40px;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 
   @media screen and (max-width: 480px) {
-    padding: 40px 16px 30px;
+    padding: 60px 16px 30px;
     min-height: auto;
   }
 `;
@@ -25,13 +25,13 @@ export const BenefitsHeading = styled.h1`
   font-weight: 600;
   text-align: center;
   color: #2c2c2c;
-  margin-bottom: 80px;
+  margin-bottom: 100px;
   direction: rtl;
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
 
   @media screen and (max-width: 768px) {
     font-size: 1.75rem;
-    margin-bottom: 60px;
+    margin-bottom: 80px;
     line-height: 1.4;
   }
 `;
@@ -44,10 +44,6 @@ export const BenefitsGrid = styled.div`
   @media screen and (max-width: 968px) {
     grid-template-columns: 1fr;
     gap: 80px;
-  }
-
-  @media screen and (max-width: 480px) {
-    gap: 70px;
   }
 `;
 
@@ -83,14 +79,14 @@ export const IconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: -60px;
+  top: -100px;
   left: 50%;
   transform: translateX(-50%);
 
   @media screen and (max-width: 480px) {
     width: 180px;
     height: 180px;
-    top: -50px;
+    top: -70px;
   }
 `;
 
