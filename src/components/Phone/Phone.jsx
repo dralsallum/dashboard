@@ -19,27 +19,29 @@ import {
 } from "./Phone.elements";
 import Appstore from "../../assets/appstore.png";
 import Googlestore from "../../assets/googlePlay.png";
+import Reserve from "../../assets/reserve.png";
+import Booking from "../../assets/booking.png";
+import Select from "../../assets/select.png";
 
 const Phone = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const articles = [
     {
-      text: "طور مستواك خطوة بخطوة",
-      subText: "احرص على تطوير مهاراتك في اللغة الإنجليزية بشكل تدريجي ومتقدم.",
-      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/educationDiet.png",
+      text: "احجز موعدك فورًا من مزوّد الخدمة",
+      subText: "اختر التخصص والوقت المناسب، واستلم تأكيد الحجز مباشرة.",
+      imgSrc: Reserve,
     },
     {
-      text: "تعلم الإنجليزي بطريقة تفاعلية",
+      text: "إدارة المواعيد بسهولة",
       subText:
-        "استمتع بتجربة تعلم تفاعلية وفعالة تضمن لك التقدم السريع والملحوظ.",
-      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/start.png",
+        "عدّل أو ألغِ الموعد بضغطة واحدة وتلقَّ تذكيرات تلقائية قبل الزيارة.",
+      imgSrc: Booking,
     },
     {
-      text: "تعلم من القصص",
-      subText:
-        "استمتع بقراءة القصص الممتعة وتعلم اللغة الإنجليزية من خلال السرد.",
-      imgSrc: "https://alsallum.s3.eu-north-1.amazonaws.com/report.png",
+      text: "اختر المزود المناسب لك",
+      subText: "قارن التقييمات والأسعار والتوافر قبل تأكيد الحجز.",
+      imgSrc: Select,
     },
   ];
 
@@ -61,7 +63,6 @@ const Phone = () => {
     const interval = setInterval(() => {
       handleNext();
     }, 2500);
-
     return () => clearInterval(interval);
   }, [currentIndex]);
 
@@ -85,6 +86,7 @@ const Phone = () => {
           ))}
         </ArSub>
       </ArCon>
+
       <ButWr>
         <ButLe onClick={handlePrevious}>
           <ButSp>‹</ButSp>
@@ -93,6 +95,7 @@ const Phone = () => {
           <ButSp>›</ButSp>
         </ButRi>
       </ButWr>
+
       <DotWr>
         {articles.map((_, index) => (
           <DotLi
@@ -104,6 +107,7 @@ const Phone = () => {
           />
         ))}
       </DotWr>
+
       <AtWr>
         <AtAA href="">
           <AtImg src={Appstore} alt="" />
