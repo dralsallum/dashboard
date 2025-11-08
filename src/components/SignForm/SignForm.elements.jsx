@@ -55,7 +55,7 @@ export const LoginSignInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #ff5826;
+    border-color: #fecc01;
   }
 `;
 
@@ -63,7 +63,8 @@ export const SignButton = styled.button`
   margin-top: 0.5rem;
   padding: 0.75rem;
   font-size: 1rem;
-  background-color: #ff7143;
+  font-weight: 600;
+  background-color: #fecc01;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -71,7 +72,7 @@ export const SignButton = styled.button`
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background-color: #ff5826;
+    background-color: #fecc01;
   }
   &:disabled {
     opacity: 0.6;
@@ -79,22 +80,22 @@ export const SignButton = styled.button`
   }
 
   &:focus {
-    background-color: #ff5826;
-    border: 2px solid #ff5826;
+    background-color: #fecc01;
+    border: 2px solid #fecc01;
     outline: none;
   }
 `;
 
 export const RegistarButton = styled(SignButton)`
   background: transparent;
-  color: #ff5826;
-  border: 1px solid #ff5826;
+  color: #fecc01;
+  border: 1px solid #fecc01;
   margin-top: 1rem;
 
   &:hover:not(:disabled) {
-    background: #ff5826;
+    background: #fecc01;
     color: #fff;
-    border: 1px solid #ff5826;
+    border: 1px solid #fecc01;
   }
 `;
 
@@ -102,7 +103,7 @@ export const Loader = styled.div`
   width: 20px;
   height: 20px;
   border: 3px solid #e0e0e0;
-  border-top-color: #ff5826;
+  border-top-color: #fecc01;
   border-radius: 50%;
   animation: ${spin} 1s linear infinite;
   margin: 0 auto;
@@ -125,7 +126,7 @@ export const LoginSignPara = styled.p`
   text-align: center;
 
   a {
-    color: #ff5826;
+    color: #fecc01;
     text-decoration: underline;
   }
 `;

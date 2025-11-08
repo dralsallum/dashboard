@@ -25,9 +25,10 @@ export const LoginContainer = styled.div`
 
 export const LoginSignHeader = styled.h1`
   font-size: 1.75rem;
-  color: #ff5826;
+  color: #fecc01;
   text-align: center;
   margin-bottom: 1.5rem;
+  font-weight: 600;
 `;
 
 export const LoginSignSubHeader = styled.label`
@@ -49,7 +50,7 @@ export const LoginSignInput = styled.input`
   color: #000;
   &:focus {
     outline: none;
-    border-color: #ff5826;
+    border-color: #fecc01;
     box-shadow: 0 0 0 2px rgba(41, 70, 182, 0.2);
   }
 `;
@@ -69,14 +70,14 @@ export const SignButton = styled.button`
   width: 100%;
   padding: 0.75rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #fff;
-  background-color: #ff5826;
+  background-color: #fecc01;
   border: none;
   border-radius: 6px;
   transition: background-color 0.2s, transform 0.1s;
   &:hover:not(:disabled) {
-    background-color: #ff5826;
+    background-color: #fecc01;
     transform: translateY(-1px);
     cursor: pointer;
   }
@@ -91,24 +92,24 @@ export const RegistarButton = styled.button`
   width: 100%;
   padding: 0.6rem;
   font-size: 0.95rem;
-  font-weight: 500;
-  color: #ff5826;
+  font-weight: 600;
+  color: #fecc01;
   background-color: transparent;
-  border: 2px solid #ff5826;
+  border: 2px solid #fecc01;
   border-radius: 6px;
   transition: background-color 0.2s, color 0.2s, transform 0.1s;
 
   &:hover {
-    background-color: #ff5826;
+    background-color: #fecc01;
     color: #fff;
     transform: translateY(-1px);
     cursor: pointer;
-    border: 2px solid #ff5826;
+    border: 2px solid #fecc01;
   }
 
   &:focus {
-    background-color: #ff5826;
-    border: 2px solid #ff5826;
+    background-color: #fecc01;
+    border: 2px solid #fecc01;
     outline: none;
   }
 `;
@@ -140,11 +141,12 @@ export const LoginSignPara = styled.p`
   line-height: 1.4;
   margin: 1.5rem 0 0.5rem;
   text-align: center;
+  font-weight: 600;
   a {
-    color: #ff5826;
+    color: #fecc01;
     text-decoration: underline;
     &:hover {
-      color: #ff5826;
+      color: #fecc01;
     }
   }
 `;
@@ -153,7 +155,8 @@ export const StyledLink = styled(Link)`
   display: block;
   text-align: center;
   font-size: 0.85rem;
-  color: #ff5826;
+  font-weight: 600;
+  color: #fecc01;
   margin-top: 0.5rem;
   &:hover {
     text-decoration: underline;
