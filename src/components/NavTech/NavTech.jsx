@@ -363,7 +363,7 @@ const BrowseModalOverlay = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 0rem;
     align-items: center;
   }
 `;
