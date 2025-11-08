@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Very,
   Footer,
@@ -9,14 +9,16 @@ import {
 } from "../components";
 
 const Home = () => {
+  const categoryRef = useRef(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   return (
     <>
       <NavTech />
-      <Very />
-      <Category />
+      <Very categoryRef={categoryRef} />
+      <Category ref={categoryRef} />
       <Benefits />
       <Phone />
       <Footer />

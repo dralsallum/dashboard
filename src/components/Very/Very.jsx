@@ -233,10 +233,13 @@ const ImageSection = styled.img`
   }
 `;
 
-const Very = () => {
-  const handleLocation = () => {
-    window.scrollTo(0, 0);
+const Very = ({ categoryRef }) => {
+  // Add categoryRef as prop
+  const handleLocation = (e) => {
+    e.preventDefault(); // Prevent Link navigation
+    categoryRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
   return (
     <MaFirst>
       <MaSec>
@@ -259,7 +262,9 @@ const Very = () => {
 
               <ButtonContainer>
                 <ButtonSubContainer>
-                  <ButtonAt onClick={handleLocation}>ابدأ الآن</ButtonAt>
+                  <ButtonAt as="button" onClick={handleLocation}>
+                    ابدأ الآن
+                  </ButtonAt>
                   <ArrowContainer></ArrowContainer>
                 </ButtonSubContainer>
               </ButtonContainer>

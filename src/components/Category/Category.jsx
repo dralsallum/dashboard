@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import {
   CategoryContainer,
   CategoryHeader,
@@ -30,7 +30,7 @@ import CignaLogo from "../../assets/cigna.png";
 
 import { useNavigate } from "react-router-dom";
 
-const Category = () => {
+const Category = forwardRef((props, ref) => {
   const navigate = useNavigate();
   const insuranceProviders = [
     { name: "أيتنا", logo: AetnaLogo },
@@ -60,7 +60,7 @@ const Category = () => {
   const handleNavigate = (nav) => navigate(nav);
 
   return (
-    <CategoryContainer>
+    <CategoryContainer ref={ref}>
       <SpecialtiesSection>
         <SpecialtiesTitle>التخصصات الأكثر بحثاً</SpecialtiesTitle>
         <SpecialtiesGrid>
@@ -97,6 +97,6 @@ const Category = () => {
       </InsuranceSection>
     </CategoryContainer>
   );
-};
+});
 
 export default Category;
