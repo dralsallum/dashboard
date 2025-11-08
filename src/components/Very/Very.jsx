@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Header from "../../assets/make.jpg";
 import ArrowCurve from "../../assets/arrowCurve.png";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const MaFirst = styled.div`
   background: #fff;
@@ -234,9 +235,19 @@ const ImageSection = styled.img`
 `;
 
 const Very = ({ categoryRef }) => {
+  const [shouldScroll, setShouldScroll] = useState(false);
+
+  // Handle the scroll with useEffect
+  useEffect(() => {
+    if (shouldScroll && categoryRef.current) {
+      categoryRef.current.scrollIntoView({ behavior: "smooth" });
+      setShouldScroll(false); // Clear immediately after triggering
+    }
+  }, [shouldScroll, categoryRef]);
+
   const handleLocation = (e) => {
     e.preventDefault();
-    categoryRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShouldScroll(true); // Trigger the scroll
   };
 
   return (
