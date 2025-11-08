@@ -102,7 +102,7 @@ const Phone = () => {
             key={index}
             onClick={() => handleDotClick(index)}
             style={{
-              background: currentIndex === index ? "#ff7143" : "#d6d6ea",
+              background: currentIndex === index ? "#f4df5f" : "#d6d6ea",
             }}
           />
         ))}
