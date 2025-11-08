@@ -28,7 +28,7 @@ import CignaLogo from "../../assets/cigna.png";
 
 import { useNavigate } from "react-router-dom";
 
-const Category = forwardRef((ref) => {
+const Category = forwardRef((props, ref) => {
   const navigate = useNavigate();
   const insuranceProviders = [
     { name: "أيتنا", logo: AetnaLogo },
