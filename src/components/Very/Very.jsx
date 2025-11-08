@@ -234,9 +234,8 @@ const ImageSection = styled.img`
 `;
 
 const Very = ({ categoryRef }) => {
-  // Add categoryRef as prop
   const handleLocation = (e) => {
-    e.preventDefault(); // Prevent Link navigation
+    e.preventDefault();
     categoryRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 

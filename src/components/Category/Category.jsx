@@ -23,14 +23,12 @@ import ObGyn from "../../assets/obgyn.png";
 import Dermatologist from "../../assets/dermatologist.png";
 import Psychiatrist from "../../assets/psychiatrist.png";
 import EyeDoctor from "../../assets/eyeDoctor.png";
-
-// Import insurance logos
 import AetnaLogo from "../../assets/aetna.png";
 import CignaLogo from "../../assets/cigna.png";
 
 import { useNavigate } from "react-router-dom";
 
-const Category = forwardRef((props, ref) => {
+const Category = forwardRef((ref) => {
   const navigate = useNavigate();
   const insuranceProviders = [
     { name: "أيتنا", logo: AetnaLogo },
