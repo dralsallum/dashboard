@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Container,
   ContentSection,
@@ -8,17 +8,12 @@ import {
   ProvidersCount,
   DateRange,
   ArrowBtn,
-  CareTypeSection,
-  CareTypeTitle,
-  CategoriesList,
-  CategoryBtn,
   ProvidersList,
   ProviderCard,
   ProviderInfo,
   ProviderAvatar,
   AvatarImage,
   AvatarPlaceholder,
-  VideoBadge,
   ProviderDetails,
   ProviderHeader,
   ProviderName,
@@ -35,9 +30,6 @@ import {
   DateLabel,
   SlotsCount,
   MoreBtn,
-  MapSection,
-  ExpandMapBtn,
-  MapPlaceholder,
   LoadingWrapper,
   LoadingSp,
   LoadingBar,
@@ -52,11 +44,35 @@ const Times = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const { major } = useParams();
+  const loadingBarRef = useRef(null);
 
   const handleNavigate = (dir) => {
     navigate(dir);
   };
+
+  // Loading animation effect
+  useEffect(() => {
+    if (loading) {
+      setLoadingProgress(0);
+      const duration = 3000; // 3 seconds
+      const startTime = Date.now();
+
+      const animateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min((elapsed / duration) * 100, 100);
+
+        setLoadingProgress(progress);
+
+        if (progress < 100 && loading) {
+          requestAnimationFrame(animateProgress);
+        }
+      };
+
+      requestAnimationFrame(animateProgress);
+    }
+  }, [loading]);
 
   // Helper function to generate availability slots for the next 14 days
   const generateAvailabilitySlots = (workingHours, holidays = []) => {
@@ -230,7 +246,10 @@ const Times = () => {
       <LoadingWrapper>
         <LoadingSp>جاري التحميل…</LoadingSp>
         <LoadingBar>
-          <LoadingBarFill />
+          <LoadingBarFill
+            ref={loadingBarRef}
+            style={{ width: `${loadingProgress}%` }}
+          />
         </LoadingBar>
       </LoadingWrapper>
     );
@@ -248,6 +267,15 @@ const Times = () => {
   return (
     <Container>
       <ContentSection>
+        <HeaderSection>
+          <ProvidersCount>{clinicians.length} مقدمي خدمة</ProvidersCount>
+          <DateRange>
+            <ArrowBtn>‹</ArrowBtn>
+            <span>اليوم، نوفمبر 7 - الخميس، نوفمبر 20</span>
+            <ArrowBtn>›</ArrowBtn>
+          </DateRange>
+        </HeaderSection>
+
         <FiltersBar>
           <FilterBtn $active>
             <span>📅</span> أنا مرن
@@ -259,31 +287,6 @@ const Times = () => {
           <FilterBtn>حضوري/فيديو</FilterBtn>
           <FilterBtn>المزيد من الفلاتر</FilterBtn>
         </FiltersBar>
-
-        <HeaderSection>
-          <ProvidersCount>{clinicians.length} مقدمي خدمة</ProvidersCount>
-          <DateRange>
-            <ArrowBtn>‹</ArrowBtn>
-            <span>اليوم، نوفمبر 7 - الخميس، نوفمبر 20</span>
-            <ArrowBtn>›</ArrowBtn>
-          </DateRange>
-        </HeaderSection>
-
-        <CareTypeSection>
-          <CareTypeTitle>ما نوع الرعاية التي تحتاجها؟</CareTypeTitle>
-          <CategoriesList>
-            {categories.map((category, index) => (
-              <CategoryBtn
-                key={index}
-                $selected={selectedCategory === category}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </CategoryBtn>
-            ))}
-            <CategoryBtn $arrow>‹</CategoryBtn>
-          </CategoriesList>
-        </CareTypeSection>
 
         <ProvidersList>
           {clinicians.map((provider) => (
@@ -377,7 +380,7 @@ const Times = () => {
                   ))}
                 </AvailabilityRow>
 
-                <AvailabilityRow>
+                <AvailabilityRow className="second-row">
                   {provider.secondRow.map((slot, idx) => (
                     <AvailabilitySlot
                       key={idx}
@@ -406,20 +409,13 @@ const Times = () => {
                       </SlotsCount>
                     </AvailabilitySlot>
                   ))}
-                  <MoreBtn>المزيد</MoreBtn>
+                  <MoreBtn className="more-btn">المزيد</MoreBtn>
                 </AvailabilityRow>
               </AvailabilityGrid>
             </ProviderCard>
           ))}
         </ProvidersList>
       </ContentSection>
-
-      <MapSection>
-        <ExpandMapBtn>توسيع الخريطة ›</ExpandMapBtn>
-        <MapPlaceholder>
-          <span>📍</span>
-        </MapPlaceholder>
-      </MapSection>
     </Container>
   );
 };

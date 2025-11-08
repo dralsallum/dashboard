@@ -234,6 +234,9 @@ const ImageSection = styled.img`
 `;
 
 const Very = () => {
+  const handleLocation = () => {
+    window.scrollTo(0, 0);
+  };
   return (
     <MaFirst>
       <MaSec>
@@ -256,7 +259,7 @@ const Very = () => {
 
               <ButtonContainer>
                 <ButtonSubContainer>
-                  <ButtonAt to={"/recommendation"}>ابدأ الآن</ButtonAt>
+                  <ButtonAt onClick={handleLocation}>ابدأ الآن</ButtonAt>
                   <ArrowContainer></ArrowContainer>
                 </ButtonSubContainer>
               </ButtonContainer>

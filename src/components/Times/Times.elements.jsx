@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
 export const Container = styled.div`
   display: flex;
@@ -15,7 +15,8 @@ export const ContentSection = styled.div`
   max-width: 1400px;
 
   @media (max-width: 768px) {
-    padding: 15px 20px;
+    padding: 0px;
+    overflow-x: hidden;
   }
 `;
 
@@ -25,6 +26,31 @@ export const FiltersBar = styled.div`
   gap: 10px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 16px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+
+    /* Hide scrollbar for cleaner look */
+    scrollbar-width: thin;
+    scrollbar-color: #d0d0d0 transparent;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #d0d0d0;
+      border-radius: 2px;
+    }
+  }
 `;
 
 export const FilterBtn = styled.button`
@@ -50,6 +76,10 @@ export const FilterBtn = styled.button`
   span {
     font-size: 14px;
   }
+
+  @media (max-width: 768px) {
+    flex-shrink: 0;
+  }
 `;
 
 /* Header Section */
@@ -60,9 +90,7 @@ export const HeaderSection = styled.div`
   margin-bottom: 24px;
 
   @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    display: none;
   }
 `;
 
@@ -98,6 +126,10 @@ export const ArrowBtn = styled.button`
 /* Care Type Section */
 export const CareTypeSection = styled.div`
   margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    padding: 0 16px;
+  }
 `;
 
 export const CareTypeTitle = styled.h3`
@@ -135,6 +167,10 @@ export const ProvidersList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
 `;
 
 export const ProviderCard = styled.div`
@@ -154,6 +190,12 @@ export const ProviderCard = styled.div`
   @media (max-width: 1400px) {
     flex-direction: column;
     gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+    margin: 0 8px;
+    border-radius: 8px;
   }
 `;
 
@@ -177,6 +219,11 @@ export const ProviderAvatar = styled.div`
   flex-shrink: 0;
   width: 64px;
   height: 64px;
+
+  @media (max-width: 768px) {
+    width: 56px;
+    height: 56px;
+  }
 `;
 
 export const AvatarImage = styled.img`
@@ -191,6 +238,11 @@ export const AvatarPlaceholder = styled.div`
   height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  @media (max-width: 768px) {
+    width: 56px;
+    height: 56px;
+  }
 `;
 
 export const VideoBadge = styled.span`
@@ -222,6 +274,10 @@ export const ProviderName = styled.h2`
   font-weight: 600;
   margin: 0;
   color: #1a1a1a;
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
 `;
 
 export const SponsoredBadge = styled.span`
@@ -240,6 +296,10 @@ export const ProviderSpecialty = styled.p`
   font-size: 14px;
   color: #333;
   margin: 0 0 10px 0;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
 `;
 
 export const ProviderMeta = styled.div`
@@ -263,6 +323,14 @@ export const Rating = styled.div`
   .reviews {
     color: #666;
   }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+
+    span:first-child {
+      font-size: 13px;
+    }
+  }
 `;
 
 export const MetaItem = styled.div`
@@ -274,6 +342,14 @@ export const MetaItem = styled.div`
 
   span {
     font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+
+    span {
+      font-size: 13px;
+    }
   }
 `;
 
@@ -292,6 +368,10 @@ export const Badge = styled.span`
     content: " · ";
     margin-right: 6px;
   }
+
+  @media (max-width: 768px) {
+    font-size: 11px;
+  }
 `;
 
 /* Availability Grid */
@@ -301,16 +381,45 @@ export const AvailabilityGrid = styled.div`
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    overflow: hidden;
+  }
 `;
 
 export const AvailabilityRow = styled.div`
   display: flex;
   gap: 6px;
 
+  &.second-row {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
   @media (max-width: 768px) {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+
+    /* Hide scrollbar for cleaner look */
+    scrollbar-width: thin;
+    scrollbar-color: #d0d0d0 transparent;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #d0d0d0;
+      border-radius: 2px;
+    }
   }
 `;
 
@@ -339,7 +448,9 @@ export const AvailabilitySlot = styled.div`
 
   @media (max-width: 768px) {
     min-width: 70px;
+    max-width: 85px;
     font-size: 10px;
+    flex-shrink: 0;
   }
 `;
 
@@ -361,6 +472,12 @@ export const SlotsCount = styled.div`
     font-size: 15px;
     font-weight: 600;
   }
+
+  @media (max-width: 768px) {
+    strong {
+      font-size: 14px;
+    }
+  }
 `;
 
 export const MoreBtn = styled.button`
@@ -378,6 +495,13 @@ export const MoreBtn = styled.button`
   &:hover {
     background-color: #f5f5f5;
     border-color: #999;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 70px;
+    max-width: 85px;
+    font-size: 12px;
+    flex-shrink: 0;
   }
 `;
 
@@ -442,15 +566,6 @@ export const MapPlaceholder = styled.div`
   }
 `;
 
-export const Increase = keyframes`
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
-`;
-
 export const LoadingWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -470,9 +585,9 @@ export const LoadingBar = styled.div`
   background-color: rgba(246, 224, 94, 0.2);
   border-radius: 4px;
   overflow: hidden;
-
   position: relative;
 `;
+
 export const LoadingSp = styled.span`
   margin-bottom: 12px;
 `;
@@ -481,6 +596,6 @@ export const LoadingBarFill = styled.div`
   height: 100%;
   background-color: #f6e05e;
   border-radius: 4px;
-  animation: ${Increase} 3s ease-out forwards;
   width: 0%;
+  transition: width 0.1s ease-out;
 `;
