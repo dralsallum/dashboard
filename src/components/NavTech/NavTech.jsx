@@ -763,7 +763,7 @@ const NavTech = () => {
                       {specialty.name}
                     </SpecialtyLink>
                   ))}
-                  <SeeMoreLink to="/specialties" onClick={toggleBrowse}>
+                  <SeeMoreLink to="/" onClick={toggleBrowse}>
                     عرض المزيد من التخصصات
                   </SeeMoreLink>
                 </SpecialtiesGrid>
