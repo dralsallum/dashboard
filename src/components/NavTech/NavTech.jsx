@@ -363,8 +363,8 @@ const BrowseModalOverlay = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 0;
-    align-items: flex-end;
+    padding: 1rem;
+    align-items: center;
   }
 `;
 
@@ -411,28 +411,29 @@ const BrowseModalContent = styled.div`
   }
 
   @media (max-width: 768px) {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 24px 24px 0 0;
+    width: calc(100% - 2rem);
+    max-width: 500px;
+    border-radius: 16px;
     padding: 2rem 1.5rem 2.5rem;
-    max-height: 90vh;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
-    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 80vh;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
-    @keyframes slideUp {
+    @keyframes popIn {
       from {
         opacity: 0;
-        transform: translateY(100%);
+        transform: scale(0.9);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
       }
     }
   }
 
   @media (max-width: 480px) {
     padding: 1.75rem 1.25rem 2rem;
+    width: calc(100% - 2rem);
   }
 `;
 
