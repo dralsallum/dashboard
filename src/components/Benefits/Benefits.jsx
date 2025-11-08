@@ -11,7 +11,7 @@ import {
   DoctorIcon,
   CalendarIcon,
 } from "./Benefits.elements";
-import DocFir from "../../assets/docFir.svg";
+import DocFir from "../../assets/docFir.png";
 import DocSec from "../../assets/docSec.svg";
 import DocThi from "../../assets/docThi.svg";
 
