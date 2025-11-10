@@ -20,6 +20,7 @@ import Upload from "./pages/Upload";
 import Appointment from "./pages/Appointment";
 import PostHog from "./pages/Posthog";
 import Reservation from "./pages/Reservation";
+import Support from "./pages/Support";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/desktop" element={<PostHog />} />
           <Route path="/reservation/:major" element={<Reservation />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/login" element={<Login />} />
           <Route

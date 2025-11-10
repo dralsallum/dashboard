@@ -711,7 +711,7 @@ const NavTech = () => {
 
         <NavLinks>
           <BrowseButton onClick={toggleBrowse}>تصفّح</BrowseButton>
-          <NavLinkStyled to="/">المساعدة</NavLinkStyled>
+          <NavLinkStyled to="/support">المساعدة</NavLinkStyled>
           <NavLinkStyled to="/upload">أضف عيادتك على منصة وقتنا</NavLinkStyled>
           <NavLinkStyled to="/">جميع العيادات</NavLinkStyled>
         </NavLinks>
