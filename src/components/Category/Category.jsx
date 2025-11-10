@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import {
   CategoryContainer,
   CategoryHeader,
@@ -16,6 +16,7 @@ import {
   SpecialtyCard,
   SpecialtyIcon,
   SpecialtyName,
+  InsuranceNone,
 } from "./Category.elements";
 import PrimaryCare from "../../assets/primaryCare.png";
 import Dentist from "../../assets/dentist.png";
@@ -73,26 +74,28 @@ const Category = forwardRef((props, ref) => {
           ))}
         </SpecialtiesGrid>
       </SpecialtiesSection>
-      <CategoryHeader>
-        <CategoryTitle>
-          ابحث عن طبيب ضمن شبكة التأمين من بين أكثر من 1000 خطة تأمينية
-        </CategoryTitle>
-        <CategorySubtitle>
-          أضف تأمينك لمشاهدة أطباء الرعاية الأولية ضمن الشبكة
-        </CategorySubtitle>
-      </CategoryHeader>
+      <InsuranceNone>
+        <CategoryHeader>
+          <CategoryTitle>
+            ابحث عن طبيب ضمن شبكة التأمين من بين أكثر من 1000 خطة تأمينية
+          </CategoryTitle>
+          <CategorySubtitle>
+            أضف تأمينك لمشاهدة أطباء الرعاية الأولية ضمن الشبكة
+          </CategorySubtitle>
+        </CategoryHeader>
 
-      <InsuranceSection>
-        <InsuranceGrid>
-          {insuranceProviders.map((provider, index) => (
-            <InsuranceCard key={index}>
-              <InsuranceLogo src={provider.logo} alt={provider.name} />
-            </InsuranceCard>
-          ))}
-          <SeeAllLink>عرض الكل (1,000+)</SeeAllLink>
-        </InsuranceGrid>
-        <AddInsuranceButton>أضف تغطيتك التأمينية</AddInsuranceButton>
-      </InsuranceSection>
+        <InsuranceSection>
+          <InsuranceGrid>
+            {insuranceProviders.map((provider, index) => (
+              <InsuranceCard key={index}>
+                <InsuranceLogo src={provider.logo} alt={provider.name} />
+              </InsuranceCard>
+            ))}
+            <SeeAllLink>عرض الكل (1,000+)</SeeAllLink>
+          </InsuranceGrid>
+          <AddInsuranceButton>أضف تغطيتك التأمينية</AddInsuranceButton>
+        </InsuranceSection>
+      </InsuranceNone>
     </CategoryContainer>
   );
 });

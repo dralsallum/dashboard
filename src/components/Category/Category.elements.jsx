@@ -40,6 +40,10 @@ export const CategorySubtitle = styled.p`
 
 export const InsuranceSection = styled.div``;
 
+export const InsuranceNone = styled.div`
+  display: none;
+`;
+
 export const InsuranceGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
