@@ -740,7 +740,7 @@ const FaqContainer = styled.div`
 `;
 
 const FaqTitle = styled.h1`
-  font-size: 36px;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 40px;
   color: #1a1a1a;
