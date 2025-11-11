@@ -6,6 +6,8 @@ import { publicRequest } from "../../requestMethods";
 import { Loader2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import Location from "../../assets/location.png";
+import AetnaLogo from "../../assets/aetna.png";
+import CignaLogo from "../../assets/cigna.png";
 
 /* ---------- حركة التحميل ---------- */
 
@@ -218,6 +220,10 @@ const TabBtn = styled.button`
     bottom: -1px;
     height: 2px;
     background: ${(p) => (p.$active ? C.ink900 : "transparent")};
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
 
@@ -659,6 +665,373 @@ const SuccessBtn = styled.button`
   }
 `;
 
+const CardTitle = styled.h2`
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0 0 24px 0;
+  color: #1a1a1a;
+`;
+
+const InsuranceList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+`;
+
+const InsuranceItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const InsuranceLogo = styled.img`
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+`;
+
+const InsuranceName = styled.span`
+  font-size: 20px;
+  font-weight: 400;
+  color: #1a1a1a;
+`;
+
+const CardPad = styled.div`
+  padding: 1rem;
+`;
+
+const SeeMoreLink = styled.a`
+  display: inline-block;
+  font-size: 16px;
+  color: #1a1a1a;
+  text-decoration: underline;
+  margin: 24px 0;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+  }
+`;
+
+const CheckCoverageButton = styled.button`
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: white;
+  border: 1.5px solid #1a1a1a;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
+const FaqContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  direction: rtl;
+`;
+
+const FaqTitle = styled.h1`
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  color: #1a1a1a;
+`;
+
+const FaqItem = styled.div`
+  margin-bottom: 40px;
+`;
+
+const FaqQuestion = styled.h2`
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1a1a1a;
+  line-height: 1.4;
+`;
+
+const FaqAnswer = styled.p`
+  font-size: 18px;
+  line-height: 1.6;
+  color: #4a4a4a;
+  margin: 0;
+`;
+
+const DocExpertiseContainer = styled.div`
+  padding: 40px 24px;
+  background-color: #ffffff;
+  min-height: 100vh;
+`;
+
+const DocExpertiseTitle = styled.h1`
+  font-size: 36px;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+`;
+
+const DocExpertiseDescription = styled.p`
+  font-size: 18px;
+  line-height: 1.6;
+  color: #333333;
+  margin-bottom: 40px;
+  font-weight: 300;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+`;
+
+const DocExpertiseInfoIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: #4285f4;
+  color: white;
+  border-radius: 50%;
+  font-size: 14px;
+  margin-left: 8px;
+  cursor: pointer;
+
+  &::before {
+    content: "i";
+    font-style: italic;
+    font-weight: bold;
+  }
+`;
+
+const DocExpertiseList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+`;
+
+const DocExpertiseItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:first-child {
+    padding-top: 0;
+  }
+`;
+
+const DocExpertiseCheckmark = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 20px;
+  color: #666666;
+  font-size: 20px;
+
+  &::before {
+    content: "✓";
+  }
+`;
+
+const DocExpertiseItemText = styled.span`
+  font-size: 20px;
+  color: #1a1a1a;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+`;
+
+const ReviewCard = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  direction: rtl;
+  font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+`;
+
+const ReviewTitle = styled.h2`
+  font-size: 32px;
+  font-weight: 400;
+  color: #5f6368;
+  margin: 0 0 16px 0;
+`;
+
+const ReviewSubtitle = styled.p`
+  font-size: 16px;
+  color: #5f6368;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+`;
+
+const ReviewMetricsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #e0e0e0;
+`;
+
+const ReviewMetricSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const ReviewMetricLabel = styled.h3`
+  font-size: 18px;
+  font-weight: 500;
+  color: #202124;
+  margin: 0 0 12px 0;
+`;
+
+const ReviewRatingLarge = styled.div`
+  font-size: 46px;
+  font-weight: 300;
+  color: #202124;
+  margin: 0 0 8px 0;
+  line-height: 1;
+`;
+
+const ReviewStarsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 8px;
+`;
+
+const ReviewStar = styled.span`
+  color: ${(props) => (props.filled ? "#fbbc04" : "#e0e0e0")};
+  font-size: 20px;
+`;
+
+const ReviewRatingText = styled.span`
+  font-size: 22px;
+  font-weight: 400;
+  color: #202124;
+  margin-right: 8px;
+`;
+
+const ReviewTrustNote = styled.div`
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #5f6368;
+  line-height: 1.6;
+  margin-bottom: 24px;
+`;
+
+const ReviewLink = styled.a`
+  color: #1a73e8;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: #1557b0;
+  }
+`;
+
+const ReviewControlsContainer = styled.div`
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+`;
+
+const ReviewSelect = styled.select`
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  color: #202124;
+  cursor: pointer;
+  min-width: 150px;
+  direction: rtl;
+
+  &:focus {
+    outline: none;
+    border-color: #1a73e8;
+  }
+`;
+
+const ReviewSearchContainer = styled.div`
+  flex: 1;
+  position: relative;
+`;
+
+const ReviewSearchIcon = styled.span`
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5f6368;
+  font-size: 20px;
+`;
+
+const ReviewSearchInput = styled.input`
+  width: 100%;
+  padding: 12px 48px 12px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+  direction: rtl;
+  background: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: #1a73e8;
+  }
+
+  &::placeholder {
+    color: #9aa0a6;
+  }
+`;
+
+const ReviewItemContainer = styled.div`
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ReviewItemStars = styled.div`
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+`;
+
+const ReviewItemStar = styled.span`
+  color: ${(props) => (props.filled ? "#fbbc04" : "#e0e0e0")};
+  font-size: 20px;
+`;
+
+const ReviewItemMeta = styled.div`
+  font-size: 14px;
+  color: #5f6368;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ReviewItemText = styled.p`
+  font-size: 14px;
+  color: #202124;
+  line-height: 1.6;
+  margin: 12px 0 0 0;
+`;
+
 const StarReview = ({ fillPercentage = 0, size = 20 }) => {
   const starId = `star-gradient-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -690,11 +1063,12 @@ const StarReview = ({ fillPercentage = 0, size = 20 }) => {
 const Website = () => {
   const { slug } = useParams();
   const [doctor, setDoctor] = useState(null);
-  const [activeTab] = useState("الحجز");
+  const [activeTab, setActiveTab] = useState("الحجز");
   const [activeLocation, setActiveLocation] = useState("");
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [loading, setLoading] = useState(true);
   const [reviewToggle, setReviewToggle] = useState(false);
+  const [rating, setRating] = useState(4);
   const [err, setErr] = useState("");
   const [visibleDays, setVisibleDays] = useState([]);
   const [bookingStep, setBookingStep] = useState(1);
@@ -716,12 +1090,371 @@ const Website = () => {
     lastName: "",
     phoneNumber: "",
   });
+  const [sortBy, setSortBy] = useState("الأكثر صلة");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleMore = (dateKey) => {
-    setSlotsToShowPerDay((prev) => ({
-      ...prev,
-      [dateKey]: (prev[dateKey] || 8) + 8,
-    }));
+  const reviews = [
+    {
+      rating: 5,
+      date: "منذ أكثر من سنة",
+      initials: "DS",
+      text: "",
+      source: "",
+    },
+    {
+      rating: 2,
+      date: "منذ أكثر من سنة",
+      initials: "مخفي",
+      text: "",
+      source: "شريك",
+    },
+    {
+      rating: 5,
+      date: "منذ أكثر من سنة",
+      initials: "AB",
+      text: "",
+      source: "",
+    },
+  ];
+
+  const insuranceData = [
+    { name: "aenta", img: AetnaLogo },
+    { name: "cigna", img: CignaLogo },
+  ];
+
+  const faqs = [
+    {
+      question: "كم من الوقت يستغرق حجز موعد مع الدكتور راج باتيل؟",
+      answer:
+        "بشكل عام، لدى الدكتور راج باتيل مواعيد متاحة على وقتنا في غضون أسبوع واحد. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وحجز موعد عبر الإنترنت.",
+    },
+    {
+      question: "هل يقبل الدكتور راج باتيل مرضى جدد؟",
+      answer:
+        "يقبل الدكتور راج باتيل عمومًا مرضى جدد على وقتنا. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وجدولة موعد عبر الإنترنت.",
+    },
+    {
+      question: "هل يقبل الدكتور راج باتيل تأميني؟",
+      answer:
+        "اختر خطة التأمين الخاصة بك للتحقق مما إذا كان الدكتور باتيل ضمن الشبكة.",
+    },
+    {
+      question: "هل يمكنني حجز موعد مع الدكتور راج باتيل عبر الإنترنت؟",
+      answer:
+        "نعم، يمكنك حجز موعد عبر الإنترنت مع الدكتور باتيل باستخدام وقتنا. الأمر بسيط.",
+    },
+  ];
+
+  const expertiseAreas = [
+    "إزالة الأورام الجلدية السرطانية",
+    "عدوى الجلد الحادة",
+    "الأورام الجلدية الحميدة أو قبل السرطانية",
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "الحجز":
+        return (
+          <Card>
+            <SectionHeader>
+              <Heading20>احجز موعدك اليوم</Heading20>
+              <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
+            </SectionHeader>
+
+            <Section>
+              <div>
+                <Label>تفاصيل الحجز</Label>
+                <SelectWrap>
+                  <Select
+                    value={appointmentType}
+                    onChange={(e) => setAppointmentType(e.target.value)}
+                  >
+                    <option>مرض عارض</option>
+                    <option>مراجعة متابعة</option>
+                    <option>فحص سنوي</option>
+                    <option>استشارة</option>
+                    <option>أخرى</option>
+                  </Select>
+                </SelectWrap>
+              </div>
+
+              <Spacer16 />
+
+              <div>
+                <Label>الموقع</Label>
+                <SelectWrap>
+                  <Select
+                    value={activeLocation}
+                    onChange={(e) => setActiveLocation(e.target.value)}
+                  >
+                    {doctor.locationOptions.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </Select>
+                </SelectWrap>
+              </div>
+              <Spacer16 />
+
+              <div>
+                <Label>نوع المراجع</Label>
+                <Toggle>
+                  <ToggleBtn
+                    $active={isNewPatient}
+                    onClick={() => setIsNewPatient(true)}
+                    type="button"
+                  >
+                    مراجع جديد
+                  </ToggleBtn>
+                  <ToggleBtn
+                    $active={!isNewPatient}
+                    onClick={() => setIsNewPatient(false)}
+                    type="button"
+                  >
+                    مراجع سابق
+                  </ToggleBtn>
+                </Toggle>
+              </div>
+
+              <Spacer16 />
+
+              <div>
+                <Label>المواعيد المتاحة *</Label>
+                <AvailBlock>
+                  {visibleDays.length === 0 ? (
+                    <P>لا توجد مواعيد متاحة حاليًا.</P>
+                  ) : (
+                    visibleDays.map((day, idx) => {
+                      const slotsToShow = slotsToShowPerDay[day.date] || 8;
+                      const hasMoreSlots = day.slots.length > slotsToShow;
+
+                      return (
+                        <div key={day.date + idx}>
+                          <DayHeader>{day.title}</DayHeader>
+                          <TimesRow>
+                            {day.slots.slice(0, slotsToShow).map((t) => {
+                              const selected =
+                                selectedSlot?.date === day.date &&
+                                selectedSlot?.time === t;
+                              const booked = isSlotBooked(day.date, t);
+
+                              return (
+                                <TimeBtn
+                                  key={t}
+                                  $selected={selected}
+                                  $booked={booked}
+                                  onClick={() => handlePickTime(day.date, t)}
+                                  type="button"
+                                  aria-pressed={selected}
+                                  disabled={booked}
+                                  style={{
+                                    cursor: booked ? "not-allowed" : "pointer",
+                                    opacity: booked ? 0.5 : 1,
+                                    backgroundColor: booked
+                                      ? "#e0e0e0"
+                                      : selected
+                                      ? "#4b90f2"
+                                      : "#fff",
+                                    color: booked
+                                      ? "#999"
+                                      : selected
+                                      ? "#fff"
+                                      : "#000",
+                                  }}
+                                >
+                                  {t}
+                                </TimeBtn>
+                              );
+                            })}
+                            {hasMoreSlots && (
+                              <MoreBtn
+                                type="button"
+                                onClick={() => handleMore(day.date)}
+                              >
+                                المزيد
+                              </MoreBtn>
+                            )}
+                          </TimesRow>
+                        </div>
+                      );
+                    })
+                  )}
+                  {visibleDays.length > 0 &&
+                    visibleDays.length < allAvailableDays.length && (
+                      <OutlineBtn type="button" onClick={handleShowMoreDays}>
+                        عرض المزيد من التوافر
+                      </OutlineBtn>
+                    )}
+                </AvailBlock>
+              </div>
+            </Section>
+          </Card>
+        );
+      case "عن الطبيب":
+        return (
+          <Card>
+            <DocExpertiseContainer>
+              <DocExpertiseTitle>مجالات الخبرة</DocExpertiseTitle>
+
+              <DocExpertiseDescription>
+                تعزز خبرة هذا الطبيب كفاءته في الحالات المشابهة. فيما يلي
+                الحالات أو العمليات الجراحية التي يعالجها بشكل متكرر
+              </DocExpertiseDescription>
+
+              <DocExpertiseList>
+                {expertiseAreas.map((area, index) => (
+                  <DocExpertiseItem key={index}>
+                    <DocExpertiseCheckmark />
+                    <DocExpertiseItemText>{area}</DocExpertiseItemText>
+                  </DocExpertiseItem>
+                ))}
+              </DocExpertiseList>
+            </DocExpertiseContainer>
+          </Card>
+        );
+      case "التأمين":
+        return (
+          <Card>
+            <CardPad>
+              <CardTitle>التأمينات الطبية المشمولة</CardTitle>
+
+              <InsuranceList>
+                {insuranceData.map((item, index) => {
+                  // Changed from InsuranceList to insuranceData
+                  return (
+                    <InsuranceItem key={index}>
+                      <InsuranceLogo src={item.img} alt="Aetna" />
+                      <InsuranceName>{item.name}</InsuranceName>
+                    </InsuranceItem>
+                  );
+                })}
+              </InsuranceList>
+
+              <SeeMoreLink>عرض المزيد</SeeMoreLink>
+
+              <CheckCoverageButton>
+                تحقق من تغطية التأمين الخاص بك
+              </CheckCoverageButton>
+            </CardPad>
+          </Card>
+        );
+      case "التقييمات":
+        return (
+          <Card>
+            <ReviewCard>
+              <ReviewTitle>تقييمات المرضى</ReviewTitle>
+              <ReviewSubtitle>
+                جميع التقييمات تم إرسالها من قبل المرضى بعد التفاعل مع العيادة.
+              </ReviewSubtitle>
+
+              <ReviewMetricsContainer>
+                <ReviewMetricSection>
+                  <ReviewMetricLabel>التقييم الإجمالي</ReviewMetricLabel>
+                  <ReviewRatingLarge>4.42</ReviewRatingLarge>
+                  <ReviewStarsContainer>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <ReviewStar key={index} filled={index < rating}>
+                        ★
+                      </ReviewStar>
+                    ))}
+                  </ReviewStarsContainer>
+                </ReviewMetricSection>
+
+                <ReviewMetricSection>
+                  <ReviewMetricLabel>وقت الانتظار</ReviewMetricLabel>
+                  <ReviewStarsContainer style={{ marginBottom: "16px" }}>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <ReviewStar key={index} filled={index < rating}>
+                        ★
+                      </ReviewStar>
+                    ))}
+                    <ReviewRatingText>5.00</ReviewRatingText>
+                  </ReviewStarsContainer>
+
+                  <ReviewMetricLabel>أسلوب التعامل</ReviewMetricLabel>
+                  <ReviewStarsContainer>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <ReviewStar key={index} filled={index < rating}>
+                        ★
+                      </ReviewStar>
+                    ))}
+                    <ReviewRatingText>5.00</ReviewRatingText>
+                  </ReviewStarsContainer>
+                </ReviewMetricSection>
+              </ReviewMetricsContainer>
+
+              <ReviewTrustNote>
+                ثقتك هي أهم اهتماماتنا، لذلك لا يمكن لمقدمي الخدمة الدفع لتغيير
+                أو إزالة التقييمات. كما أننا لا ننشر التقييمات التي تحتوي على أي
+                معلومات صحية خاصة بالمريض.{" "}
+                <ReviewLink>اعرف المزيد هنا</ReviewLink>
+              </ReviewTrustNote>
+
+              <ReviewControlsContainer>
+                <ReviewSelect
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="الأكثر صلة">الأكثر صلة</option>
+                  <option value="الأحدث">الأحدث</option>
+                  <option value="الأقدم">الأقدم</option>
+                  <option value="الأعلى تقييماً">الأعلى تقييماً</option>
+                  <option value="الأقل تقييماً">الأقل تقييماً</option>
+                </ReviewSelect>
+
+                <ReviewSearchContainer>
+                  <ReviewSearchIcon>🔍</ReviewSearchIcon>
+                  <ReviewSearchInput
+                    type="text"
+                    placeholder="بحث"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </ReviewSearchContainer>
+              </ReviewControlsContainer>
+
+              {reviews.map((review, index) => (
+                <ReviewItemContainer key={index}>
+                  <ReviewItemStars>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <ReviewItemStar key={index} filled={index < rating}>
+                        ★
+                      </ReviewItemStar>
+                    ))}
+                  </ReviewItemStars>
+                  <ReviewItemMeta>
+                    <span>{review.date}</span>
+                    <span>•</span>
+                    <span>{review.initials}</span>
+                    {review.source && (
+                      <>
+                        <span>•</span>
+                        <span>المصدر: {review.source}</span>
+                      </>
+                    )}
+                  </ReviewItemMeta>
+                  {review.text && (
+                    <ReviewItemText>{review.text}</ReviewItemText>
+                  )}
+                </ReviewItemContainer>
+              ))}
+            </ReviewCard>
+          </Card>
+        );
+      case "الأسئلة الشائعة":
+        return (
+          <Card>
+            <FaqContainer>
+              <FaqTitle>الأسئلة الشائعة</FaqTitle>
+              {faqs.map((faq, index) => (
+                <FaqItem key={index}>
+                  <FaqQuestion>{faq.question}</FaqQuestion>
+                  <FaqAnswer>{faq.answer}</FaqAnswer>
+                </FaqItem>
+              ))}
+            </FaqContainer>
+          </Card>
+        );
+    }
   };
 
   const fmtDayTitle = (dateISO) => {
@@ -1372,145 +2105,17 @@ ${
               "التقييمات",
               "الأسئلة الشائعة",
             ].map((t) => (
-              <TabBtn key={t} $active={t === activeTab}>
+              <TabBtn
+                key={t}
+                $active={t === activeTab}
+                onClick={() => setActiveTab(t)}
+              >
                 {t}
               </TabBtn>
             ))}
           </TabsBar>
-
-          <Card>
-            <SectionHeader>
-              <Heading20>احجز موعدك اليوم</Heading20>
-              <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
-            </SectionHeader>
-
-            <Section>
-              <div>
-                <Label>تفاصيل الحجز</Label>
-                <SelectWrap>
-                  <Select
-                    value={appointmentType}
-                    onChange={(e) => setAppointmentType(e.target.value)}
-                  >
-                    <option>مرض عارض</option>
-                    <option>مراجعة متابعة</option>
-                    <option>فحص سنوي</option>
-                    <option>استشارة</option>
-                    <option>أخرى</option>
-                  </Select>
-                </SelectWrap>
-              </div>
-
-              <Spacer16 />
-
-              <div>
-                <Label>الموقع</Label>
-                <SelectWrap>
-                  <Select
-                    value={activeLocation}
-                    onChange={(e) => setActiveLocation(e.target.value)}
-                  >
-                    {doctor.locationOptions.map((o) => (
-                      <option key={o}>{o}</option>
-                    ))}
-                  </Select>
-                </SelectWrap>
-              </div>
-              <Spacer16 />
-
-              <div>
-                <Label>نوع المراجع</Label>
-                <Toggle>
-                  <ToggleBtn
-                    $active={isNewPatient}
-                    onClick={() => setIsNewPatient(true)}
-                    type="button"
-                  >
-                    مراجع جديد
-                  </ToggleBtn>
-                  <ToggleBtn
-                    $active={!isNewPatient}
-                    onClick={() => setIsNewPatient(false)}
-                    type="button"
-                  >
-                    مراجع سابق
-                  </ToggleBtn>
-                </Toggle>
-              </div>
-
-              <Spacer16 />
-
-              <div>
-                <Label>المواعيد المتاحة *</Label>
-                <AvailBlock>
-                  {visibleDays.length === 0 ? (
-                    <P>لا توجد مواعيد متاحة حاليًا.</P>
-                  ) : (
-                    visibleDays.map((day, idx) => {
-                      const slotsToShow = slotsToShowPerDay[day.date] || 8;
-                      const hasMoreSlots = day.slots.length > slotsToShow;
-
-                      return (
-                        <div key={day.date + idx}>
-                          <DayHeader>{day.title}</DayHeader>
-                          <TimesRow>
-                            {day.slots.slice(0, slotsToShow).map((t) => {
-                              const selected =
-                                selectedSlot?.date === day.date &&
-                                selectedSlot?.time === t;
-                              const booked = isSlotBooked(day.date, t);
-
-                              return (
-                                <TimeBtn
-                                  key={t}
-                                  $selected={selected}
-                                  $booked={booked}
-                                  onClick={() => handlePickTime(day.date, t)}
-                                  type="button"
-                                  aria-pressed={selected}
-                                  disabled={booked}
-                                  style={{
-                                    cursor: booked ? "not-allowed" : "pointer",
-                                    opacity: booked ? 0.5 : 1,
-                                    backgroundColor: booked
-                                      ? "#e0e0e0"
-                                      : selected
-                                      ? "#4b90f2"
-                                      : "#fff",
-                                    color: booked
-                                      ? "#999"
-                                      : selected
-                                      ? "#fff"
-                                      : "#000",
-                                  }}
-                                >
-                                  {t}
-                                </TimeBtn>
-                              );
-                            })}
-                            {hasMoreSlots && (
-                              <MoreBtn
-                                type="button"
-                                onClick={() => handleMore(day.date)}
-                              >
-                                المزيد
-                              </MoreBtn>
-                            )}
-                          </TimesRow>
-                        </div>
-                      );
-                    })
-                  )}
-                  {visibleDays.length > 0 &&
-                    visibleDays.length < allAvailableDays.length && (
-                      <OutlineBtn type="button" onClick={handleShowMoreDays}>
-                        عرض المزيد من التوافر
-                      </OutlineBtn>
-                    )}
-                </AvailBlock>
-              </div>
-            </Section>
-          </Card>
+          {/* it is gonna be here */}
+          {renderContent()}
         </PhoneInner>
       </Phone>
 

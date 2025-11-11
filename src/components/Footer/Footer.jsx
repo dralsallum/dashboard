@@ -39,7 +39,7 @@ const Footer = () => {
         <FooterLinksWrapper>
           <FooterLinksItems>
             <FooterLinkTitle>من نحن</FooterLinkTitle>
-            <FooterLink to="/sign-up">كيف يعمل</FooterLink>
+            <FooterLink to="/support">كيف يعمل</FooterLink>
             <FooterLink to="/">شهادة المستخدمين</FooterLink>
           </FooterLinksItems>
           <FooterLinksItems>
