@@ -240,11 +240,6 @@ const Stars = styled.div`
   color: #f6c81e;
 `;
 
-const StarFill = styled(Star)`
-  fill: currentColor;
-  stroke: currentColor;
-`;
-
 /* ---------- حقول الإدخال ---------- */
 const Label = styled.div`
   font-size: 14px;
@@ -422,27 +417,6 @@ const FormInput = styled.input`
   }
 `;
 
-const RadioGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const RadioLabel = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  color: ${C.ink900};
-  cursor: pointer;
-`;
-
-const RadioInput = styled.input`
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-`;
-
 const BackBtn = styled.button`
   background: transparent;
   border: none;
@@ -599,10 +573,6 @@ const LocImg = styled.img`
   padding: 0;
 `;
 
-const LocationSp = styled.span`
-  color: #000;
-`;
-
 const SuccessWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -665,13 +635,6 @@ const SuccessBtn = styled.button`
   }
 `;
 
-const CardTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 500;
-  margin: 0 0 24px 0;
-  color: #1a1a1a;
-`;
-
 const InsuranceList = styled.div`
   display: flex;
   flex-direction: column;
@@ -698,7 +661,7 @@ const InsuranceName = styled.span`
 `;
 
 const CardPad = styled.div`
-  padding: 1rem;
+  padding: 10px;
 `;
 
 const SeeMoreLink = styled.a`
@@ -732,18 +695,10 @@ const CheckCoverageButton = styled.button`
 `;
 
 const FaqContainer = styled.div`
-  max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px;
   font-family: Arial, sans-serif;
   direction: rtl;
-`;
-
-const FaqTitle = styled.h1`
-  font-size: 30px;
-  font-weight: bold;
-  margin-bottom: 40px;
-  color: #1a1a1a;
 `;
 
 const FaqItem = styled.div`
@@ -751,15 +706,15 @@ const FaqItem = styled.div`
 `;
 
 const FaqQuestion = styled.h2`
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
   margin-bottom: 16px;
   color: #1a1a1a;
   line-height: 1.4;
 `;
 
 const FaqAnswer = styled.p`
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.6;
   color: #4a4a4a;
   margin: 0;
@@ -770,43 +725,14 @@ const DocExpertiseContainer = styled.div`
   background-color: #ffffff;
 `;
 
-const DocExpertiseTitle = styled.h1`
-  font-size: 36px;
-  font-weight: 400;
-  color: #1a1a1a;
-  margin-bottom: 32px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-`;
-
 const DocExpertiseDescription = styled.p`
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.6;
   color: #333333;
   margin-bottom: 40px;
   font-weight: 300;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-`;
-
-const DocExpertiseInfoIcon = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background-color: #4285f4;
-  color: white;
-  border-radius: 50%;
-  font-size: 14px;
-  margin-left: 8px;
-  cursor: pointer;
-
-  &::before {
-    content: "i";
-    font-style: italic;
-    font-weight: bold;
-  }
 `;
 
 const DocExpertiseList = styled.div`
@@ -830,9 +756,7 @@ const DocExpertiseCheckmark = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
   height: 24px;
-  margin-right: 20px;
   color: #666666;
   font-size: 20px;
 
@@ -842,7 +766,7 @@ const DocExpertiseCheckmark = styled.span`
 `;
 
 const DocExpertiseItemText = styled.span`
-  font-size: 20px;
+  font-size: 18px;
   color: #1a1a1a;
   font-weight: 400;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -852,17 +776,17 @@ const DocExpertiseItemText = styled.span`
 const ReviewCard = styled.div`
   background: white;
   border-radius: 8px;
-  padding: 24px;
+  padding: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   direction: rtl;
   font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 `;
 
 const ReviewTitle = styled.h2`
-  font-size: 32px;
-  font-weight: 400;
+  font-size: 26px;
+  font-weight: 500;
   color: #5f6368;
-  margin: 0 0 16px 0;
+  margin: 0 0 10px 0;
 `;
 
 const ReviewSubtitle = styled.p`
@@ -1292,7 +1216,7 @@ const Website = () => {
         return (
           <Card>
             <DocExpertiseContainer>
-              <DocExpertiseTitle>مجالات الخبرة</DocExpertiseTitle>
+              <ReviewTitle>مجالات الخبرة</ReviewTitle>
 
               <DocExpertiseDescription>
                 تعزز خبرة هذا الطبيب كفاءته في الحالات المشابهة. فيما يلي
@@ -1314,7 +1238,7 @@ const Website = () => {
         return (
           <Card>
             <CardPad>
-              <CardTitle>التأمينات الطبية المشمولة</CardTitle>
+              <ReviewTitle>التأمينات الطبية المشمولة</ReviewTitle>
 
               <InsuranceList>
                 {insuranceData.map((item, index) => {
@@ -1443,7 +1367,7 @@ const Website = () => {
         return (
           <Card>
             <FaqContainer>
-              <FaqTitle>الأسئلة الشائعة</FaqTitle>
+              <ReviewTitle>الأسئلة الشائعة</ReviewTitle>
               {faqs.map((faq, index) => (
                 <FaqItem key={index}>
                   <FaqQuestion>{faq.question}</FaqQuestion>
