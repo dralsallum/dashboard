@@ -766,7 +766,7 @@ const FaqAnswer = styled.p`
 `;
 
 const DocExpertiseContainer = styled.div`
-  padding: 40px 24px;
+  padding: 20px 12px;
   background-color: #ffffff;
   min-height: 100vh;
 `;
