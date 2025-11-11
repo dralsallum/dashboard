@@ -721,7 +721,7 @@ const FaqAnswer = styled.p`
 `;
 
 const DocExpertiseContainer = styled.div`
-  padding: 20px 12px;
+  padding: 10px;
   background-color: #ffffff;
 `;
 
@@ -776,7 +776,7 @@ const DocExpertiseItemText = styled.span`
 const ReviewCard = styled.div`
   background: white;
   border-radius: 8px;
-  padding: 14px;
+  padding: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   direction: rtl;
   font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -991,7 +991,6 @@ const Website = () => {
   const [isNewPatient, setIsNewPatient] = useState(true);
   const [loading, setLoading] = useState(true);
   const [reviewToggle, setReviewToggle] = useState(false);
-  const [rating, setRating] = useState(4);
   const [err, setErr] = useState("");
   const [visibleDays, setVisibleDays] = useState([]);
   const [bookingStep, setBookingStep] = useState(1);
@@ -1015,370 +1014,6 @@ const Website = () => {
   });
   const [sortBy, setSortBy] = useState("الأكثر صلة");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const reviews = [
-    {
-      rating: 5,
-      date: "منذ أكثر من سنة",
-      initials: "DS",
-      text: "",
-      source: "",
-    },
-    {
-      rating: 2,
-      date: "منذ أكثر من سنة",
-      initials: "مخفي",
-      text: "",
-      source: "شريك",
-    },
-    {
-      rating: 5,
-      date: "منذ أكثر من سنة",
-      initials: "AB",
-      text: "",
-      source: "",
-    },
-  ];
-
-  const insuranceData = [
-    { name: "aenta", img: AetnaLogo },
-    { name: "cigna", img: CignaLogo },
-  ];
-
-  const faqs = [
-    {
-      question: "كم من الوقت يستغرق حجز موعد مع الدكتور راج باتيل؟",
-      answer:
-        "بشكل عام، لدى الدكتور راج باتيل مواعيد متاحة على وقتنا في غضون أسبوع واحد. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وحجز موعد عبر الإنترنت.",
-    },
-    {
-      question: "هل يقبل الدكتور راج باتيل مرضى جدد؟",
-      answer:
-        "يقبل الدكتور راج باتيل عمومًا مرضى جدد على وقتنا. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وجدولة موعد عبر الإنترنت.",
-    },
-    {
-      question: "هل يقبل الدكتور راج باتيل تأميني؟",
-      answer:
-        "اختر خطة التأمين الخاصة بك للتحقق مما إذا كان الدكتور باتيل ضمن الشبكة.",
-    },
-    {
-      question: "هل يمكنني حجز موعد مع الدكتور راج باتيل عبر الإنترنت؟",
-      answer:
-        "نعم، يمكنك حجز موعد عبر الإنترنت مع الدكتور باتيل باستخدام وقتنا. الأمر بسيط.",
-    },
-  ];
-
-  const expertiseAreas = [
-    "إزالة الأورام الجلدية السرطانية",
-    "عدوى الجلد الحادة",
-    "الأورام الجلدية الحميدة أو قبل السرطانية",
-  ];
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case "الحجز":
-        return (
-          <Card>
-            <SectionHeader>
-              <Heading20>احجز موعدك اليوم</Heading20>
-              <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
-            </SectionHeader>
-
-            <Section>
-              <div>
-                <Label>تفاصيل الحجز</Label>
-                <SelectWrap>
-                  <Select
-                    value={appointmentType}
-                    onChange={(e) => setAppointmentType(e.target.value)}
-                  >
-                    <option>مرض عارض</option>
-                    <option>مراجعة متابعة</option>
-                    <option>فحص سنوي</option>
-                    <option>استشارة</option>
-                    <option>أخرى</option>
-                  </Select>
-                </SelectWrap>
-              </div>
-
-              <Spacer16 />
-
-              <div>
-                <Label>الموقع</Label>
-                <SelectWrap>
-                  <Select
-                    value={activeLocation}
-                    onChange={(e) => setActiveLocation(e.target.value)}
-                  >
-                    {doctor.locationOptions.map((o) => (
-                      <option key={o}>{o}</option>
-                    ))}
-                  </Select>
-                </SelectWrap>
-              </div>
-              <Spacer16 />
-
-              <div>
-                <Label>نوع المراجع</Label>
-                <Toggle>
-                  <ToggleBtn
-                    $active={isNewPatient}
-                    onClick={() => setIsNewPatient(true)}
-                    type="button"
-                  >
-                    مراجع جديد
-                  </ToggleBtn>
-                  <ToggleBtn
-                    $active={!isNewPatient}
-                    onClick={() => setIsNewPatient(false)}
-                    type="button"
-                  >
-                    مراجع سابق
-                  </ToggleBtn>
-                </Toggle>
-              </div>
-
-              <Spacer16 />
-
-              <div>
-                <Label>المواعيد المتاحة *</Label>
-                <AvailBlock>
-                  {visibleDays.length === 0 ? (
-                    <P>لا توجد مواعيد متاحة حاليًا.</P>
-                  ) : (
-                    visibleDays.map((day, idx) => {
-                      const slotsToShow = slotsToShowPerDay[day.date] || 8;
-                      const hasMoreSlots = day.slots.length > slotsToShow;
-
-                      return (
-                        <div key={day.date + idx}>
-                          <DayHeader>{day.title}</DayHeader>
-                          <TimesRow>
-                            {day.slots.slice(0, slotsToShow).map((t) => {
-                              const selected =
-                                selectedSlot?.date === day.date &&
-                                selectedSlot?.time === t;
-                              const booked = isSlotBooked(day.date, t);
-
-                              return (
-                                <TimeBtn
-                                  key={t}
-                                  $selected={selected}
-                                  $booked={booked}
-                                  onClick={() => handlePickTime(day.date, t)}
-                                  type="button"
-                                  aria-pressed={selected}
-                                  disabled={booked}
-                                  style={{
-                                    cursor: booked ? "not-allowed" : "pointer",
-                                    opacity: booked ? 0.5 : 1,
-                                    backgroundColor: booked
-                                      ? "#e0e0e0"
-                                      : selected
-                                      ? "#4b90f2"
-                                      : "#fff",
-                                    color: booked
-                                      ? "#999"
-                                      : selected
-                                      ? "#fff"
-                                      : "#000",
-                                  }}
-                                >
-                                  {t}
-                                </TimeBtn>
-                              );
-                            })}
-                            {hasMoreSlots && (
-                              <MoreBtn
-                                type="button"
-                                onClick={() => handleMore(day.date)}
-                              >
-                                المزيد
-                              </MoreBtn>
-                            )}
-                          </TimesRow>
-                        </div>
-                      );
-                    })
-                  )}
-                  {visibleDays.length > 0 &&
-                    visibleDays.length < allAvailableDays.length && (
-                      <OutlineBtn type="button" onClick={handleShowMoreDays}>
-                        عرض المزيد من التوافر
-                      </OutlineBtn>
-                    )}
-                </AvailBlock>
-              </div>
-            </Section>
-          </Card>
-        );
-      case "عن الطبيب":
-        return (
-          <Card>
-            <DocExpertiseContainer>
-              <ReviewTitle>مجالات الخبرة</ReviewTitle>
-
-              <DocExpertiseDescription>
-                تعزز خبرة هذا الطبيب كفاءته في الحالات المشابهة. فيما يلي
-                الحالات أو العمليات الجراحية التي يعالجها بشكل متكرر
-              </DocExpertiseDescription>
-
-              <DocExpertiseList>
-                {expertiseAreas.map((area, index) => (
-                  <DocExpertiseItem key={index}>
-                    <DocExpertiseCheckmark />
-                    <DocExpertiseItemText>{area}</DocExpertiseItemText>
-                  </DocExpertiseItem>
-                ))}
-              </DocExpertiseList>
-            </DocExpertiseContainer>
-          </Card>
-        );
-      case "التأمين":
-        return (
-          <Card>
-            <CardPad>
-              <ReviewTitle>التأمينات الطبية المشمولة</ReviewTitle>
-
-              <InsuranceList>
-                {insuranceData.map((item, index) => {
-                  // Changed from InsuranceList to insuranceData
-                  return (
-                    <InsuranceItem key={index}>
-                      <InsuranceLogo src={item.img} alt="Aetna" />
-                      <InsuranceName>{item.name}</InsuranceName>
-                    </InsuranceItem>
-                  );
-                })}
-              </InsuranceList>
-
-              <SeeMoreLink>عرض المزيد</SeeMoreLink>
-
-              <CheckCoverageButton>
-                تحقق من تغطية التأمين الخاص بك
-              </CheckCoverageButton>
-            </CardPad>
-          </Card>
-        );
-      case "التقييمات":
-        return (
-          <Card>
-            <ReviewCard>
-              <ReviewTitle>تقييمات المرضى</ReviewTitle>
-              <ReviewSubtitle>
-                جميع التقييمات تم إرسالها من قبل المرضى بعد التفاعل مع العيادة.
-              </ReviewSubtitle>
-
-              <ReviewMetricsContainer>
-                <ReviewMetricSection>
-                  <ReviewMetricLabel>التقييم الإجمالي</ReviewMetricLabel>
-                  <ReviewRatingLarge>4.42</ReviewRatingLarge>
-                  <ReviewStarsContainer>
-                    {Array.from({ length: 5 }, (_, index) => (
-                      <ReviewStar key={index} filled={index < rating}>
-                        ★
-                      </ReviewStar>
-                    ))}
-                  </ReviewStarsContainer>
-                </ReviewMetricSection>
-
-                <ReviewMetricSection>
-                  <ReviewMetricLabel>وقت الانتظار</ReviewMetricLabel>
-                  <ReviewStarsContainer style={{ marginBottom: "16px" }}>
-                    {Array.from({ length: 5 }, (_, index) => (
-                      <ReviewStar key={index} filled={index < rating}>
-                        ★
-                      </ReviewStar>
-                    ))}
-                    <ReviewRatingText>5.00</ReviewRatingText>
-                  </ReviewStarsContainer>
-
-                  <ReviewMetricLabel>أسلوب التعامل</ReviewMetricLabel>
-                  <ReviewStarsContainer>
-                    {Array.from({ length: 5 }, (_, index) => (
-                      <ReviewStar key={index} filled={index < rating}>
-                        ★
-                      </ReviewStar>
-                    ))}
-                    <ReviewRatingText>5.00</ReviewRatingText>
-                  </ReviewStarsContainer>
-                </ReviewMetricSection>
-              </ReviewMetricsContainer>
-
-              <ReviewTrustNote>
-                ثقتك هي أهم اهتماماتنا، لذلك لا يمكن لمقدمي الخدمة الدفع لتغيير
-                أو إزالة التقييمات. كما أننا لا ننشر التقييمات التي تحتوي على أي
-                معلومات صحية خاصة بالمريض.{" "}
-                <ReviewLink>اعرف المزيد هنا</ReviewLink>
-              </ReviewTrustNote>
-
-              <ReviewControlsContainer>
-                <ReviewSelect
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="الأكثر صلة">الأكثر صلة</option>
-                  <option value="الأحدث">الأحدث</option>
-                  <option value="الأقدم">الأقدم</option>
-                  <option value="الأعلى تقييماً">الأعلى تقييماً</option>
-                  <option value="الأقل تقييماً">الأقل تقييماً</option>
-                </ReviewSelect>
-
-                <ReviewSearchContainer>
-                  <ReviewSearchIcon>🔍</ReviewSearchIcon>
-                  <ReviewSearchInput
-                    type="text"
-                    placeholder="بحث"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </ReviewSearchContainer>
-              </ReviewControlsContainer>
-
-              {reviews.map((review, index) => (
-                <ReviewItemContainer key={index}>
-                  <ReviewItemStars>
-                    {Array.from({ length: 5 }, (_, index) => (
-                      <ReviewItemStar key={index} filled={index < rating}>
-                        ★
-                      </ReviewItemStar>
-                    ))}
-                  </ReviewItemStars>
-                  <ReviewItemMeta>
-                    <span>{review.date}</span>
-                    <span>•</span>
-                    <span>{review.initials}</span>
-                    {review.source && (
-                      <>
-                        <span>•</span>
-                        <span>المصدر: {review.source}</span>
-                      </>
-                    )}
-                  </ReviewItemMeta>
-                  {review.text && (
-                    <ReviewItemText>{review.text}</ReviewItemText>
-                  )}
-                </ReviewItemContainer>
-              ))}
-            </ReviewCard>
-          </Card>
-        );
-      case "الأسئلة الشائعة":
-        return (
-          <Card>
-            <FaqContainer>
-              <ReviewTitle>الأسئلة الشائعة</ReviewTitle>
-              {faqs.map((faq, index) => (
-                <FaqItem key={index}>
-                  <FaqQuestion>{faq.question}</FaqQuestion>
-                  <FaqAnswer>{faq.answer}</FaqAnswer>
-                </FaqItem>
-              ))}
-            </FaqContainer>
-          </Card>
-        );
-    }
-  };
 
   const fmtDayTitle = (dateISO) => {
     const d = new Date(dateISO + "T00:00:00");
@@ -1727,6 +1362,386 @@ ${
     );
 
   if (!doctor) return null;
+
+  const reviews = [
+    {
+      rating: 5,
+      date: "منذ أكثر من سنة",
+      initials: "DS",
+      text: "",
+      source: "",
+    },
+    {
+      rating: 2,
+      date: "منذ أكثر من سنة",
+      initials: "مخفي",
+      text: "",
+      source: "شريك",
+    },
+    {
+      rating: 5,
+      date: "منذ أكثر من سنة",
+      initials: "AB",
+      text: "",
+      source: "",
+    },
+  ];
+
+  const insuranceData = [
+    { name: "aenta", img: AetnaLogo },
+    { name: "cigna", img: CignaLogo },
+  ];
+
+  const faqs = [
+    {
+      question: "كم من الوقت يستغرق حجز موعد مع الدكتور راج باتيل؟",
+      answer:
+        "بشكل عام، لدى الدكتور راج باتيل مواعيد متاحة على وقتنا في غضون أسبوع واحد. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وحجز موعد عبر الإنترنت.",
+    },
+    {
+      question: "هل يقبل الدكتور راج باتيل مرضى جدد؟",
+      answer:
+        "يقبل الدكتور راج باتيل عمومًا مرضى جدد على وقتنا. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وجدولة موعد عبر الإنترنت.",
+    },
+    {
+      question: "هل يقبل الدكتور راج باتيل تأميني؟",
+      answer:
+        "اختر خطة التأمين الخاصة بك للتحقق مما إذا كان الدكتور باتيل ضمن الشبكة.",
+    },
+    {
+      question: "هل يمكنني حجز موعد مع الدكتور راج باتيل عبر الإنترنت؟",
+      answer:
+        "نعم، يمكنك حجز موعد عبر الإنترنت مع الدكتور باتيل باستخدام وقتنا. الأمر بسيط.",
+    },
+  ];
+
+  const expertiseAreas = [
+    "إزالة الأورام الجلدية السرطانية",
+    "عدوى الجلد الحادة",
+    "الأورام الجلدية الحميدة أو قبل السرطانية",
+  ];
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "الحجز":
+        return (
+          <Card>
+            <SectionHeader>
+              <Heading20>احجز موعدك اليوم</Heading20>
+              <P>أكمل التفاصيل ثم اختر الوقت، واضغط زر الحجز للمتابعة.</P>
+            </SectionHeader>
+
+            <Section>
+              <div>
+                <Label>تفاصيل الحجز</Label>
+                <SelectWrap>
+                  <Select
+                    value={appointmentType}
+                    onChange={(e) => setAppointmentType(e.target.value)}
+                  >
+                    <option>مرض عارض</option>
+                    <option>مراجعة متابعة</option>
+                    <option>فحص سنوي</option>
+                    <option>استشارة</option>
+                    <option>أخرى</option>
+                  </Select>
+                </SelectWrap>
+              </div>
+
+              <Spacer16 />
+
+              <div>
+                <Label>الموقع</Label>
+                <SelectWrap>
+                  <Select
+                    value={activeLocation}
+                    onChange={(e) => setActiveLocation(e.target.value)}
+                  >
+                    {doctor.locationOptions.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </Select>
+                </SelectWrap>
+              </div>
+              <Spacer16 />
+
+              <div>
+                <Label>نوع المراجع</Label>
+                <Toggle>
+                  <ToggleBtn
+                    $active={isNewPatient}
+                    onClick={() => setIsNewPatient(true)}
+                    type="button"
+                  >
+                    مراجع جديد
+                  </ToggleBtn>
+                  <ToggleBtn
+                    $active={!isNewPatient}
+                    onClick={() => setIsNewPatient(false)}
+                    type="button"
+                  >
+                    مراجع سابق
+                  </ToggleBtn>
+                </Toggle>
+              </div>
+
+              <Spacer16 />
+
+              <div>
+                <Label>المواعيد المتاحة *</Label>
+                <AvailBlock>
+                  {visibleDays.length === 0 ? (
+                    <P>لا توجد مواعيد متاحة حاليًا.</P>
+                  ) : (
+                    visibleDays.map((day, idx) => {
+                      const slotsToShow = slotsToShowPerDay[day.date] || 8;
+                      const hasMoreSlots = day.slots.length > slotsToShow;
+
+                      return (
+                        <div key={day.date + idx}>
+                          <DayHeader>{day.title}</DayHeader>
+                          <TimesRow>
+                            {day.slots.slice(0, slotsToShow).map((t) => {
+                              const selected =
+                                selectedSlot?.date === day.date &&
+                                selectedSlot?.time === t;
+                              const booked = isSlotBooked(day.date, t);
+
+                              return (
+                                <TimeBtn
+                                  key={t}
+                                  $selected={selected}
+                                  $booked={booked}
+                                  onClick={() => handlePickTime(day.date, t)}
+                                  type="button"
+                                  aria-pressed={selected}
+                                  disabled={booked}
+                                  style={{
+                                    cursor: booked ? "not-allowed" : "pointer",
+                                    opacity: booked ? 0.5 : 1,
+                                    backgroundColor: booked
+                                      ? "#e0e0e0"
+                                      : selected
+                                      ? "#4b90f2"
+                                      : "#fff",
+                                    color: booked
+                                      ? "#999"
+                                      : selected
+                                      ? "#fff"
+                                      : "#000",
+                                  }}
+                                >
+                                  {t}
+                                </TimeBtn>
+                              );
+                            })}
+                            {hasMoreSlots && (
+                              <MoreBtn
+                                type="button"
+                                onClick={() => handleMore(day.date)}
+                              >
+                                المزيد
+                              </MoreBtn>
+                            )}
+                          </TimesRow>
+                        </div>
+                      );
+                    })
+                  )}
+                  {visibleDays.length > 0 &&
+                    visibleDays.length < allAvailableDays.length && (
+                      <OutlineBtn type="button" onClick={handleShowMoreDays}>
+                        عرض المزيد من التوافر
+                      </OutlineBtn>
+                    )}
+                </AvailBlock>
+              </div>
+            </Section>
+          </Card>
+        );
+      case "عن الطبيب":
+        return (
+          <Card>
+            <DocExpertiseContainer>
+              <ReviewTitle>مجالات الخبرة</ReviewTitle>
+
+              <DocExpertiseDescription>
+                تعزز خبرة هذا الطبيب كفاءته في الحالات المشابهة. فيما يلي
+                الحالات أو العمليات الجراحية التي يعالجها بشكل متكرر
+              </DocExpertiseDescription>
+
+              <DocExpertiseList>
+                {expertiseAreas.map((area, index) => (
+                  <DocExpertiseItem key={index}>
+                    <DocExpertiseCheckmark />
+                    <DocExpertiseItemText>{area}</DocExpertiseItemText>
+                  </DocExpertiseItem>
+                ))}
+              </DocExpertiseList>
+            </DocExpertiseContainer>
+          </Card>
+        );
+      case "التأمين":
+        return (
+          <Card>
+            <CardPad>
+              <ReviewTitle>التأمينات الطبية المشمولة</ReviewTitle>
+
+              <InsuranceList>
+                {insuranceData.map((item, index) => {
+                  // Changed from InsuranceList to insuranceData
+                  return (
+                    <InsuranceItem key={index}>
+                      <InsuranceLogo src={item.img} alt="Aetna" />
+                      <InsuranceName>{item.name}</InsuranceName>
+                    </InsuranceItem>
+                  );
+                })}
+              </InsuranceList>
+
+              <SeeMoreLink>عرض المزيد</SeeMoreLink>
+
+              <CheckCoverageButton>
+                تحقق من تغطية التأمين الخاص بك
+              </CheckCoverageButton>
+            </CardPad>
+          </Card>
+        );
+      case "التقييمات":
+        return (
+          <Card>
+            <ReviewCard>
+              <ReviewTitle>تقييمات المرضى</ReviewTitle>
+              <ReviewSubtitle>
+                جميع التقييمات تم إرسالها من قبل المرضى بعد التفاعل مع العيادة.
+              </ReviewSubtitle>
+
+              <ReviewMetricsContainer>
+                <ReviewMetricSection>
+                  <ReviewMetricLabel>التقييم الإجمالي</ReviewMetricLabel>
+                  <ReviewRatingLarge>{doctor.rating}</ReviewRatingLarge>
+                  <Grow>
+                    <KPI $mt={4} $size={0}>
+                      <Stars style={{ display: "flex", gap: "2px" }}>
+                        {Array.from({ length: 5 }).map((_, i) => {
+                          const fillPercentage = Math.min(
+                            Math.max(doctor.rating - i, 0),
+                            1
+                          );
+                          return (
+                            <StarReview
+                              key={i}
+                              fillPercentage={fillPercentage}
+                              size={20}
+                            />
+                          );
+                        })}
+                      </Stars>
+                    </KPI>
+                    <P $size={14}>{doctor.reviewHighlight}</P>
+                  </Grow>
+                </ReviewMetricSection>
+
+                <ReviewMetricSection>
+                  <ReviewMetricLabel>وقت الانتظار</ReviewMetricLabel>
+                  <ReviewStarsContainer style={{ marginBottom: "16px" }}>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <ReviewStar key={index} filled={index < doctor.rating}>
+                        ★
+                      </ReviewStar>
+                    ))}
+                    <ReviewRatingText>5.00</ReviewRatingText>
+                  </ReviewStarsContainer>
+
+                  <ReviewMetricLabel>أسلوب التعامل</ReviewMetricLabel>
+                  <ReviewStarsContainer>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <ReviewStar key={index} filled={index < doctor.rating}>
+                        ★
+                      </ReviewStar>
+                    ))}
+                    <ReviewRatingText>5.00</ReviewRatingText>
+                  </ReviewStarsContainer>
+                </ReviewMetricSection>
+              </ReviewMetricsContainer>
+
+              <ReviewTrustNote>
+                ثقتك هي أهم اهتماماتنا، لذلك لا يمكن لمقدمي الخدمة الدفع لتغيير
+                أو إزالة التقييمات. كما أننا لا ننشر التقييمات التي تحتوي على أي
+                معلومات صحية خاصة بالمريض.{" "}
+                <ReviewLink>اعرف المزيد هنا</ReviewLink>
+              </ReviewTrustNote>
+
+              <ReviewControlsContainer>
+                <ReviewSelect
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="الأكثر صلة">الأكثر صلة</option>
+                  <option value="الأحدث">الأحدث</option>
+                  <option value="الأقدم">الأقدم</option>
+                  <option value="الأعلى تقييماً">الأعلى تقييماً</option>
+                  <option value="الأقل تقييماً">الأقل تقييماً</option>
+                </ReviewSelect>
+
+                <ReviewSearchContainer>
+                  <ReviewSearchIcon>🔍</ReviewSearchIcon>
+                  <ReviewSearchInput
+                    type="text"
+                    placeholder="بحث"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </ReviewSearchContainer>
+              </ReviewControlsContainer>
+
+              {reviews.map((review, index) => (
+                <ReviewItemContainer key={index}>
+                  <ReviewItemStars>
+                    {Array.from({ length: 5 }, (_, starIndex) => (
+                      <ReviewItemStar
+                        key={starIndex}
+                        filled={starIndex < review.rating}
+                      >
+                        ★
+                      </ReviewItemStar>
+                    ))}
+                  </ReviewItemStars>
+                  <ReviewItemMeta>
+                    <span>{review.date}</span>
+                    <span>•</span>
+                    <span>{review.initials}</span>
+                    {review.source && (
+                      <>
+                        <span>•</span>
+                        <span>المصدر: {review.source}</span>
+                      </>
+                    )}
+                  </ReviewItemMeta>
+                  {review.text && (
+                    <ReviewItemText>{review.text}</ReviewItemText>
+                  )}
+                </ReviewItemContainer>
+              ))}
+            </ReviewCard>
+          </Card>
+        );
+      case "الأسئلة الشائعة":
+        return (
+          <Card>
+            <FaqContainer>
+              <ReviewTitle>الأسئلة الشائعة</ReviewTitle>
+              {faqs.map((faq, index) => (
+                <FaqItem key={index}>
+                  <FaqQuestion>{faq.question}</FaqQuestion>
+                  <FaqAnswer>{faq.answer}</FaqAnswer>
+                </FaqItem>
+              ))}
+            </FaqContainer>
+          </Card>
+        );
+    }
+  };
 
   /* ---------- Step 3: Payment Method ---------- */
   if (bookingStep === 3) {
