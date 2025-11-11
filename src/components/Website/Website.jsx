@@ -751,7 +751,7 @@ const FaqItem = styled.div`
 `;
 
 const FaqQuestion = styled.h2`
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   margin-bottom: 16px;
   color: #1a1a1a;
