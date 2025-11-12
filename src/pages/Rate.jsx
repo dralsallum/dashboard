@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Review } from "../components";
+import { Desktop, NavTech } from "../components";
 
-const Rate = () => {
+const PostHog = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   return (
     <>
-      <Review />
+      <Desktop />
     </>
   );
 };
 
-export default Rate;
+export default PostHog;

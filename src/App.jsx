@@ -21,6 +21,7 @@ import Appointment from "./pages/Appointment";
 import PostHog from "./pages/Posthog";
 import Reservation from "./pages/Reservation";
 import Support from "./pages/Support";
+import Rate from "./pages/pay";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -31,6 +32,7 @@ const App = () => {
       <div style={{ width: "100%", overflow: "hidden" }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/rate" element={<Rate />} />
           <Route path="/desktop" element={<PostHog />} />
           <Route path="/reservation/:major" element={<Reservation />} />
           <Route path="/test" element={<Test />} />

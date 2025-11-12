@@ -27,3 +27,4 @@ export { default as Category } from "./Category/Category";
 export { default as Benefits } from "./Benefits/Benefits";
 export { default as Times } from "./Times/Times";
 export { default as Help } from "./Help/Help";
+export { default as Review } from "./Review/Review";

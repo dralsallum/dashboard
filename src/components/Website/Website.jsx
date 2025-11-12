@@ -769,6 +769,7 @@ const DocExpertiseItemText = styled.span`
   font-size: 18px;
   color: #1a1a1a;
   font-weight: 400;
+  margin: 0 4px 0 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 `;
@@ -1085,6 +1086,7 @@ const Website = () => {
               : data.username,
           specialty: data?.major || "طبيب تجميل",
           location: data?.location || "الرياض",
+          expertise: data?.expertise || null,
           rating: data.rating,
           reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة",
           inNetwork: "تأمينات متعددة (Aetna, BCBS, Cigna, ...)",
@@ -1394,31 +1396,21 @@ ${
 
   const faqs = [
     {
-      question: "كم من الوقت يستغرق حجز موعد مع الدكتور راج باتيل؟",
-      answer:
-        "بشكل عام، لدى الدكتور راج باتيل مواعيد متاحة على وقتنا في غضون أسبوع واحد. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وحجز موعد عبر الإنترنت.",
+      question: `كم من الوقت يستغرق حجز موعد مع  ${doctor.name}؟`,
+      answer: `بشكل عام، لدى ${doctor.name}؟ مواعيد متاحة على وقتنا في غضون أسبوع واحد. يمكنك رؤية أقرب موعد متاح على وقتنا وحجز موعد عبر الإنترنت.`,
     },
     {
-      question: "هل يقبل الدكتور راج باتيل مرضى جدد؟",
-      answer:
-        "يقبل الدكتور راج باتيل عمومًا مرضى جدد على وقتنا. يمكنك رؤية أقرب موعد متاح للدكتور باتيل على وقتنا وجدولة موعد عبر الإنترنت.",
+      question: `هل يقبل ${doctor.name}؟ مرضى جدد؟`,
+      answer: `يقبل ${doctor.name}؟ عمومًا مرضى جدد على وقتنا. يمكنك رؤية أقرب موعد متاح على وقتنا وجدولة موعد عبر الإنترنت.`,
     },
     {
-      question: "هل يقبل الدكتور راج باتيل تأميني؟",
-      answer:
-        "اختر خطة التأمين الخاصة بك للتحقق مما إذا كان الدكتور باتيل ضمن الشبكة.",
+      question: `هل يقبل ${doctor.name}؟ تأميني؟`,
+      answer: `اختر خطة التأمين الخاصة بك للتحقق مما إذا كان ضمن الشبكة.`,
     },
     {
-      question: "هل يمكنني حجز موعد مع الدكتور راج باتيل عبر الإنترنت؟",
-      answer:
-        "نعم، يمكنك حجز موعد عبر الإنترنت مع الدكتور باتيل باستخدام وقتنا. الأمر بسيط.",
+      question: `هل يمكنني حجز موعد مع ${doctor.name}؟ عبر الإنترنت؟`,
+      answer: "نعم، يمكنك حجز موعد عبر الإنترنت مع باستخدام وقتنا. الأمر بسيط.",
     },
-  ];
-
-  const expertiseAreas = [
-    "إزالة الأورام الجلدية السرطانية",
-    "عدوى الجلد الحادة",
-    "الأورام الجلدية الحميدة أو قبل السرطانية",
   ];
 
   const renderContent = () => {
@@ -1571,7 +1563,7 @@ ${
               </DocExpertiseDescription>
 
               <DocExpertiseList>
-                {expertiseAreas.map((area, index) => (
+                {doctor.expertise.map((area, index) => (
                   <DocExpertiseItem key={index}>
                     <DocExpertiseCheckmark />
                     <DocExpertiseItemText>{area}</DocExpertiseItemText>
