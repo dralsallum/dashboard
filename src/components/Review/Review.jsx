@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import styled, { css, keyframes } from "styled-components";
 import {
   ReWrapper,
   ReviewContainer,
@@ -18,14 +19,91 @@ import {
   SuccessMessage,
   ErrorMessage,
 } from "./Review.elements";
+import { useParams, useNavigate } from "react-router-dom";
+const Increase = keyframes`
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+`;
 
-const Review = ({ appointmentId, businessId, onClose, onSubmitSuccess }) => {
+const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  direction: rtl;
+  color: #444;
+  background: #f7f2e6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 100dvh;
+`;
+
+const LoadingBar = styled.div`
+  width: 200px;
+  height: 8px;
+  background-color: rgba(246, 224, 94, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+
+  position: relative;
+`;
+const LoadingSp = styled.span`
+  margin-bottom: 12px;
+`;
+
+const LoadingBarFill = styled.div`
+  height: 100%;
+  background-color: #f6e05e;
+  border-radius: 4px;
+  animation: ${Increase} 3s ease-out forwards;
+  width: 0%;
+`;
+
+const Review = ({ onClose, onSubmitSuccess }) => {
+  const { slug, quota } = useParams();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [canReview, setCanReview] = useState(false);
+
+  // Validate that the quota can be reviewed on component mount
+  useEffect(() => {
+    const checkReviewEligibility = async () => {
+      try {
+        const response = await fetch(
+          `https://theknot-30278e2ff419.herokuapp.com/api/review/can-review/${quota}`
+        );
+        const data = await response.json();
+
+        if (!data.canReview) {
+          setError(data.message || "لا يمكنك تقييم هذا الموعد");
+          setCanReview(false);
+        } else {
+          setCanReview(true);
+        }
+      } catch (err) {
+        setError("حدث خطأ أثناء التحقق من صلاحية التقييم");
+        setCanReview(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (quota) {
+      checkReviewEligibility();
+    } else {
+      setError("معلومات الموعد غير صحيحة");
+      setIsLoading(false);
+    }
+  }, [quota]);
 
   const handleStarClick = (value) => {
     setRating(value);
@@ -69,7 +147,6 @@ const Review = ({ appointmentId, businessId, onClose, onSubmitSuccess }) => {
     setError("");
 
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch(
         "https://theknot-30278e2ff419.herokuapp.com/api/review",
         {
@@ -78,7 +155,8 @@ const Review = ({ appointmentId, businessId, onClose, onSubmitSuccess }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            businessId,
+            quotaId: quota,
+            businessId: slug,
             rating,
             comment: feedback.trim(),
           }),
@@ -98,25 +176,60 @@ const Review = ({ appointmentId, businessId, onClose, onSubmitSuccess }) => {
         onSubmitSuccess(data);
       }
 
-      // Auto close after 2 seconds
+      // Auto redirect after 2 seconds
       setTimeout(() => {
         if (onClose) {
           onClose();
+        } else {
+          // Redirect to business page or home
+          navigate(`/business/${slug}`);
         }
       }, 2000);
     } catch (err) {
       setError(err.message || "حدث خطأ أثناء إرسال التقييم");
     } finally {
       setIsSubmitting(false);
+      navigate("/");
     }
   };
 
   const handleCancel = () => {
     if (onClose) {
       onClose();
+    } else {
+      navigate(-1); // Go back to previous page
     }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <LoadingWrapper>
+        <LoadingSp>جاري التحميل…</LoadingSp>
+        <LoadingBar>
+          <LoadingBarFill />
+        </LoadingBar>
+      </LoadingWrapper>
+    );
+  }
+
+  // Error state - cannot review
+  if (!canReview && error) {
+    return (
+      <ReWrapper>
+        <ReviewContainer>
+          <ErrorMessage>{error}</ErrorMessage>
+          <ButtonGroup>
+            <SubmitButton type="button" onClick={handleCancel}>
+              العودة
+            </SubmitButton>
+          </ButtonGroup>
+        </ReviewContainer>
+      </ReWrapper>
+    );
+  }
+
+  // Success state
   if (success) {
     return (
       <ReWrapper>
@@ -163,7 +276,7 @@ const Review = ({ appointmentId, businessId, onClose, onSubmitSuccess }) => {
 
           <FeedbackSection>
             <FeedbackLabel htmlFor="feedback">
-              أخبرنا المزيد عن تجربتك (اختياري)
+              أخبرنا المزيد عن تجربتك
             </FeedbackLabel>
             <FeedbackTextarea
               id="feedback"

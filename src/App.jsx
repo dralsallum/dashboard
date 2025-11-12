@@ -32,7 +32,7 @@ const App = () => {
       <div style={{ width: "100%", overflow: "hidden" }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/rate" element={<Rate />} />
+          <Route path="/rate/:slug/:quota" element={<Rate />} />
           <Route path="/desktop" element={<PostHog />} />
           <Route path="/reservation/:major" element={<Reservation />} />
           <Route path="/test" element={<Test />} />
