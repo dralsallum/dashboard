@@ -474,7 +474,7 @@ import Board from "../../assets/board.png";
 import Board2 from "../../assets/board2.png";
 import Board3 from "../../assets/board3.png";
 import Chair from "../../assets/chair.webp";
-import logo from "../../assets/drslallum.png";
+import logo from "../../assets/logoWhite.png";
 import marketsIcon from "../../assets/markets.png";
 import { useNavigate } from "react-router-dom";
 import { setSettingTab } from "../../redux/settingRedux";
