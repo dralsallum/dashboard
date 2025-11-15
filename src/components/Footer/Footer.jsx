@@ -24,6 +24,45 @@ import Logo from "../../assets/logoWhite.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
+  const LinkDis = [
+    {
+      title: "من نحن",
+      path: {
+        name1: "كيف يعمل",
+        path1: "/howItWork",
+        name2: "اخر الاخبار",
+        path2: "/news",
+      },
+    },
+    {
+      title: "الشروط والاحكام",
+      path: {
+        name1: "اطلع عليها",
+        path1: "/policy",
+        name2: "سياسة الخصوصية",
+        path2: "/privacy",
+      },
+    },
+    {
+      title: "تواصل معنا",
+      path: {
+        name1: "السوشل ميديا",
+        path1: "/social",
+        name2: "اتصل بنا",
+        path2: "/contact",
+      },
+    },
+    {
+      title: "الخدمات",
+      path: {
+        name1: "حجز موعد",
+        path1: "/book",
+        name2: "جميع المزودين",
+        path2: "/providers",
+      },
+    },
+  ];
+
   return (
     <FooterContainer>
       <FooterSubscription>
@@ -36,30 +75,17 @@ const Footer = () => {
         </Form>
       </FooterSubscription>
       <FooterLinksContainer>
-        <FooterLinksWrapper>
-          <FooterLinksItems>
-            <FooterLinkTitle>من نحن</FooterLinkTitle>
-            <FooterLink to="/support">كيف يعمل</FooterLink>
-            <FooterLink to="/">شهادة المستخدمين</FooterLink>
-          </FooterLinksItems>
-          <FooterLinksItems>
-            <FooterLinkTitle>تواصل معنا</FooterLinkTitle>
-            <FooterLink to="/sign-up">كيف يعمل</FooterLink>
-            <FooterLink to="/">شهادة المستخدمين</FooterLink>
-          </FooterLinksItems>
-        </FooterLinksWrapper>
-        <FooterLinksWrapper>
-          <FooterLinksItems>
-            <FooterLinkTitle>الشروط والاحكام</FooterLinkTitle>
-            <FooterLink to="/policy">اطلع عليها</FooterLink>
-            <FooterLink to="/policy">شهادة المستخدمين</FooterLink>
-          </FooterLinksItems>
-          <FooterLinksItems>
-            <FooterLinkTitle>السوشل ميديا</FooterLinkTitle>
-            <FooterLink to="/sign-up">كيف يعمل</FooterLink>
-            <FooterLink to="/">شهادة المستخدمين</FooterLink>
-          </FooterLinksItems>
-        </FooterLinksWrapper>
+        {LinkDis.map((item, index) => {
+          return (
+            <FooterLinksWrapper key={index}>
+              <FooterLinksItems>
+                <FooterLinkTitle>{item.title}</FooterLinkTitle>
+                <FooterLink to={item.path.path1}>{item.path.name1}</FooterLink>
+                <FooterLink to={item.path.path2}>{item.path.name2}</FooterLink>
+              </FooterLinksItems>
+            </FooterLinksWrapper>
+          );
+        })}
       </FooterLinksContainer>
       <SocialMedia>
         <SocialMediaWrap>
