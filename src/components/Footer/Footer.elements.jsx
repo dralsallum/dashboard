@@ -96,7 +96,8 @@ export const FooterLinksContainer = styled.div`
   display: flex;
   justify-content: center;
   background-color: #101522;
-
+  flex-wrap: wrap;
+  align-items: center;
   @media screen and (max-width: 820px) {
     padding-top: 12px;
   }
@@ -105,6 +106,7 @@ export const FooterLinksContainer = styled.div`
 export const FooterLinksWrapper = styled.div`
   display: flex;
   background-color: #101522;
+  justify-content: center;
 
   @media screen and (max-width: 820px) {
     flex-direction: column;

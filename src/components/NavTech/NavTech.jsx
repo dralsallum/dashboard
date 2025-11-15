@@ -55,6 +55,7 @@ const NavLinks = styled.nav`
 `;
 
 const NavLinkStyled = styled(Link)`
+  font-size: 18px;
   text-decoration: none;
   color: #000;
   font-weight: 500;
