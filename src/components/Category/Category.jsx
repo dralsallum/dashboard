@@ -53,7 +53,7 @@ const Category = forwardRef((props, ref) => {
       dir: "/reservation/طبيب جلدية",
     },
     { name: "طبيب نفسي", icon: Psychiatrist, dir: "/reservation/طبيب نفسي" },
-    { name: "طبيب عيون", icon: EyeDoctor, dir: "/reservation/EyeDoctor" },
+    { name: "طبيب تجميل", icon: EyeDoctor, dir: "/reservation/طبيب تجميل" },
   ];
 
   const handleNavigate = (nav) => navigate(nav);
