@@ -241,7 +241,7 @@ const Website = () => {
               : data.username,
           specialty: data?.major || "طبيب تجميل",
           location: data?.location || "الرياض",
-          allowReview: data?.appointmentSettings.reviewSettings.enabled || true,
+          allowReview: data?.appointmentSettings.reviewSettings.enabled ?? true,
           expertise: data?.expertise || null,
           rating: data.appointmentSettings.reviewSettings.rating || null,
           reviewHighlight: "تجربة ممتازة، إنصات واهتمام ونصائح واضحة",
