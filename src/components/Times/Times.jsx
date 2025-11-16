@@ -45,6 +45,7 @@ const Times = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [imageLoadStates, setImageLoadStates] = useState({});
   const { major } = useParams();
   const loadingBarRef = useRef(null);
 
@@ -302,6 +303,16 @@ const Times = () => {
                     <AvatarImage
                       src={provider.profileImg}
                       alt={provider.name}
+                      onLoad={() => {
+                        setImageLoadStates((prev) => ({
+                          ...prev,
+                          [provider.id]: true,
+                        }));
+                      }}
+                      style={{
+                        opacity: imageLoadStates[provider.id] ? 1 : 0,
+                        transition: "opacity 0.3s ease-in-out",
+                      }}
                     />
                   ) : (
                     <AvatarPlaceholder />
