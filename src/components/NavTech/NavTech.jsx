@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/userRedux";
+import Menu from "../../assets/menu.png";
 
 /* ====== Styled Components for Navigation Bar ====== */
 const Header = styled.header`
@@ -153,9 +154,9 @@ const MenuButton = styled.button`
     width: 44px;
     height: 44px;
     border-radius: 8px;
-    font-size: 1.3rem;
     cursor: pointer;
     transition: background 0.2s ease;
+    padding: 0;
 
     &:active {
       background: #e5b803;
@@ -168,6 +169,27 @@ const MenuButton = styled.button`
   @media (max-width: 480px) {
     width: 40px;
     height: 40px;
+  }
+`;
+
+const MenuIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+  transition: transform 0.2s ease;
+
+  @media (max-width: 480px) {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const CloseIcon = styled.span`
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #fff;
+
+  @media (max-width: 480px) {
     font-size: 1.2rem;
   }
 `;
@@ -727,7 +749,13 @@ const NavTech = () => {
           </SubscribeButton>
         )}
 
-        <MenuButton onClick={toggleMenu}>{isMenuOpen ? "✕" : "☰"}</MenuButton>
+        <MenuButton onClick={toggleMenu}>
+          {isMenuOpen ? (
+            <CloseIcon>✕</CloseIcon>
+          ) : (
+            <MenuIcon src={Menu} alt="Menu" />
+          )}
+        </MenuButton>
       </Header>
 
       {/* Browse Modal */}
