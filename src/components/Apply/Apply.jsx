@@ -130,6 +130,7 @@ const LoadingSpinner = () => (
 );
 
 const Apply = () => {
+  const navigate = useNavigate();
   const [isMasterOneVisible, setIsMasterOneVisible] = useState(true);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -144,8 +145,6 @@ const Apply = () => {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [waitingList, setWaitingList] = useState(1272);
-
-  const navigate = useNavigate();
 
   const professionOptions = {
     طبيب: [
