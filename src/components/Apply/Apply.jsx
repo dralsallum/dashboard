@@ -10,7 +10,6 @@ import {
   ApConTw,
   ApFo,
   ApFoIn,
-  ApFoInput,
   ApFoNo,
   ApHe,
   ApHeBe,
@@ -55,11 +54,11 @@ import {
 
 // Animated Counter Component
 const AnimatedCounter = ({ targetValue, duration = 1500 }) => {
-  const [displayValue, setDisplayValue] = useState(0); // Start from 0
-  const previousValueRef = useRef(0); // Start from 0
+  const [displayValue, setDisplayValue] = useState(0);
+  const previousValueRef = useRef(0);
   const animationFrameRef = useRef(null);
   const startTimeRef = useRef(null);
-  const isInitialMount = useRef(true); // Track initial mount
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const startValue = isInitialMount.current ? 0 : previousValueRef.current;
@@ -75,7 +74,6 @@ const AnimatedCounter = ({ targetValue, duration = 1500 }) => {
       const elapsed = currentTime - startTimeRef.current;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Easing function for smooth animation (easeOutQuad)
       const easedProgress = 1 - Math.pow(1 - progress, 3);
       const currentValue = Math.floor(startValue + difference * easedProgress);
 
@@ -86,7 +84,7 @@ const AnimatedCounter = ({ targetValue, duration = 1500 }) => {
       } else {
         previousValueRef.current = targetValue;
         startTimeRef.current = null;
-        isInitialMount.current = false; // Mark as no longer initial mount
+        isInitialMount.current = false;
       }
     };
 
@@ -140,11 +138,9 @@ const Apply = () => {
   const [lastName, setLastName] = useState("");
   const [profession, setProfession] = useState("");
   const [discipline, setDiscipline] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [otherSpecialty, setOtherSpecialty] = useState("");
-  const [salaryRange, setSalaryRange] = useState("");
+  const [level, setLevel] = useState("");
+  const [patientsMonthly, setPatientsMonthly] = useState("");
   const [disciplineOptions, setDisciplineOptions] = useState([]);
-  const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [waitingList, setWaitingList] = useState(1272);
@@ -152,31 +148,34 @@ const Apply = () => {
   const navigate = useNavigate();
 
   const professionOptions = {
+    طبيب: [
+      "جراحة تجميل",
+      "جلدية",
+      "طبيب نفسي",
+      "جراحة أنف وأذن وحنجرة",
+      "جراحة عيون",
+      "قلب",
+      "اعصاب",
+      "طبيب باطنة",
+      "جراحة عظام",
+      "أطفال",
+      "نساء وولادة",
+    ],
+    "طبيب اسنان": ["جراحة", "عيادة"],
     ممرض: ["ممرض سريري", "ممرض جراحي"],
-    طبيب: ["قلب", "اعصاب"],
-    dentist: ["جراحة", "عيادة"],
-    allies: ["قلب", "اعصاب"],
-    leadership: ["قلب", "اعصاب"],
-    language: ["قلب", "اعصاب"],
   };
 
-  const disciplineOptionsMapping = {
-    "ممرض سريري": ["Adult Health", "Pediatrics"],
-    "ممرض جراحي": ["Orthopedics", "Neurosurgery"],
-    قلب: ["قلب تدخلي", "كهربت القلب"],
-    اعصاب: ["Stroke Care", "Epilepsy"],
-  };
+  const levelOptions = ["استشاري", "اخصائي", "مقيم"];
 
-  const salaryRanges = [
-    "أقل من 5,000 ريال",
-    "5,000 - 10,000 ريال",
-    "10,000 - 15,000 ريال",
-    "15,000 - 20,000 ريال",
-    "20,000 - 30,000 ريال",
-    "أكثر من 30,000 ريال",
+  const patientsMonthlyOptions = [
+    "0-50",
+    "51-100",
+    "101-200",
+    "201-300",
+    "301-500",
+    "500+",
   ];
 
-  // Animated counter effect - increments by 13 every 2 seconds up to maximum of 1325
   useEffect(() => {
     const intervalId = setInterval(() => {
       setWaitingList((prev) => {
@@ -194,12 +193,6 @@ const Apply = () => {
     }
   }, [profession]);
 
-  useEffect(() => {
-    if (discipline) {
-      setSpecialtyOptions(disciplineOptionsMapping[discipline] || []);
-    }
-  }, [discipline]);
-
   const submitApplication = async () => {
     setIsLoading(true);
     const applicationData = {
@@ -209,9 +202,8 @@ const Apply = () => {
       lastName,
       profession,
       discipline,
-      specialty,
-      otherSpecialty,
-      salaryRange,
+      level,
+      patientsMonthly,
     };
 
     try {
@@ -253,22 +245,6 @@ const Apply = () => {
     if (emailError) setEmailError("");
   };
 
-  const handleSpecialtyChange = (e) => {
-    const value = e.target.value;
-    setSpecialty(value);
-    if (value) {
-      setOtherSpecialty("");
-    }
-  };
-
-  const handleOtherSpecialtyChange = (e) => {
-    const value = e.target.value;
-    setOtherSpecialty(value);
-    if (value) {
-      setSpecialty("");
-    }
-  };
-
   const validateEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
   };
@@ -287,7 +263,6 @@ const Apply = () => {
         <ApConOn>
           <ApHe>
             <span>
-              {" "}
               <AnimatedCounter targetValue={waitingList} />
             </span>
             <span> مسجل في قائمة الانتظار</span>
@@ -316,7 +291,6 @@ const Apply = () => {
                       <ApFoIn type="text" />
                       <ApFoIn type="text" />
                       <ApFoIn type="text" />
-                      <ApFoInput type="text" />
                       <ApFoNo>
                         <ApNo></ApNo>
                       </ApFoNo>
@@ -463,19 +437,17 @@ const Apply = () => {
                                 <HiOnSp></HiOnSp>
                               </HiWraOn>
                               <HiWraOn>
-                                <HiFiLa>التخصص *</HiFiLa>
+                                <HiFiLa>المستوى *</HiFiLa>
                                 <HiFiSel
-                                  id="specialty"
-                                  value={specialty}
-                                  onChange={handleSpecialtyChange}
-                                  disabled={
-                                    !discipline ||
-                                    isLoading ||
-                                    otherSpecialty !== ""
+                                  id="level"
+                                  value={level}
+                                  onChange={(e) =>
+                                    handleSelectChange(e, setLevel)
                                   }
+                                  disabled={isLoading}
                                 >
-                                  <HiFiOp value="">-- اختر التخصص --</HiFiOp>
-                                  {specialtyOptions.map((option) => (
+                                  <HiFiOp value="">-- اختر المستوى --</HiFiOp>
+                                  {levelOptions.map((option) => (
                                     <HiFiOp key={option} value={option}>
                                       {option}
                                     </HiFiOp>
@@ -484,52 +456,33 @@ const Apply = () => {
                                 <HiOnSp></HiOnSp>
                               </HiWraOn>
                               <HiWraOn>
-                                <HiFiLa>تخصصات اخرى *</HiFiLa>
+                                <HiFiLa>عدد المرضى شهريا *</HiFiLa>
                                 <HiFiSel
-                                  id="otherSpecialty"
-                                  value={otherSpecialty}
-                                  onChange={handleOtherSpecialtyChange}
-                                  disabled={isLoading || specialty !== ""}
-                                >
-                                  <HiFiOp value="">-- تخصصات اخرى --</HiFiOp>
-                                  <HiFiOp value="nursing">تمريض</HiFiOp>
-                                  <HiFiOp value="allies">استقبال</HiFiOp>
-                                  <HiFiOp value="physician">طبيب</HiFiOp>
-                                  <HiFiOp value="leadership">اداري</HiFiOp>
-                                  <HiFiOp value="dentist">طبيب اسنان</HiFiOp>
-                                  <HiFiOp value="language">فني</HiFiOp>
-                                </HiFiSel>
-                                <HiOnSp></HiOnSp>
-                              </HiWraOn>
-                              <HiWraOn>
-                                <HiFiLa>النطاق المرتب المطلوب *</HiFiLa>
-                                <HiFiSel
-                                  id="salaryRange"
-                                  value={salaryRange}
+                                  id="patientsMonthly"
+                                  value={patientsMonthly}
                                   onChange={(e) =>
-                                    handleSelectChange(e, setSalaryRange)
+                                    handleSelectChange(e, setPatientsMonthly)
                                   }
                                   disabled={isLoading}
                                 >
-                                  <HiFiOp value="">
-                                    -- اختر النطاق المرتبي --
-                                  </HiFiOp>
-                                  {salaryRanges.map((range, index) => (
-                                    <HiFiOp key={index} value={range}>
-                                      {range}
+                                  <HiFiOp value="">-- اختر النطاق --</HiFiOp>
+                                  {patientsMonthlyOptions.map((option) => (
+                                    <HiFiOp key={option} value={option}>
+                                      {option}
                                     </HiFiOp>
                                   ))}
                                 </HiFiSel>
                                 <HiOnSp></HiOnSp>
                               </HiWraOn>
                               <HiWraOn>
-                                <HiTwLa htmlFor="">السيرة *</HiTwLa>
+                                <HiFiLa>تصنيف الهيئة "اختياري" </HiFiLa>
                                 <HiOnIn
                                   id="resume"
                                   type="file"
                                   placeholder="resume"
                                   onChange={(e) => setFile(e.target.files[0])}
                                   disabled={isLoading}
+                                  accept=".pdf,.doc,.docx"
                                 />
                                 <HiOnSp></HiOnSp>
                               </HiWraOn>
