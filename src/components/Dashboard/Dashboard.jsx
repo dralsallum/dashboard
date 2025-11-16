@@ -520,6 +520,11 @@ const Dashboard = () => {
     allowOnlinePayment: true,
     requireUpfrontPayment: false,
   });
+  const [reviewSettings, setReviewSettings] = useState({
+    enabled: true,
+    rating: 4,
+    review: 3,
+  });
   const [holidays, setHolidays] = useState([]);
   const [newHoliday, setNewHoliday] = useState({
     date: "",
@@ -583,6 +588,11 @@ const Dashboard = () => {
       // Initialize payment settings
       if (currentUser.appointmentSettings?.paymentSettings) {
         setPaymentSettings(currentUser.appointmentSettings.paymentSettings);
+      }
+
+      // Initialize review settings
+      if (currentUser.appointmentSettings?.reviewSettings) {
+        setReviewSettings(currentUser.appointmentSettings.reviewSettings);
       }
 
       // Initialize holidays
@@ -784,6 +794,11 @@ const Dashboard = () => {
             allowPayOnArrival: paymentSettings.allowPayOnArrival,
             allowOnlinePayment: paymentSettings.allowOnlinePayment,
             requireUpfrontPayment: paymentSettings.requireUpfrontPayment,
+          },
+          reviewSettings: {
+            enabled: reviewSettings.enabled,
+            review: reviewSettings.review || 0,
+            rating: reviewSettings.rating || 0,
           },
 
           holidays: holidays.map((h) => ({
@@ -2785,6 +2800,19 @@ const Dashboard = () => {
                         />
                         <CheckboxText>يتطلب الدفع المسبق</CheckboxText>
                       </CheckboxLabel>
+                      <CheckboxLabel>
+                        <CheckboxInput
+                          type="checkbox"
+                          checked={reviewSettings.enabled}
+                          onChange={(e) =>
+                            setReviewSettings((prev) => ({
+                              ...prev,
+                              enabled: e.target.checked,
+                            }))
+                          }
+                        />
+                        <CheckboxText>اظهار التقاييم</CheckboxText>
+                      </CheckboxLabel>
                     </CheckboxGroup>
                   </WhiteCard>
 
@@ -2882,12 +2910,14 @@ const Dashboard = () => {
                             <DoctorSpecialty>
                               {major || "طبيب رعاية أولية"}
                             </DoctorSpecialty>
-                            <RatingRow>
-                              <Rating
-                                value={currentUser?.rating || 4.9}
-                                reviews={currentUser?.reviews || 860}
-                              />
-                            </RatingRow>
+                            {reviewSettings.enabled ? (
+                              <RatingRow>
+                                <Rating
+                                  value={currentUser?.rating || 4.9}
+                                  reviews={currentUser?.reviews || 860}
+                                />
+                              </RatingRow>
+                            ) : null}
                           </DoctorDetails>
                         </DoctorInfoRow>
                       </PreviewSection>

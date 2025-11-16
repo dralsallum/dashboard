@@ -180,8 +180,8 @@ const Times = () => {
         id: clinician._id,
         name: displayName,
         specialty: clinician.major || "ممارس عام",
-        rating: clinician.rating || 0,
-        reviews: clinician.reviews || 0,
+        rating: clinician.appointmentSettings?.reviewSettings?.rating || 0,
+        reviews: clinician.appointmentSettings?.reviewSettings?.reviews || 0,
         videoVisits: true, // Default to true, can be made configurable
         inNetwork: clinician.appointmentSettings?.requireInsurance || false,
         sponsored: false, // Default to false

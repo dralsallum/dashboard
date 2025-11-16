@@ -1,5 +1,4 @@
 import styled, { keyframes, css } from "styled-components";
-
 export const Increase = keyframes`
   0% {
     width: 0%;
@@ -31,6 +30,7 @@ export const LoadingBar = styled.div`
 
   position: relative;
 `;
+
 export const LoadingSp = styled.span`
   margin-bottom: 12px;
 `;
@@ -42,6 +42,7 @@ export const LoadingBarFill = styled.div`
   animation: ${Increase} 3s ease-out forwards;
   width: 0%;
 `;
+
 /* ---------- لوحة الألوان ---------- */
 export const C = {
   cream: "#F7F2E6",
@@ -101,7 +102,7 @@ export const SectionHeader = styled(Section)`
 export const HeaderRow = styled.div`
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
   padding: 16px 12px 0;
   margin: 12px 0 0 0;
 `;
@@ -943,4 +944,8 @@ export const ReviewItemText = styled.p`
   color: #202124;
   line-height: 1.6;
   margin: 12px 0 0 0;
+`;
+
+export const RateFlex = styled.div`
+  display: flex;
 `;
