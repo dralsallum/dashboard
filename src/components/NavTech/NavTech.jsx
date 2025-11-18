@@ -141,6 +141,52 @@ const SignOutButton = styled.button`
   }
 `;
 
+const MobileButtonGroup = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+`;
+
+const UploadButton = styled(Link)`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    color: #fece04;
+    border: 2px solid #fece04;
+    height: 44px;
+    padding: 0 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+
+    &:active {
+      background: #f8f6f2;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    height: 40px;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+  }
+`;
+
 const MenuButton = styled.button`
   display: none;
 
@@ -749,13 +795,16 @@ const NavTech = () => {
           </SubscribeButton>
         )}
 
-        <MenuButton onClick={toggleMenu}>
-          {isMenuOpen ? (
-            <CloseIcon>✕</CloseIcon>
-          ) : (
-            <MenuIcon src={Menu} alt="Menu" />
-          )}
-        </MenuButton>
+        <MobileButtonGroup>
+          <MenuButton onClick={toggleMenu}>
+            {isMenuOpen ? (
+              <CloseIcon>✕</CloseIcon>
+            ) : (
+              <MenuIcon src={Menu} alt="Menu" />
+            )}
+          </MenuButton>
+          <UploadButton to="/upload">أضف عيادتك</UploadButton>
+        </MobileButtonGroup>
       </Header>
 
       {/* Browse Modal */}
