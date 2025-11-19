@@ -137,6 +137,7 @@ const Apply = () => {
   const [phone, setPhone] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [clinicName, setClinicName] = useState("");
   const [profession, setProfession] = useState("");
   const [discipline, setDiscipline] = useState("");
   const [level, setLevel] = useState("");
@@ -199,6 +200,7 @@ const Apply = () => {
       phone,
       firstName,
       lastName,
+      clinicName,
       profession,
       discipline,
       level,
@@ -392,6 +394,20 @@ const Apply = () => {
                                   value={lastName}
                                   onChange={(e) =>
                                     handleInputChange(e, setLastName)
+                                  }
+                                  disabled={isLoading}
+                                />
+                                <HiOnSp></HiOnSp>
+                              </HiWraOn>
+                              <HiWraOn>
+                                <HiTwLa htmlFor="">اسم العائلة *</HiTwLa>
+                                <HiOnIn
+                                  id="clinicName"
+                                  type="text"
+                                  placeholder="اسم العيادة"
+                                  value={clinicName}
+                                  onChange={(e) =>
+                                    handleInputChange(e, setClinicName)
                                   }
                                   disabled={isLoading}
                                 />
