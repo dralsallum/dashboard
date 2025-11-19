@@ -162,12 +162,12 @@ const UploadButton = styled(Link)`
     color: #fece04;
     border: 2px solid #fece04;
     height: 44px;
-    padding: 0 1rem;
+    padding: 0 0.6rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
     white-space: nowrap;
 
