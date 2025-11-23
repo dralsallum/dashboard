@@ -37,6 +37,7 @@ import {
   FilterDropdown,
   FilterOption,
   FilterToggle,
+  InputFilter,
 } from "./Times.elements";
 import axios from "axios";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -452,11 +453,10 @@ const Times = () => {
             onClick={() => setAvailableWithinWeek(!availableWithinWeek)}
           >
             <span>📅</span> متاح خلال أسبوع
-            <input
+            <InputFilter
               type="checkbox"
               checked={availableWithinWeek}
               onChange={() => {}}
-              style={{ marginRight: "8px" }}
             />
           </FilterToggle>
         </FiltersBar>

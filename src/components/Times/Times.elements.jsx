@@ -73,11 +73,8 @@ export const FiltersBar = styled.div`
   z-index: 9999;
   @media (max-width: 768px) {
     flex-wrap: nowrap;
-
-    padding: 16px;
-    margin-bottom: 16px;
-
-    /* Hide scrollbar for cleaner look */
+    padding: 10px;
+    margin-bottom: 10px;
     scrollbar-width: thin;
     scrollbar-color: #d0d0d0 transparent;
 
@@ -122,6 +119,7 @@ export const FilterBtn = styled.button`
 
   @media (max-width: 768px) {
     flex-shrink: 0;
+    padding: 6px 14px;
   }
 `;
 
@@ -156,7 +154,14 @@ export const FilterToggle = styled.button`
 
   @media (max-width: 768px) {
     flex-shrink: 0;
+    padding: 6px 14px;
   }
+`;
+
+export const InputFilter = styled.input`
+  background-color: #fff;
+  accent-color: #007bff;
+  margin-right: 8px;
 `;
 
 export const FilterDropdown = styled.div`
