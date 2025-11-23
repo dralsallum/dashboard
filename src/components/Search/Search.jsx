@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   ArWrapper,
   Container,
@@ -22,35 +21,9 @@ const Search = () => {
   const [specialty, setSpecialty] = useState("");
   const [location, setLocation] = useState("");
   const [insurance, setInsurance] = useState("");
-  const [majors, setMajors] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Fetch available majors/specialties from the backend
-  useEffect(() => {
-    const fetchMajors = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          "https://theknot-30278e2ff419.herokuapp.com/api/business/category"
-        );
-
-        // Extract unique majors from the response
-        const uniqueMajors = [
-          ...new Set(
-            response.data.map((clinician) => clinician.major).filter(Boolean)
-          ),
-        ].sort();
-
-        setMajors(uniqueMajors);
-      } catch (error) {
-        console.error("Error fetching majors:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMajors();
-  }, []);
+  const main = ["طبيب باطنة", "طبيب جلدية", "طبيب تجميل"];
+  const cities = ["الرياض", "جدة", "الدمام"];
 
   const handleSearch = () => {
     // Build the navigation path and query parameters
@@ -109,17 +82,15 @@ const Search = () => {
                 aria-label="اختر التخصص"
                 value={specialty}
                 onChange={(e) => setSpecialty(e.target.value)}
-                disabled={loading}
                 style={{
-                  cursor: loading ? "not-allowed" : "pointer",
-                  backgroundColor: loading ? "#FFFFFF" : "white",
+                  cursor: "pointer",
                   appearance: "none",
                   WebkitAppearance: "none",
                   MozAppearance: "none",
                 }}
               >
-                <option>اختر التخصص</option>
-                {majors.map((major) => (
+                <option value="">اختر التخصص</option>
+                {main.map((major) => (
                   <option key={major} value={major}>
                     {major}
                   </option>
@@ -130,14 +101,25 @@ const Search = () => {
             <InputGroup>
               <Label htmlFor="location-input">الموقع</Label>
               <Input
+                as="select"
                 id="location-input"
-                type="text"
-                placeholder="اسم المدينة (مثال: الرياض)"
-                aria-label="أدخل الموقع"
+                aria-label="اختر المدينة"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
+                style={{
+                  cursor: "pointer",
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                }}
+              >
+                <option value="">اختر المدينة</option>
+                {cities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </Input>
             </InputGroup>
 
             <InputGroup>
@@ -156,14 +138,9 @@ const Search = () => {
             <FindButton
               onClick={handleSearch}
               aria-label="ابحث عن الرعاية الصحية بالمعايير المحددة"
-              disabled={loading}
-              style={{
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.6 : 1,
-              }}
             >
               <SearchIconSVG size={20} />
-              <span>{loading ? "جاري التحميل..." : "ابحث عن رعاية صحية"}</span>
+              <span>ابحث عن رعاية صحية</span>
             </FindButton>
           </SearchContainer>
         </ContentWrapper>
