@@ -95,7 +95,7 @@ const Search = () => {
           <TopWrapper>
             <Heading>
               صحتك تبدأ بخطوة احجز <br />
-              مع طبيبك في ثواني
+              مع طبيبك في دقائق
             </Heading>
             <TopImg src={Hands} alt="رسم توضيحي ليدين تحملان بطاقة طبية" />
           </TopWrapper>

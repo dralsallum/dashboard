@@ -30,3 +30,5 @@ export { default as Help } from "./Help/Help";
 export { default as Review } from "./Review/Review";
 export { default as Search } from "./Search/Search";
 export { default as Allcategories } from "./Allcategories/Allcategories";
+export { default as Publish } from "./Publish/Publish";
+export { default as Last } from "./Last/Last";

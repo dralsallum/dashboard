@@ -1,13 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {
-  Very,
-  Footer,
-  NavTech,
-  Phone,
-  Category,
-  Benefits,
-  Search,
-} from "../components";
+import { Footer, Last, NavTech, Publish } from "../components";
 
 const Newsletter = () => {
   const categoryRef = useRef(null);
@@ -18,10 +10,8 @@ const Newsletter = () => {
   return (
     <>
       <NavTech />
-      <Search />
-      <Category ref={categoryRef} />
-      <Benefits />
-      <Phone />
+      <Publish />
+      <Last />
       <Footer />
     </>
   );
