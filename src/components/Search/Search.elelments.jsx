@@ -101,7 +101,7 @@ export const Input = styled.input`
   @media screen and (max-width: 968px) {
     border: none;
     border-bottom: 1px solid #e2e8f0;
-    padding: 4px;
+    padding: 2px;
     box-shadow: none;
   }
 `;
