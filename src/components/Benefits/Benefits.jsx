@@ -14,8 +14,13 @@ import {
 import DocFir from "../../assets/docFir.png";
 import DocSec from "../../assets/docSec.svg";
 import DocThi from "../../assets/docThi.svg";
+import { useNavigate } from "react-router-dom";
 
 const Benefits = () => {
+  const navigate = useNavigate();
+
+  const handleNav = (des) => navigate(des);
+
   return (
     <BenefitsContainer>
       <BenefitsWrapper>
@@ -27,7 +32,13 @@ const Benefits = () => {
               <DoctorIcon src={DocFir} alt="تصفح الأطباء" />
             </IconWrapper>
             <BenefitTitle>تصفح مقدمي الخدمة الذين يقبلون تأمينك</BenefitTitle>
-            <BenefitButton>عرض التخصصات</BenefitButton>
+            <BenefitButton
+              onClick={() => {
+                handleNav("/speciality");
+              }}
+            >
+              عرض التخصصات
+            </BenefitButton>
           </BenefitCard>
 
           <BenefitCard>

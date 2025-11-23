@@ -281,9 +281,7 @@ const Apply = () => {
               <AqSubSec>
                 <AqAra>
                   <AqAraOne>
-                    <AqAraOnePa>
-                      عبّر عن اهتمامك وانضم إلى قائمة الانتظار
-                    </AqAraOnePa>
+                    <AqAraOnePa>عبّر عن اهتمامك وسجل الان</AqAraOnePa>
                   </AqAraOne>
                   <AqAraTwo>
                     <ApFo onSubmit={(e) => e.preventDefault()}>

@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 export const AllCategoriesContainer = styled.div`
   width: 100%;
-  max-width: 1400px;
   margin: 0 auto;
   padding: 80px 40px 60px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
