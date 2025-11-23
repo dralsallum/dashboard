@@ -38,6 +38,7 @@ import {
   FilterOption,
   FilterToggle,
   InputFilter,
+  CheckBtn,
 } from "./Times.elements";
 import axios from "axios";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
@@ -448,7 +449,7 @@ const Times = () => {
           </div>
 
           {/* Available Within Week Toggle */}
-          <FilterToggle
+          <CheckBtn
             $active={availableWithinWeek}
             onClick={() => setAvailableWithinWeek(!availableWithinWeek)}
           >
@@ -458,7 +459,7 @@ const Times = () => {
               checked={availableWithinWeek}
               onChange={() => {}}
             />
-          </FilterToggle>
+          </CheckBtn>
         </FiltersBar>
 
         <ProvidersList>

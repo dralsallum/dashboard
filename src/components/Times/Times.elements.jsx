@@ -93,6 +93,35 @@ export const FiltersBar = styled.div`
   }
 `;
 
+export const CheckBtn = styled.button`
+  padding: 8px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 20px;
+  background-color: ${(props) => (props.$active ? "#f5f5f5" : "#000")};
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #000;
+  border-color: ${(props) => (props.$active ? "#999" : "#d0d0d0")};
+  white-space: nowrap;
+
+  &:hover {
+    border-color: #999;
+    background-color: #f9f9f9;
+  }
+
+  span {
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    flex-shrink: 0;
+    padding: 6px 14px;
+  }
+`;
 export const FilterBtn = styled.button`
   padding: 8px 16px;
   border: 1px solid #d0d0d0;
