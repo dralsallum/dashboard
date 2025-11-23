@@ -10,7 +10,7 @@ import {
   CategoryName,
   CategoryDescription,
   BackButton,
-} from "./AllCategories.elements";
+} from "./Allcategories.elements";
 import PrimaryCare from "../../assets/primaryCare.png";
 import Dentist from "../../assets/dentist.png";
 import ObGyn from "../../assets/obgyn.png";
