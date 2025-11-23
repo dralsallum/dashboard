@@ -97,7 +97,7 @@ export const CheckBtn = styled.button`
   padding: 8px 16px;
   border: 1px solid #d0d0d0;
   border-radius: 20px;
-  background-color: ${(props) => (props.$active ? "#f5f5f5" : "#000")};
+  background-color: ${(props) => (props.$active ? "#f5f5f5" : "white")};
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
