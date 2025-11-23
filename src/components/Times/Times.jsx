@@ -34,14 +34,19 @@ import {
   LoadingSp,
   LoadingBar,
   LoadingBarFill,
+  FilterDropdown,
+  FilterOption,
+  FilterToggle,
 } from "./Times.elements";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 const Times = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [clinicians, setClinicians] = useState([]);
+  const [filteredClinicians, setFilteredClinicians] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -49,9 +54,59 @@ const Times = () => {
   const { major } = useParams();
   const loadingBarRef = useRef(null);
 
+  // Filter states
+  const [showCountryFilter, setShowCountryFilter] = useState(false);
+  const [showCityFilter, setShowCityFilter] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [availableWithinWeek, setAvailableWithinWeek] = useState(false);
+
+  // Refs for click outside detection
+  const countryFilterRef = useRef(null);
+  const cityFilterRef = useRef(null);
+
   const handleNavigate = (dir) => {
     navigate(dir);
   };
+
+  // Read query parameters and set filters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    const cityParam = searchParams.get("city");
+    const countryParam = searchParams.get("country");
+
+    if (countryParam) {
+      setSelectedCountry(countryParam);
+    }
+
+    if (cityParam) {
+      setSelectedCity(cityParam);
+    }
+  }, [location.search]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        countryFilterRef.current &&
+        !countryFilterRef.current.contains(event.target)
+      ) {
+        setShowCountryFilter(false);
+      }
+      if (
+        cityFilterRef.current &&
+        !cityFilterRef.current.contains(event.target)
+      ) {
+        setShowCityFilter(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Loading animation effect
   useEffect(() => {
@@ -74,6 +129,38 @@ const Times = () => {
       requestAnimationFrame(animateProgress);
     }
   }, [loading]);
+
+  // Filter clinicians based on selected filters
+  useEffect(() => {
+    let filtered = [...clinicians];
+
+    // Filter by country
+    if (selectedCountry) {
+      filtered = filtered.filter(
+        (clinician) => clinician.country === selectedCountry
+      );
+    }
+
+    // Filter by city
+    if (selectedCity) {
+      filtered = filtered.filter(
+        (clinician) => clinician.city === selectedCity
+      );
+    }
+
+    // Filter by availability within a week
+    if (availableWithinWeek) {
+      filtered = filtered.filter((clinician) => {
+        // Check if any slot in the first 7 days has availability
+        const hasWeekAvailability = clinician.availability
+          .slice(0, 7)
+          .some((slot) => slot.available && slot.slots > 0);
+        return hasWeekAvailability;
+      });
+    }
+
+    setFilteredClinicians(filtered);
+  }, [clinicians, selectedCountry, selectedCity, availableWithinWeek]);
 
   // Helper function to generate availability slots for the next 14 days
   const generateAvailabilitySlots = (workingHours, holidays = []) => {
@@ -191,6 +278,8 @@ const Times = () => {
         slug: clinician.slug,
         secondRow: secondRow,
         profileImg: clinician.profileImg,
+        country: clinician.country || "",
+        city: clinician.city || "",
       };
     });
   };
@@ -214,17 +303,33 @@ const Times = () => {
     return badges;
   };
 
+  // Get unique countries and cities from clinicians
+  const countries = [
+    ...new Set(clinicians.map((c) => c.country).filter(Boolean)),
+  ];
+  const cities = selectedCountry
+    ? [
+        ...new Set(
+          clinicians
+            .filter((c) => c.country === selectedCountry)
+            .map((c) => c.city)
+            .filter(Boolean)
+        ),
+      ]
+    : [...new Set(clinicians.map((c) => c.city).filter(Boolean))];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
         // Build URL with query parameter
-        const url = major
-          ? `https://theknot-30278e2ff419.herokuapp.com/api/business/category?major=${encodeURIComponent(
-              major
-            )}`
-          : "https://theknot-30278e2ff419.herokuapp.com/api/business/category";
+        const url =
+          major && major !== "all"
+            ? `https://theknot-30278e2ff419.herokuapp.com/api/business/category?major=${encodeURIComponent(
+                major
+              )}`
+            : "https://theknot-30278e2ff419.herokuapp.com/api/business/category";
 
         const response = await axios.get(url);
 
@@ -247,29 +352,20 @@ const Times = () => {
       <LoadingWrapper>
         <LoadingSp>جاري التحميل…</LoadingSp>
         <LoadingBar>
-          <LoadingBarFill
-            ref={loadingBarRef}
-            style={{ width: `${loadingProgress}%` }}
-          />
+          <LoadingBarFill />
         </LoadingBar>
       </LoadingWrapper>
     );
-  if (error) return <div>Error: {error}</div>;
 
-  const categories = [
-    "الفحص السنوي",
-    "استشارة الحساسية",
-    "فحص أمراض النساء السنوي",
-    "الربو",
-    "آلام الظهر",
-    "فحص الدم",
-  ];
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <Container>
       <ContentSection>
         <HeaderSection>
-          <ProvidersCount>{clinicians.length} مقدمي خدمة</ProvidersCount>
+          <ProvidersCount>
+            {filteredClinicians.length} مقدمي خدمة
+          </ProvidersCount>
           <DateRange>
             <ArrowBtn>‹</ArrowBtn>
             <span>اليوم، نوفمبر 7 - الخميس، نوفمبر 20</span>
@@ -278,19 +374,95 @@ const Times = () => {
         </HeaderSection>
 
         <FiltersBar>
-          <FilterBtn $active>
-            <span>📅</span> أنا مرن
-          </FilterBtn>
-          <FilterBtn>وقت اليوم</FilterBtn>
-          <FilterBtn>المرض</FilterBtn>
-          <FilterBtn>التخصص</FilterBtn>
-          <FilterBtn>المسافة</FilterBtn>
-          <FilterBtn>حضوري/فيديو</FilterBtn>
-          <FilterBtn>المزيد من الفلاتر</FilterBtn>
+          {/* Country Filter */}
+          <div ref={countryFilterRef} style={{ position: "relative" }}>
+            <FilterBtn
+              $active={selectedCountry !== ""}
+              onClick={() => setShowCountryFilter(!showCountryFilter)}
+            >
+              <span>🌍</span> {selectedCountry || "الدولة"}
+            </FilterBtn>
+            {showCountryFilter && (
+              <FilterDropdown>
+                <FilterOption
+                  onClick={() => {
+                    setSelectedCountry("");
+                    setSelectedCity("");
+                    setShowCountryFilter(false);
+                  }}
+                  $selected={selectedCountry === ""}
+                >
+                  الكل
+                </FilterOption>
+                {countries.map((country) => (
+                  <FilterOption
+                    key={country}
+                    onClick={() => {
+                      setSelectedCountry(country);
+                      setSelectedCity(""); // Reset city when country changes
+                      setShowCountryFilter(false);
+                    }}
+                    $selected={selectedCountry === country}
+                  >
+                    {country}
+                  </FilterOption>
+                ))}
+              </FilterDropdown>
+            )}
+          </div>
+
+          {/* City Filter */}
+          <div ref={cityFilterRef} style={{ position: "relative" }}>
+            <FilterBtn
+              $active={selectedCity !== ""}
+              onClick={() => setShowCityFilter(!showCityFilter)}
+            >
+              <span>🏙️</span> {selectedCity || "المدينة"}
+            </FilterBtn>
+            {showCityFilter && (
+              <FilterDropdown>
+                <FilterOption
+                  onClick={() => {
+                    setSelectedCity("");
+                    setShowCityFilter(false);
+                  }}
+                  $selected={selectedCity === ""}
+                >
+                  الكل
+                </FilterOption>
+                {cities.map((city) => (
+                  <FilterOption
+                    key={city}
+                    onClick={() => {
+                      setSelectedCity(city);
+                      setShowCityFilter(false);
+                    }}
+                    $selected={selectedCity === city}
+                  >
+                    {city}
+                  </FilterOption>
+                ))}
+              </FilterDropdown>
+            )}
+          </div>
+
+          {/* Available Within Week Toggle */}
+          <FilterToggle
+            $active={availableWithinWeek}
+            onClick={() => setAvailableWithinWeek(!availableWithinWeek)}
+          >
+            <span>📅</span> متاح خلال أسبوع
+            <input
+              type="checkbox"
+              checked={availableWithinWeek}
+              onChange={() => {}}
+              style={{ marginRight: "8px" }}
+            />
+          </FilterToggle>
         </FiltersBar>
 
         <ProvidersList>
-          {clinicians.map((provider) => (
+          {filteredClinicians.map((provider) => (
             <ProviderCard
               key={provider.id}
               onClick={() => {

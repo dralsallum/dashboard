@@ -21,6 +21,7 @@ import {
 import PrimaryCare from "../../assets/primaryCare.png";
 import Dentist from "../../assets/dentist.png";
 import ObGyn from "../../assets/obgyn.png";
+import AllSpeciality from "../../assets/allSpeciality.png";
 import Dermatologist from "../../assets/dermatologist.png";
 import Psychiatrist from "../../assets/psychiatrist.png";
 import EyeDoctor from "../../assets/eyeDoctor.png";
@@ -46,7 +47,6 @@ const Category = forwardRef((props, ref) => {
       dir: "/reservation/طبيب اسرة",
     },
     { name: "طبيب أسنان", icon: Dentist, dir: "/reservation/dentist" },
-    { name: "طبيب نساء وولادة", icon: ObGyn, dir: "/reservation/ObGyn" },
     {
       name: "طبيب جلدية",
       icon: Dermatologist,
@@ -54,6 +54,7 @@ const Category = forwardRef((props, ref) => {
     },
     { name: "طبيب نفسي", icon: Psychiatrist, dir: "/reservation/طبيب نفسي" },
     { name: "طبيب تجميل", icon: EyeDoctor, dir: "/reservation/طبيب تجميل" },
+    { name: "كل التخصصات", icon: AllSpeciality, dir: "/speciality" },
   ];
 
   const handleNavigate = (nav) => navigate(nav);

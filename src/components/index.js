@@ -29,3 +29,4 @@ export { default as Times } from "./Times/Times";
 export { default as Help } from "./Help/Help";
 export { default as Review } from "./Review/Review";
 export { default as Search } from "./Search/Search";
+export { default as Allcategories } from "./Allcategories/Allcategories";

@@ -1,4 +1,48 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
+
+export const Increase = keyframes`
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+`;
+
+export const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  direction: rtl;
+  color: #444;
+  background: #f7f2e6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 100dvh;
+`;
+
+export const LoadingBar = styled.div`
+  width: 200px;
+  height: 8px;
+  background-color: rgba(246, 224, 94, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+
+  position: relative;
+`;
+
+export const LoadingSp = styled.span`
+  margin-bottom: 12px;
+`;
+
+export const LoadingBarFill = styled.div`
+  height: 100%;
+  background-color: #f6e05e;
+  border-radius: 4px;
+  animation: ${Increase} 3s ease-out forwards;
+  width: 0%;
+`;
 
 export const Container = styled.div`
   display: flex;
@@ -26,13 +70,12 @@ export const FiltersBar = styled.div`
   gap: 10px;
   margin-bottom: 24px;
   flex-wrap: wrap;
-
+  z-index: 9999;
   @media (max-width: 768px) {
     flex-wrap: nowrap;
-    overflow-x: auto;
+
     padding: 16px;
     margin-bottom: 16px;
-    -webkit-overflow-scrolling: touch;
 
     /* Hide scrollbar for cleaner look */
     scrollbar-width: thin;
@@ -79,6 +122,94 @@ export const FilterBtn = styled.button`
 
   @media (max-width: 768px) {
     flex-shrink: 0;
+  }
+`;
+
+export const FilterToggle = styled.button`
+  padding: 8px 16px;
+  border: 1px solid #d0d0d0;
+  border-radius: 20px;
+  background-color: ${(props) => (props.$active ? "#007aff" : "white")};
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: ${(props) => (props.$active ? "white" : "#000")};
+  border-color: ${(props) => (props.$active ? "#007aff" : "#d0d0d0")};
+  white-space: nowrap;
+
+  &:hover {
+    border-color: ${(props) => (props.$active ? "#0056b3" : "#999")};
+    background-color: ${(props) => (props.$active ? "#0056b3" : "#f9f9f9")};
+  }
+
+  input[type="checkbox"] {
+    accent-color: white;
+    cursor: pointer;
+  }
+
+  span {
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    flex-shrink: 0;
+  }
+`;
+
+export const FilterDropdown = styled.div`
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 9999;
+  padding: 8px 0;
+
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #d0d0d0;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    max-height: 250px;
+  }
+`;
+
+export const FilterOption = styled.div`
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+  color: #000;
+  background-color: ${(props) => (props.$selected ? "#f0f0f0" : "transparent")};
+  font-weight: ${(props) => (props.$selected ? "600" : "400")};
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
   }
 `;
 
@@ -533,7 +664,7 @@ export const ExpandMapBtn = styled.button`
   font-size: 13px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  z-index: 1000000;
   color: #000;
   transition: all 0.2s;
 
@@ -564,38 +695,4 @@ export const MapPlaceholder = styled.div`
       transform: translateY(-10px);
     }
   }
-`;
-
-export const LoadingWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  direction: rtl;
-  color: #444;
-  background: #f7f2e6;
-  font-size: 1.2rem;
-  font-weight: 600;
-  min-height: 100dvh;
-`;
-
-export const LoadingBar = styled.div`
-  width: 200px;
-  height: 8px;
-  background-color: rgba(246, 224, 94, 0.2);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-`;
-
-export const LoadingSp = styled.span`
-  margin-bottom: 12px;
-`;
-
-export const LoadingBarFill = styled.div`
-  height: 100%;
-  background-color: #f6e05e;
-  border-radius: 4px;
-  width: 0%;
-  transition: width 0.1s ease-out;
 `;

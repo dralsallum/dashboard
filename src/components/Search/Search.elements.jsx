@@ -42,7 +42,7 @@ export const Heading = styled.h1`
   letter-spacing: -0.5px;
 
   @media screen and (max-width: 968px) {
-    font-size: 32px;
+    font-size: 30px;
     padding: 0 1.8rem 0.5rem 1.8rem;
     margin: 0.2rem 0 0.2rem 0;
   }

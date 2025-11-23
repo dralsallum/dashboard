@@ -23,6 +23,7 @@ import Reservation from "./pages/Reservation";
 import Support from "./pages/Support";
 import Rate from "./pages/pay";
 import Newsletter from "./pages/Newsletter";
+import Speciality from "./pages/Speciality";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -46,6 +47,7 @@ const App = () => {
           />
           <Route path="/item" element={<Item />} />
           <Route path="/newsletter" element={<Newsletter />} />
+          <Route path="/speciality" element={<Speciality />} />
           <Route path="/preference" element={<Preference />} />
           <Route path="/product/:id" element={<Product />} />
           <Route path="/outcome" element={<Outcome />} />
