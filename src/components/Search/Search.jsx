@@ -145,7 +145,7 @@ const Search = () => {
               <Input
                 id="insurance-input"
                 type="text"
-                placeholder="شركة التأمين والخطة (اختياري)"
+                placeholder="شركة التأمين (اختياري)"
                 aria-label="أدخل معلومات التأمين"
                 value={insurance}
                 onChange={(e) => setInsurance(e.target.value)}
