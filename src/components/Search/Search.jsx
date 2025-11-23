@@ -8,13 +8,6 @@ import {
   Label,
   Input,
   FindButton,
-  ImageWrapper,
-  HandIllustration,
-  OrangeHand,
-  GreenArm,
-  MedicalCard,
-  YellowBlob,
-  SearchIcon,
   TopWrapper,
   TopImg,
 } from "./Search.elelments";

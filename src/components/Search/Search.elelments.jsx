@@ -97,12 +97,11 @@ export const Input = styled.input`
 
   &:focus {
     border-color: #ffd52b;
-    box-shadow: 0 0 0 3px rgba(255, 213, 43, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   @media screen and (max-width: 968px) {
     border: none;
     border-bottom: 1px solid #e2e8f0;
-    padding: 0;
+    padding: 4px;
     box-shadow: none;
   }
 `;
