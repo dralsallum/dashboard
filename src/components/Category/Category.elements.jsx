@@ -203,7 +203,7 @@ export const SpecialtyIcon = styled.img`
 export const SpecialtyName = styled.div`
   font-size: 22px;
   color: #1a1a1a;
-  font-weight: 600;
+  font-weight: 500;
   text-align: center;
 
   @media (max-width: 768px) {

@@ -6,6 +6,7 @@ import {
   Phone,
   Category,
   Benefits,
+  Search,
 } from "../components";
 
 const Home = () => {
@@ -17,7 +18,7 @@ const Home = () => {
   return (
     <>
       <NavTech />
-      <Very categoryRef={categoryRef} />
+      <Search />
       <Category ref={categoryRef} />
       <Benefits />
       <Phone />

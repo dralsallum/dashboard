@@ -13,7 +13,7 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: #f8f6f2;
+  background: #fdfaee;
   position: relative;
 
   @media (max-width: 768px) {
