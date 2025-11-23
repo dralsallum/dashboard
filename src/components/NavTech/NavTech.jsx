@@ -171,6 +171,7 @@ const UploadButton = styled(Link)`
 
     &:active {
       background: #f8f6f2;
+      outline: none;
     }
 
     &:focus {
@@ -774,7 +775,7 @@ const NavTech = () => {
           <BrowseButton onClick={toggleBrowse}>تصفّح</BrowseButton>
           <NavLinkStyled to="/support">المساعدة</NavLinkStyled>
           <NavLinkStyled to="/upload">أضف عيادتك على منصة وقتنا</NavLinkStyled>
-          <NavLinkStyled to="/">جميع العيادات</NavLinkStyled>
+          <NavLinkStyled to="/newsletter">النشرة البريدة</NavLinkStyled>
         </NavLinks>
 
         {currentUser ? (

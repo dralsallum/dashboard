@@ -145,7 +145,7 @@ const Apply = () => {
   const [disciplineOptions, setDisciplineOptions] = useState([]);
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [waitingList, setWaitingList] = useState(1272);
+  const [waitingList, setWaitingList] = useState(127);
 
   const professionOptions = {
     طبيب: [
@@ -180,7 +180,7 @@ const Apply = () => {
     const intervalId = setInterval(() => {
       setWaitingList((prev) => {
         const newValue = prev + 8;
-        return newValue >= 1325 ? 1325 : newValue;
+        return newValue >= 152 ? 152 : newValue;
       });
     }, 4500);
 
