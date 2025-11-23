@@ -28,14 +28,12 @@ const Logo = styled(Link)`
   font-weight: bold;
   color: #000;
   text-decoration: none;
-  background-color: #f8f6f1;
 `;
 
 const LogoImage = styled.img`
   width: 150px;
   height: auto;
   margin-right: 0.5rem;
-  background-color: #f8f6f1;
 
   @media (max-width: 768px) {
     width: 100px;
