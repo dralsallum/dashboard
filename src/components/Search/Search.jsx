@@ -18,7 +18,7 @@ import {
   TopWrapper,
   TopImg,
 } from "./Search.elelments";
-import Hands from "../../assets/Hands.png";
+import Hands from "../../assets/hands.png";
 import { Search as SearchIconSVG } from "lucide-react";
 
 const Search = () => {
