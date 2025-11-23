@@ -132,7 +132,7 @@ const Search = () => {
               <Input
                 id="location-input"
                 type="text"
-                placeholder="الرياض، السعودية"
+                placeholder="اسم المدينة (مثال: الرياض)"
                 aria-label="أدخل الموقع"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -145,7 +145,7 @@ const Search = () => {
               <Input
                 id="insurance-input"
                 type="text"
-                placeholder="شركة التأمين والخطة"
+                placeholder="شركة التأمين والخطة (اختياري)"
                 aria-label="أدخل معلومات التأمين"
                 value={insurance}
                 onChange={(e) => setInsurance(e.target.value)}
