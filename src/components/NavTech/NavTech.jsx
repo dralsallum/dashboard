@@ -176,6 +176,7 @@ const UploadButton = styled(Link)`
 
     &:focus {
       outline: none;
+      color: #fece04;
     }
   }
 `;
@@ -775,7 +776,7 @@ const NavTech = () => {
           <BrowseButton onClick={toggleBrowse}>تصفّح</BrowseButton>
           <NavLinkStyled to="/support">المساعدة</NavLinkStyled>
           <NavLinkStyled to="/upload">أضف عيادتك على منصة وقتنا</NavLinkStyled>
-          <NavLinkStyled to="/newsletter">النشرة البريدة</NavLinkStyled>
+          <NavLinkStyled to="/newsletter">النشرة البريدية</NavLinkStyled>
         </NavLinks>
 
         {currentUser ? (
@@ -875,11 +876,8 @@ const NavTech = () => {
               </MobileMenuLink>
             </MobileMenuItem>
             <MobileMenuItem>
-              <MobileMenuLink
-                to="/main/إنتاجية%20عالية:%20مفتاح%20النجاح%20والتوازن%20في%20الحياة"
-                onClick={toggleMenu}
-              >
-                جميع العيادات
+              <MobileMenuLink to="/newsletter" onClick={toggleMenu}>
+                النشرة البريدية
               </MobileMenuLink>
             </MobileMenuItem>
           </MobileMenuList>

@@ -266,7 +266,7 @@ const Apply = () => {
             <span>
               <AnimatedCounter targetValue={waitingList} />
             </span>
-            <span> عيادة مسجلة في قائمة الانتظار</span>
+            <span>عيادة مسجلة في قائمة الانتظار</span>
           </ApHe>
           <ApHeBe>
             شريكك التقني الذي يساعدك على النمو والوصول إلى أكبر عدد ممكن من
