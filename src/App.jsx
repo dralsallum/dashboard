@@ -22,6 +22,7 @@ import PostHog from "./pages/Posthog";
 import Reservation from "./pages/Reservation";
 import Support from "./pages/Support";
 import Rate from "./pages/pay";
+import Newsletter from "./pages/Newsletter";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -44,6 +45,7 @@ const App = () => {
             element={user ? <Navigate to="/control" /> : <SignUp />}
           />
           <Route path="/item" element={<Item />} />
+          <Route path="/newsletter" element={<Newsletter />} />
           <Route path="/preference" element={<Preference />} />
           <Route path="/product/:id" element={<Product />} />
           <Route path="/outcome" element={<Outcome />} />

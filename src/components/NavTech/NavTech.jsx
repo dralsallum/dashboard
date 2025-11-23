@@ -160,15 +160,15 @@ const UploadButton = styled(Link)`
     align-items: center;
     background: #fff;
     color: #fece04;
-    border: 2px solid #fece04;
-    height: 44px;
-    padding: 0 0.6rem;
+    border: 2px solid #ffc801;
+    height: 40px;
+    padding: 0 0.75rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
     text-decoration: none;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 800;
     white-space: nowrap;
 
     &:active {
@@ -178,12 +178,6 @@ const UploadButton = styled(Link)`
     &:focus {
       outline: none;
     }
-  }
-
-  @media (max-width: 480px) {
-    height: 40px;
-    padding: 0 0.75rem;
-    font-size: 0.85rem;
   }
 `;
 
