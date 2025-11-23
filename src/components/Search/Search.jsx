@@ -112,13 +112,13 @@ const Search = () => {
                 disabled={loading}
                 style={{
                   cursor: loading ? "not-allowed" : "pointer",
-                  backgroundColor: loading ? "#f5f5f5" : "white",
+                  backgroundColor: loading ? "#FFFFFF" : "white",
                   appearance: "none",
                   WebkitAppearance: "none",
                   MozAppearance: "none",
                 }}
               >
-                <option value="">اختر التخصص</option>
+                <option>اختر التخصص</option>
                 {majors.map((major) => (
                   <option key={major} value={major}>
                     {major}

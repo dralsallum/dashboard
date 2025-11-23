@@ -86,7 +86,7 @@ export const Input = styled.input`
   border-radius: 6px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  color: #2d3748;
+  color: ${(props) => props.$textColor || "#2d3748"};
   font-family: inherit;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -95,9 +95,23 @@ export const Input = styled.input`
     color: #a0aec0;
   }
 
+  /* Style for the placeholder option */
+  option:first-child {
+    color: ${(props) => props.$placeholderColor || "#a0aebf"};
+  }
+
+  /* Style for selected values */
+  &:not(:placeholder-shown) {
+    color: ${(props) =>
+      props.value && props.value !== props.$placeholderText
+        ? props.$textColor || "#2d3748"
+        : props.$placeholderColor || "#a0aebf"};
+  }
+
   &:focus {
     border-color: #ffd52b;
   }
+
   @media screen and (max-width: 968px) {
     border: none;
     border-bottom: 1px solid #e2e8f0;
