@@ -21,6 +21,7 @@ import {
 } from "./Last.elements";
 import Puzzle from "../../assets/puzzle.png";
 import Stress from "../../assets/stress.png";
+import Hill from "../../assets/hill.png";
 
 const quizItems = [
   {
@@ -38,7 +39,7 @@ const quizItems = [
   {
     href: "",
     title: "نوبات الهلع",
-    imgSrc: Puzzle,
+    imgSrc: Hill,
     alt: "",
   },
   {
