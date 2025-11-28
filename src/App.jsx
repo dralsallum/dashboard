@@ -24,6 +24,7 @@ import Support from "./pages/Support";
 import Rate from "./pages/pay";
 import Newsletter from "./pages/Newsletter";
 import Speciality from "./pages/Speciality";
+import Knowledge from "./pages/Knowledge";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -60,6 +61,7 @@ const App = () => {
           <Route path="/quota/:id" element={<Quota />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/practice" element={<Practice />} />
+          <Route path="/knowledge/:id" element={<Knowledge />} />
           <Route
             path="/control"
             element={user ? <Control /> : <Navigate to="/signup" replace />}

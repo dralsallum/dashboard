@@ -6,7 +6,6 @@ import Location from "../../assets/location.png";
 import AetnaLogo from "../../assets/aetna.png";
 import CignaLogo from "../../assets/cigna.png";
 import {
-  Increase,
   LoadingWrapper,
   LoadingBar,
   LoadingSp,

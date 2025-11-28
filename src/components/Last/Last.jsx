@@ -105,6 +105,23 @@ const Last = () => {
             </CoSub>
           ))}
         </CoCon>
+        <CoTe>التزامنا تجاهك</CoTe>
+        <CoCon>
+          <CoRe>
+            <CoDiv>محتوانا يساعدك في اتخاذ أفضل القرارات لصحتك النفسية.</CoDiv>
+            <CoAt href="">
+              <CoSp>اقرأ عن عمليتنا</CoSp>
+            </CoAt>
+          </CoRe>
+          {contentItems.map((item, index) => (
+            <CoSub key={index}>
+              <CoIn>
+                <CoLa>{item.text}</CoLa>
+                <CoImg src={item.imgSrc} alt={item.alt} />
+              </CoIn>
+            </CoSub>
+          ))}
+        </CoCon>
       </CoWr>
     </ArWra>
   );

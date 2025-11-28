@@ -1,9 +1,6 @@
-import React from "react";
-import styled from "styled-components";
-import Image1 from "../../assets/image1.webp";
-import Image2 from "../../assets/image2.png";
-import Image3 from "../../assets/image3.png";
-import Image4 from "../../assets/image4.png";
+import React, { useState, useEffect } from "react";
+import styled, { keyframes, css } from "styled-components";
+import { publicRequest } from "../../requestMethods";
 
 const Container = styled.div`
   background: #f5f5f5;
@@ -69,12 +66,16 @@ const Card = styled.article`
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
   border: 1px solid rgba(248, 196, 79, 0.1);
   outline: none;
 
   &:focus {
     outline: none;
+  }
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(248, 196, 79, 0.12);
   }
 `;
 
@@ -171,9 +172,15 @@ const NewsContent = styled.div`
 const NewsItem = styled.div`
   padding: 20px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 
   &:last-child {
     border-bottom: none;
+  }
+
+  &:hover {
+    opacity: 0.9;
   }
 `;
 
@@ -213,9 +220,14 @@ const ReadMoreButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
   margin-right: auto;
   outline: none;
+
+  &:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 
   &:focus {
     outline: none;
@@ -260,9 +272,14 @@ const AdButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   outline: none;
+
+  &:hover {
+    opacity: 0.9;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  }
 
   &:focus {
     outline: none;
@@ -304,77 +321,219 @@ const EditorButton = styled.button`
   margin: 6px 0;
   width: 100%;
   max-width: 280px;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   outline: none;
+
+  &:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 
   &:focus {
     outline: none;
   }
 `;
 
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 18px;
+  color: #d4a944;
+`;
+
+const ErrorMessage = styled.div`
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 600px;
+`;
+export const Increase = keyframes`
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+`;
+
+export const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  direction: rtl;
+  color: #444;
+  background: #f7f2e6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 100dvh;
+`;
+
+export const LoadingBar = styled.div`
+  width: 200px;
+  height: 8px;
+  background-color: rgba(246, 224, 94, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+
+  position: relative;
+`;
+
+export const LoadingSp = styled.span`
+  margin-bottom: 12px;
+`;
+
+export const LoadingBarFill = styled.div`
+  height: 100%;
+  background-color: #f6e05e;
+  border-radius: 4px;
+  animation: ${Increase} 3s ease-out forwards;
+  width: 0%;
+`;
+
+// Helper function to format time ago
+const getTimeAgo = (date) => {
+  const now = new Date();
+  const created = new Date(date);
+  const diffInMs = now - created;
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+  if (diffInHours < 1) {
+    return "منذ دقائق";
+  } else if (diffInHours < 24) {
+    return `منذ ${diffInHours} ساعة`;
+  } else {
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `منذ ${diffInDays} يوم`;
+  }
+};
+
 const Publish = () => {
+  const [newsletters, setNewsletters] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchNewsletters();
+  }, []);
+
+  const fetchNewsletters = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch the latest 8 newsletters using publicRequest
+      const response = await publicRequest.get("/newsletter?limit=8&page=1");
+
+      // Handle both response formats
+      const newsletterData = response.data.data || response.data;
+      setNewsletters(Array.isArray(newsletterData) ? newsletterData : []);
+    } catch (err) {
+      console.error("Error fetching newsletters:", err);
+      setError("فشل في تحميل النشرات الإخبارية. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNewsletterClick = (id) => {
+    // Navigate to newsletter detail page
+    window.location.href = `/knowledge/${id}`;
+  };
+
+  if (loading)
+    return (
+      <LoadingWrapper>
+        <LoadingSp>جاري التحميل…</LoadingSp>
+        <LoadingBar>
+          <LoadingBarFill />
+        </LoadingBar>
+      </LoadingWrapper>
+    );
+
+  if (error) {
+    return (
+      <Container>
+        <ErrorMessage>{error}</ErrorMessage>
+      </Container>
+    );
+  }
+
+  // Split newsletters for display
+  const featuredNewsletter = newsletters[0]; // Main featured article
+  const newsItems = newsletters.slice(1, 5); // 4 items for news card
+  const bottomNewsletters = newsletters.slice(5, 8); // 3 items for bottom row
+
   return (
     <Container>
       <Grid>
         {/* FIRST ROW - 3 columns (reversed order for RTL) */}
         <FirstRow>
-          {/* Ad Card */}
-          <AdCard>
-            <div>
-              <AdImage src={Image1} />
-              <AdTitle>
-                PsA and Your Life: A Guide to Your Daily Well-Being
-              </AdTitle>
-            </div>
-            <AdButton>اقرأ المزيد</AdButton>
-          </AdCard>
+          {/* Ad Card - Featured Newsletter or First Newsletter */}
+          {featuredNewsletter && (
+            <AdCard
+              onClick={() => handleNewsletterClick(featuredNewsletter._id)}
+            >
+              <div>
+                <AdImage src={featuredNewsletter.titleImg} />
+                <AdTitle>{featuredNewsletter.title}</AdTitle>
+              </div>
+              <AdButton>اقرأ المزيد</AdButton>
+            </AdCard>
+          )}
 
           {/* News and Trending Card */}
           <NewsCard>
             <NewsHeader>الأخبار والشائع</NewsHeader>
             <NewsContent>
-              <NewsItem>
-                <NewsTitle>
-                  7 إيجابيات وسلبيات لتناول ألواح البروتين يوميًا
-                </NewsTitle>
-                <NewsMeta>مراجعة طبية بواسطة جوناثان بورتيل، RDN</NewsMeta>
-                <NewsTime>منذ ساعة</NewsTime>
-              </NewsItem>
-              <NewsItem>
-                <NewsTitle>
-                  ماذا يحدث لتعافي العضلات والنوم عند تناول حمامات المغنيسيوم
-                </NewsTitle>
-                <NewsMeta>مراجعة طبية بواسطة جوناثان بورتيل، RDN</NewsMeta>
-                <NewsTime>منذ ساعة</NewsTime>
-              </NewsItem>
-              <NewsItem>
-                <NewsTitle>
-                  أفضل طريقة لطهي البروكلي للحصول على أقصى قدر من مضادات الأكسدة
-                </NewsTitle>
-                <NewsMeta>مراجعة طبية بواسطة إليزابيث بارنز، RDN</NewsMeta>
-                <NewsTime>منذ ساعة</NewsTime>
-              </NewsItem>
-              <NewsItem>
-                <NewsTitle>ماذا يحدث لجسمك عند تناول البرقوق بانتظام</NewsTitle>
-                <NewsMeta>مراجعة طبية بواسطة كارينا تولنتينو، RD</NewsMeta>
-                <NewsTime>منذ ساعتين</NewsTime>
-              </NewsItem>
-              <ReadMoreButton>
+              {newsItems.length > 0 ? (
+                newsItems.map((newsletter) => (
+                  <NewsItem
+                    key={newsletter._id}
+                    onClick={() => handleNewsletterClick(newsletter._id)}
+                  >
+                    <NewsTitle>{newsletter.title}</NewsTitle>
+                    {newsletter.author && (
+                      <NewsMeta>بقلم {newsletter.author}</NewsMeta>
+                    )}
+                    <NewsTime>{getTimeAgo(newsletter.createdAt)}</NewsTime>
+                  </NewsItem>
+                ))
+              ) : (
+                <NewsItem>
+                  <NewsTitle>لا توجد أخبار متاحة حالياً</NewsTitle>
+                </NewsItem>
+              )}
+              <ReadMoreButton
+                onClick={() => (window.location.href = "/newsletters")}
+              >
                 <span>←</span> اقرأ المزيد من الأخبار
               </ReadMoreButton>
             </NewsContent>
           </NewsCard>
 
-          {/* Main Featured Article */}
-          <Card>
-            <FeaturedCardImage src={Image3} />
-            <CardContent>
-              <Category>أخبار صحية</Category>
-              <CardTitle>دليلك الكامل لعيد شكر صديق لمرضى السكري</CardTitle>
-              <CardMeta>بقلم ستيفاني براون</CardMeta>
-            </CardContent>
-          </Card>
+          {/* Main Featured Article - Second Newsletter */}
+          {newsletters[1] && (
+            <Card onClick={() => handleNewsletterClick(newsletters[1]._id)}>
+              <FeaturedCardImage src={newsletters[1].titleImg} />
+              <CardContent>
+                {newsletters[1].category && (
+                  <Category>{newsletters[1].category}</Category>
+                )}
+                <CardTitle>{newsletters[1].title}</CardTitle>
+                {newsletters[1].author && (
+                  <CardMeta>بقلم {newsletters[1].author}</CardMeta>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </FirstRow>
 
         {/* SECOND ROW - 4 columns (reversed order for RTL) */}
@@ -388,42 +547,47 @@ const Publish = () => {
               </EditorsSubtitle>
             </div>
             <div>
-              <EditorButton>الماموجرام منخفض التكلفة</EditorButton>
-              <EditorButton>ارتفاع ضغط الدم والمغنيسيوم</EditorButton>
-              <EditorButton>الأطعمة الغنية بالبروتين</EditorButton>
-              <EditorButton>الإنفلونزا: يومًا بيوم</EditorButton>
+              <EditorButton
+                onClick={() => (window.location.href = "/category/skin-health")}
+              >
+                صحة البشرة
+              </EditorButton>
+              <EditorButton
+                onClick={() => (window.location.href = "/category/supplements")}
+              >
+                المكملات الغذائية
+              </EditorButton>
+              <EditorButton
+                onClick={() => (window.location.href = "/category/nutrition")}
+              >
+                التغذية الصحية
+              </EditorButton>
+              <EditorButton
+                onClick={() => (window.location.href = "/category/wellness")}
+              >
+                الصحة العامة
+              </EditorButton>
             </div>
           </EditorsCard>
 
-          {/* Skin Health Card */}
-          <Card>
-            <CardImage src={Image2} />
-            <CardContent>
-              <Category>صحة البشرة</Category>
-              <CardTitle>لماذا بشرتي جافة جدًا حتى عند الترطيب؟</CardTitle>
-              <CardMeta>مراجعة طبية بواسطة ليه أنسل، MD</CardMeta>
-            </CardContent>
-          </Card>
-
-          {/* Supplements Card */}
-          <Card>
-            <CardImage src={Image3} />
-            <CardContent>
-              <Category>المكملات الغذائية</Category>
-              <CardTitle>ما تحتاج معرفته عن فوائد الإشنسا</CardTitle>
-              <CardMeta>مراجعة طبية بواسطة ماري تشوي، PharmD</CardMeta>
-            </CardContent>
-          </Card>
-
-          {/* Cold & Flu Card */}
-          <Card>
-            <CardImage src={Image4} />
-            <CardContent>
-              <Category>نزلات البرد والإنفلونزا</Category>
-              <CardTitle>مراحل نزلة البرد: كم تستمر أعراض البرد؟</CardTitle>
-              <CardMeta>مراجعة طبية بواسطة بريان ويتشلر، DO</CardMeta>
-            </CardContent>
-          </Card>
+          {/* Display remaining newsletters */}
+          {bottomNewsletters.map((newsletter) => (
+            <Card
+              key={newsletter._id}
+              onClick={() => handleNewsletterClick(newsletter._id)}
+            >
+              <CardImage src={newsletter.titleImg} />
+              <CardContent>
+                {newsletter.category && (
+                  <Category>{newsletter.category}</Category>
+                )}
+                <CardTitle>{newsletter.title}</CardTitle>
+                {newsletter.author && (
+                  <CardMeta>بقلم {newsletter.author}</CardMeta>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </SecondRow>
       </Grid>
     </Container>

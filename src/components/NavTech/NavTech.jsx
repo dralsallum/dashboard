@@ -28,6 +28,10 @@ const Logo = styled(Link)`
   font-weight: bold;
   color: #000;
   text-decoration: none;
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const LogoImage = styled.img`

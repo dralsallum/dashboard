@@ -5,13 +5,15 @@ export const ArWra = styled.div`
   display: flex;
   flex-direction: row-reverse;
   flex-wrap: wrap;
-  padding: 2.5rem;
-  background-color: #fff;
 
+  padding: 2.5rem;
+
+  background-color: #fff;
   @media screen and (max-width: 700px) {
     display: flex;
     flex-direction: column-reverse;
     flex-wrap: wrap;
+
     padding: 1rem;
   }
 `;
@@ -22,7 +24,6 @@ export const ArCon = styled.div`
   margin-right: 1.25rem;
   font-family: Merriweather, Verdana, Arial, serif;
   font-size: 1rem;
-
   @media screen and (max-width: 700px) {
     font-family: Merriweather, Verdana, Arial, serif;
     font-size: 1rem;
@@ -71,7 +72,6 @@ export const ArUl = styled.ul`
   background: #fff;
   padding: 0.5rem 1rem;
   list-style: none;
-
   @media screen and (max-width: 700px) {
     border-radius: 9px;
     border-bottom-right-radius: 0;
@@ -125,7 +125,6 @@ export const ArRe = styled.div`
   margin-left: 0rem;
   color: #000;
   line-height: 22px;
-
   @media screen and (max-width: 700px) {
     margin-left: 1rem;
     color: #000;
@@ -139,7 +138,6 @@ export const ArImg = styled.img`
   width: 75px;
   height: auto;
   object-fit: contain;
-
   @media screen and (max-width: 700px) {
   }
 `;
@@ -149,13 +147,10 @@ export const CoWr = styled.div`
   flex-direction: column;
   justify-content: stretch;
   width: calc(70% - 5px);
-  gap: 2rem;
-
   @media screen and (max-width: 700px) {
     display: flex;
     flex-direction: column;
     width: 100%;
-    gap: 1.5rem;
   }
 `;
 
@@ -163,140 +158,108 @@ export const CoTe = styled.h3`
   white-space: nowrap;
   font-family: "FS Albert Extra Bold", Helvetica, Arial, sans-serif;
   font-size: 1.5rem;
-  line-height: 1.2;
+  line-height: 1;
   color: #f6bb3f;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.75rem;
   word-wrap: break-word;
   font-weight: bold;
   margin-right: 0.5rem;
 
   @media screen and (max-width: 700px) {
     font-family: "FS Albert Extra Bold", Helvetica, Arial, sans-serif;
-    font-size: 1.5rem;
-    line-height: 1.2;
+    font-size: 1.25rem;
+    line-height: 1;
     color: #f6bb3f;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.75rem;
   }
 `;
 
 export const CoCon = styled.div`
-  border-radius: 12px;
+  border-radius: 9px;
+
   width: 100%;
   display: flex;
-  flex-direction: row-reverse;
-  padding: 2rem 1.5rem;
+  flex-direction: reverse;
+  padding: 1.5rem 1rem;
   margin-left: 0.3125rem;
-  background: linear-gradient(135deg, #ffd37c 0%, #ffdb91 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
+  background-color: #ffd37c;
   @media screen and (max-width: 700px) {
-    border-radius: 12px;
+    border-radius: 9px;
+
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 1.5rem 1rem 2rem;
+    padding: 1.25rem 1rem 2rem;
     margin-left: 0rem;
   }
 `;
 
 export const CoRe = styled.div`
-  flex: 0 0 22rem;
+  flex: 0 0 20.625rem;
   margin: auto;
   font-size: 1.125rem;
-  padding-left: 1.5rem;
-
   @media screen and (max-width: 700px) {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     font-size: 1.125rem;
-    flex: 0 0 auto;
-    padding-left: 0;
+    flex: 0 0 2.625rem;
   }
 `;
 
 export const CoSub = styled.div`
   display: flex;
-  flex: 1;
-  padding-right: 1.5rem;
-  margin-bottom: 0;
+  flex: 0 1 auto;
+  flex-basis: 100%;
+  padding-right: 2rem;
+  margin-bottom: 0.625rem;
   flex-direction: row-reverse;
-  align-items: stretch;
-
-  &:not(:last-child) {
-    border-left: 2px solid rgba(255, 255, 255, 0.3);
-    padding-left: 1.5rem;
-  }
-
   @media screen and (max-width: 700px) {
     display: flex;
     flex: 0 1 auto;
     flex-direction: column;
     padding-right: 0rem;
-    padding-left: 0rem;
-    margin-bottom: 1.5rem;
-
-    &:not(:last-child) {
-      border-left: none;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-      padding-bottom: 1.5rem;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
   }
 `;
 
 export const CoAt = styled.a`
-  padding: 0.875rem 1.5rem;
+  padding: 0.75rem 1.2rem;
   display: inline-flex;
+  padding: 0.75rem 1rem;
   align-items: center;
-  justify-content: center;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
-  border-radius: 12px;
+  letter-spacing: 1px;
+  border-radius: 9px;
   border-bottom-right-radius: 0;
   border: 0;
   outline: 0;
   text-decoration: none;
   background: #f6bb3f;
   color: #fff;
-  font-weight: 600;
-  font-size: 0.9rem;
   line-height: 1;
   text-align: center;
   cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 2px 8px rgba(246, 187, 63, 0.3);
-  margin-top: 1rem;
-
-  &:hover {
-    background: #e5aa2e;
-    box-shadow: 0 4px 12px rgba(246, 187, 63, 0.4);
-  }
-
+  transition: all 0.15s ease-out;
   @media screen and (max-width: 700px) {
     display: inline-flex;
-    padding: 0.875rem 1.25rem;
+    padding: 0.75rem 1rem;
     align-items: center;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-radius: 12px;
+    border-radius: 9px;
     border-bottom-right-radius: 0;
     outline: 0;
     border: 0;
-    background: #f6bb3f;
+    padding: 1em;
+    background: #ffd37c;
     color: #fff;
     line-height: 1;
     text-decoration: none;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    font-size: 0.9rem;
+    transition: all 0.15s ease-out;
   }
 `;
 
@@ -306,74 +269,60 @@ export const CoSp = styled.span`
   padding: 0;
   vertical-align: baseline;
   font-size: 100%;
-  font-weight: 600;
-  background: transparent;
-
+  font-weight: 400;
+  background: 0 0;
   @media screen and (max-width: 700px) {
   }
 `;
 
 export const CoIn = styled.div`
   display: flex;
+  margin-bottom: 0.625rem;
   align-items: center;
-  flex: 1;
+  flex: 0 0 33%;
   flex-direction: column-reverse;
-  justify-content: center;
-  gap: 1rem;
-  padding: 0.5rem;
-
+  margin-bottom: 0;
   @media screen and (max-width: 700px) {
     display: flex;
+    margin-bottom: 0.625rem;
     align-items: center;
     flex-direction: row-reverse;
-    gap: 1rem;
-    padding: 0.5rem 0;
   }
 `;
 
 export const CoLa = styled.div`
   width: 100%;
   font-family: Merriweather, Verdana, Arial, serif;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #212121;
   padding-left: 0rem;
-  line-height: 1.5;
+  line-height: 1.375rem;
   text-align: center;
   font-weight: 500;
-
   @media screen and (max-width: 700px) {
-    text-align: right;
-    font-size: 0.95rem;
   }
 `;
 
 export const CoImg = styled.img`
-  width: 80px;
+  width: 125px;
   margin-left: 0;
-  min-width: 60px;
+  min-width: 86px;
   max-width: 100%;
   height: auto;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-
   @media screen and (max-width: 700px) {
-    width: 70px;
-    min-width: 50px;
   }
 `;
 
 export const CoDiv = styled.div`
   padding-left: 1rem;
-  font-size: 1.4rem;
-  line-height: 1.4;
+  font-size: 1.5rem;
+  line-height: 1.12;
   margin-bottom: 1rem;
   color: #13404f;
-  font-weight: 500;
-
   @media screen and (max-width: 700px) {
     margin-bottom: 1rem;
-    line-height: 1.4;
+    line-height: 1.15;
     color: #13404f;
-    font-size: 1.15rem;
-    padding-left: 0;
+    font-size: 1.25rem;
   }
 `;
