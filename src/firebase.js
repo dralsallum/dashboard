@@ -11,15 +11,6 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
 
-// Validate required fields
-const requiredFields = ["apiKey", "authDomain", "projectId", "appId"];
-const missingFields = requiredFields.filter((field) => !firebaseConfig[field]);
-
-if (missingFields.length > 0) {
-  console.error("Missing Firebase configuration:", missingFields);
-  throw new Error(`Missing Firebase config: ${missingFields.join(", ")}`);
-}
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
