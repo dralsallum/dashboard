@@ -269,7 +269,9 @@ export const CoAt = styled.a`
   line-height: 1;
   text-align: center;
   cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(246, 187, 63, 0.3);
   margin-top: 1rem;
 
