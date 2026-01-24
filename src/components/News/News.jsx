@@ -1,17 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { publicRequest } from "../../requestMethods";
 
 const News = () => {
-  const { id } = useParams(); // Changed from slug to id
+  const { id } = useParams();
   const navigate = useNavigate();
+
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ---------- helpers ----------
+  const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
+
+  const formatDate = (date) => {
+    try {
+      return date
+        ? new Date(date).toLocaleDateString("ar-SA")
+        : new Date().toLocaleDateString("ar-SA");
+    } catch {
+      return new Date().toLocaleDateString("ar-SA");
+    }
+  };
+
+  const SafeImage = ({ src, alt, variant = "content" }) => {
+    const [hidden, setHidden] = useState(false);
+
+    if (!isNonEmptyString(src) || hidden) return null;
+
+    const Img = variant === "hero" ? HeroImage : ContentImage;
+
+    return (
+      <Img src={src} alt={alt} loading="lazy" onError={() => setHidden(true)} />
+    );
+  };
+
+  // ---------- fetch ----------
   useEffect(() => {
-    // Validate id parameter exists
     if (!id) {
       setError("لا يوجد معرف للنشرة الإخبارية");
       setLoading(false);
@@ -23,39 +49,51 @@ const News = () => {
       setError(null);
 
       try {
-        // Call the correct backend endpoint: GET /newsletter/:id
-        const response = await publicRequest.get(`/newsletter/${id}`);
+        const res = await publicRequest.get(`/newsletter/${id}`);
+        const n = res?.data;
 
-        // Validate response has data
-        if (!response.data) {
-          throw new Error("لا توجد بيانات في الاستجابة");
-        }
+        if (!n) throw new Error("لا توجد بيانات في الاستجابة");
 
-        // The backend now returns the newsletter directly (not nested)
-        // Map and structure the data with safe fallbacks
-        const newsletterData = {
-          id: response.data._id,
-          title: response.data.title || "بدون عنوان",
-          titleImg: response.data.titleImg || "",
-          mainText: response.data.mainText || "",
-          mainImg: response.data.mainImg || "",
-          firstText: response.data.firstText || "",
-          firstImg: response.data.firstImg || "",
-          isFeatured: response.data.isFeatured || false,
-          author: response.data.author || "الكاتب",
-          publishDate: response.data.publishDate
-            ? new Date(response.data.publishDate).toLocaleDateString("ar-SA")
-            : new Date().toLocaleDateString("ar-SA"),
-          reviewedBy: response.data.reviewedBy || "المراجع الطبي",
+        // Map backend schema -> frontend (matches your new schema exactly)
+        const mapped = {
+          id: n._id,
+          title: n.title || "بدون عنوان",
+          titleImg: n.titleImg || "",
+
+          mainText: n.mainText || "",
+          mainImg: n.mainImg || "",
+
+          firstTitle: n.firstTitle || "",
+          firstText: n.firstText || "",
+          firstImg: n.firstImg || "",
+
+          secTitle: n.secTitle || "",
+          secText: n.secText || "",
+          secImg: n.secImg || "",
+
+          thirdTitle: n.thirdTitle || "",
+          thirdText: n.thirdText || "",
+          thirdImg: n.thirdImg || "",
+
+          fourthTitle: n.fourthTitle || "",
+          fourthText: n.fourthText || "",
+          fourthImg: n.fourthImg || "",
+
+          fivthTitle: n.fivthTitle || "",
+          fivthText: n.fivthText || "",
+          fivthImg: n.fivthImg || "",
+
+          isFeatured: Boolean(n.isFeatured),
+          author: n.author || "الكاتب",
+          reviewedBy: n.reviewedBy || "المراجع الطبي",
+          publishDate: formatDate(n.publishDate),
         };
 
-        setData(newsletterData);
+        setData(mapped);
       } catch (err) {
         console.error("Error fetching newsletter:", err);
 
-        // Handle different error types
         if (err.response) {
-          // Server responded with error status
           switch (err.response.status) {
             case 404:
               setError("النشرة الإخبارية غير موجودة");
@@ -70,10 +108,8 @@ const News = () => {
               setError("حدث خطأ أثناء جلب البيانات");
           }
         } else if (err.request) {
-          // Request made but no response received
           setError("لا يوجد اتصال بالخادم، يرجى التحقق من الإنترنت");
         } else {
-          // Something else happened
           setError(err.message || "تعذر جلب بيانات النشرة الإخبارية");
         }
       } finally {
@@ -82,23 +118,82 @@ const News = () => {
     };
 
     fetchNewsletter();
-  }, [id]); // Changed dependency from slug to id
+  }, [id]);
 
-  // Loading State
+  // ---------- build sections dynamically (only show if it has text or image) ----------
+  const sections = useMemo(() => {
+    if (!data) return [];
+
+    const rawSections = [
+      {
+        id: "main",
+        title: "المحتوى الرئيسي",
+        text: data.mainText,
+        image: data.mainImg,
+        fallbackTitle: "المحتوى الرئيسي",
+      },
+      {
+        id: "first",
+        title: data.firstTitle,
+        text: data.firstText,
+        image: data.firstImg,
+        fallbackTitle: "القسم الأول",
+      },
+      {
+        id: "second",
+        title: data.secTitle,
+        text: data.secText,
+        image: data.secImg,
+        fallbackTitle: "القسم الثاني",
+      },
+      {
+        id: "third",
+        title: data.thirdTitle,
+        text: data.thirdText,
+        image: data.thirdImg,
+        fallbackTitle: "القسم الثالث",
+      },
+      {
+        id: "fourth",
+        title: data.fourthTitle,
+        text: data.fourthText,
+        image: data.fourthImg,
+        fallbackTitle: "القسم الرابع",
+      },
+      {
+        id: "fivth",
+        title: data.fivthTitle,
+        text: data.fivthText,
+        image: data.fivthImg,
+        fallbackTitle: "القسم الخامس",
+      },
+    ];
+
+    return rawSections
+      .filter(
+        (section) =>
+          isNonEmptyString(section.text) || isNonEmptyString(section.image),
+      )
+      .map((section) => ({
+        ...section,
+        title: isNonEmptyString(section.title)
+          ? section.title.trim()
+          : section.fallbackTitle,
+      }));
+  }, [data]);
+
+  // ---------- states ----------
   if (loading) {
     return (
-      <ArticleWrapper>
-        <Container>
-          <LoadingContainer>
-            <Spinner />
-            <LoadingText>جاري تحميل النشرة الإخبارية...</LoadingText>
-          </LoadingContainer>
-        </Container>
-      </ArticleWrapper>
+      <LoadingWrapper>
+        <LoadingSp>جاري التحميل…</LoadingSp>
+        <LoadingBar>
+          <LoadingBarFill />
+        </LoadingBar>
+      </LoadingWrapper>
     );
   }
 
-  // Error State
   if (error) {
     return (
       <ArticleWrapper>
@@ -119,7 +214,6 @@ const News = () => {
     );
   }
 
-  // No Data State (shouldn't happen but good to have)
   if (!data) {
     return (
       <ArticleWrapper>
@@ -132,13 +226,21 @@ const News = () => {
     );
   }
 
-  // Main Content
+  // optional intro (only show if exists)
+  const introText =
+    (isNonEmptyString(data.mainText) &&
+      data.mainText.split("\n").slice(0, 2).join("\n")) ||
+    (isNonEmptyString(data.firstText) &&
+      data.firstText.split("\n").slice(0, 2).join("\n")) ||
+    "";
+
   return (
     <ArticleWrapper>
       <Container>
         <Article>
           <Header>
             <Title>{data.title}</Title>
+
             <Meta>
               <Author>
                 بقلم <Link href="#">{data.author}</Link>
@@ -146,70 +248,54 @@ const News = () => {
               <Separator>|</Separator>
               <PublishDate>نُشر في {data.publishDate}</PublishDate>
             </Meta>
+
             <ReviewedBy>
               ✓ تمت المراجعة الطبية بواسطة{" "}
               <Link href="#">{data.reviewedBy}</Link>
             </ReviewedBy>
           </Header>
 
-          {data.titleImg && (
-            <>
-              <HeroImage
-                src={data.titleImg}
-                alt={data.title}
-                onError={(e) => {
-                  e.target.style.display = "none";
-                }}
-              />
-              <Caption>
-                {data.mainText || "صورة توضيحية للمقال"}
-                <br />
-                <Credit>الصورة من المصدر</Credit>
-              </Caption>
-            </>
+          {/* Hero image only if exists */}
+          <SafeImage src={data.titleImg} alt={data.title} variant="hero" />
+
+          {/* Caption only if hero exists */}
+          {isNonEmptyString(data.titleImg) && (
+            <Caption>
+              صورة توضيحية: {data.title}
+              <br />
+              <Credit>المصدر: الصورة الرئيسية للمقال</Credit>
+            </Caption>
           )}
 
           <ContentGrid>
             <MainContent>
-              <Intro>
-                {data.firstText || data.mainText || "مرحباً بك في هذا المقال"}
-              </Intro>
-
-              <Section>
-                <SectionTitle>المحتوى الرئيسي</SectionTitle>
-                <Paragraph>
-                  {data.mainText || "المحتوى غير متوفر حالياً"}
-                </Paragraph>
-
-                {data.mainImg && (
-                  <ContentImage
-                    src={data.mainImg}
-                    alt="صورة المحتوى"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                    }}
-                  />
-                )}
-              </Section>
-
-              <Section>
-                <SectionTitle>معلومات إضافية</SectionTitle>
-                <Paragraph>
-                  {data.firstText || "لا توجد معلومات إضافية"}
-                </Paragraph>
-
-                {data.firstImg && (
-                  <ContentImage
-                    src={data.firstImg}
-                    alt="صورة إضافية"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                    }}
-                  />
-                )}
-              </Section>
-
               {data.isFeatured && <FeaturedBadge>⭐ مقال مميز</FeaturedBadge>}
+
+              {/* Intro only if we have content */}
+              {isNonEmptyString(introText) && (
+                <Intro id="intro">{introText}</Intro>
+              )}
+
+              {/* Render sections - each section shows text if exists and image if exists */}
+              {sections.length > 0 ? (
+                sections.map((section) => (
+                  <Section key={section.id} id={section.id}>
+                    <SectionTitle>{section.title}</SectionTitle>
+
+                    {isNonEmptyString(section.text) && (
+                      <Paragraph>{section.text}</Paragraph>
+                    )}
+
+                    <SafeImage
+                      src={section.image}
+                      alt={section.title}
+                      variant="content"
+                    />
+                  </Section>
+                ))
+              ) : (
+                <Paragraph>لا يوجد محتوى متاح لهذا المقال</Paragraph>
+              )}
 
               <RelatedSection>
                 <RelatedTitle>قصص ذات صلة</RelatedTitle>
@@ -217,6 +303,7 @@ const News = () => {
                   <RelatedImage
                     src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=100&q=80"
                     alt="مقال ذو صلة"
+                    loading="lazy"
                   />
                   <RelatedLink href="#">
                     اقرأ المزيد من المقالات المشابهة
@@ -226,26 +313,31 @@ const News = () => {
             </MainContent>
 
             <Sidebar>
-              <TOCBox>
-                <TOCTitle>جدول المحتويات</TOCTitle>
-                <TOCList>
-                  <TOCItem>
-                    <TOCLink href="#intro">المقدمة</TOCLink>
-                  </TOCItem>
-                  <TOCItem>
-                    <TOCLink href="#main">المحتوى الرئيسي</TOCLink>
-                  </TOCItem>
-                  <TOCItem>
-                    <TOCLink href="#additional">معلومات إضافية</TOCLink>
-                  </TOCItem>
-                </TOCList>
-              </TOCBox>
+              {sections.length > 0 && (
+                <TOCBox>
+                  <TOCTitle>جدول المحتويات</TOCTitle>
+                  <TOCList>
+                    {isNonEmptyString(introText) && (
+                      <TOCItem>
+                        <TOCLink href="#intro">المقدمة</TOCLink>
+                      </TOCItem>
+                    )}
+
+                    {sections.map((s) => (
+                      <TOCItem key={s.id}>
+                        <TOCLink href={`#${s.id}`}>{s.title}</TOCLink>
+                      </TOCItem>
+                    ))}
+                  </TOCList>
+                </TOCBox>
+              )}
 
               <KeyTakeawaysBox>
                 <KeyTitle>النقاط الرئيسية</KeyTitle>
                 <KeyList>
                   <KeyItem>{data.title}</KeyItem>
                   <KeyItem>نُشر في {data.publishDate}</KeyItem>
+                  <KeyItem>بقلم {data.author}</KeyItem>
                   {data.isFeatured && <KeyItem>مقال مميز ⭐</KeyItem>}
                 </KeyList>
               </KeyTakeawaysBox>
@@ -255,11 +347,12 @@ const News = () => {
                 <ShareButtons>
                   <ShareButton
                     onClick={() => {
+                      const url = window.location.href;
                       if (navigator.share) {
-                        navigator.share({
-                          title: data.title,
-                          url: window.location.href,
-                        });
+                        navigator.share({ title: data.title, url });
+                      } else {
+                        navigator.clipboard.writeText(url);
+                        alert("تم نسخ الرابط");
                       }
                     }}
                   >
@@ -279,11 +372,26 @@ const News = () => {
 // STYLED COMPONENTS
 // =====================================================
 
+const Increase = keyframes`
+  0% { width: 0%; }
+  100% { width: 100%; }
+`;
+
+const LoadingBar = styled.div`
+  width: 200px;
+  height: 8px;
+  background-color: rgba(246, 224, 94, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+`;
+
 const ArticleWrapper = styled.div`
   background-color: #ffffff;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   color: #1a1a1a;
   direction: rtl;
 `;
@@ -294,47 +402,32 @@ const Container = styled.div`
   padding: 40px 20px;
 `;
 
-// =====================================================
-// LOADING STATES
-// =====================================================
-
-const LoadingContainer = styled.div`
+export const LoadingWrapper = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: 20px;
+  flex-direction: column;
+  direction: rtl;
+  color: #444;
+  background: #f7f2e6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 100dvh;
 `;
 
-const Spinner = styled.div`
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #0066cc;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+export const LoadingSp = styled.span`
+  margin-bottom: 12px;
 `;
 
-const LoadingText = styled.p`
-  font-size: 1.1rem;
-  color: #666;
-  text-align: center;
+export const LoadingBarFill = styled.div`
+  height: 100%;
+  background-color: #f6e05e;
+  border-radius: 4px;
+  animation: ${Increase} 3s ease-out forwards;
+  width: 0%;
 `;
 
-// =====================================================
 // ERROR STATES
-// =====================================================
-
 const ErrorContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -413,10 +506,7 @@ const BackButton = styled.button`
   }
 `;
 
-// =====================================================
-// ARTICLE COMPONENTS
-// =====================================================
-
+// ARTICLE
 const Article = styled.article`
   background: white;
 `;
@@ -532,10 +622,12 @@ const Intro = styled.p`
   color: #333;
   text-align: right;
   font-weight: 500;
+  white-space: pre-wrap;
 `;
 
 const Section = styled.section`
   margin-bottom: 40px;
+  scroll-margin-top: 20px;
 `;
 
 const SectionTitle = styled.h2`
@@ -552,6 +644,7 @@ const Paragraph = styled.p`
   margin-bottom: 16px;
   color: #333;
   text-align: right;
+  white-space: pre-wrap;
 `;
 
 const FeaturedBadge = styled.div`
@@ -565,10 +658,7 @@ const FeaturedBadge = styled.div`
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 `;
 
-// =====================================================
-// SIDEBAR COMPONENTS
-// =====================================================
-
+// SIDEBAR
 const Sidebar = styled.aside`
   @media (max-width: 968px) {
     order: -1;
@@ -697,10 +787,7 @@ const ShareButton = styled.button`
   }
 `;
 
-// =====================================================
-// RELATED CONTENT
-// =====================================================
-
+// RELATED
 const RelatedSection = styled.div`
   margin-top: 40px;
   padding-top: 30px;

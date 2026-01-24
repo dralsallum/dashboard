@@ -1,13 +1,47 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { publicRequest } from "../../requestMethods";
+import Mail from "../../assets/gmail.png";
+export const Increase = keyframes`
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+`;
 
+export const LoadingWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  direction: rtl;
+  color: #444;
+  background: #f7f2e6;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 100dvh;
+`;
+
+export const LoadingSp = styled.span`
+  margin-bottom: 12px;
+`;
+
+export const LoadingBarFill = styled.div`
+  height: 100%;
+  background-color: #f6e05e;
+  border-radius: 4px;
+  animation: ${Increase} 3s ease-out forwards;
+  width: 0%;
+`;
 const Container = styled.div`
   background: #f5f5f5;
   min-height: 100vh;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   direction: rtl;
 
   @media (max-width: 768px) {
@@ -66,7 +100,7 @@ const Card = styled.article`
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   border: 1px solid rgba(248, 196, 79, 0.1);
   outline: none;
 
@@ -75,6 +109,7 @@ const Card = styled.article`
   }
 
   &:hover {
+    transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(248, 196, 79, 0.12);
   }
 `;
@@ -173,14 +208,14 @@ const NewsItem = styled.div`
   padding: 20px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: transform 0.2s ease;
 
   &:last-child {
     border-bottom: none;
   }
 
   &:hover {
-    opacity: 0.9;
+    transform: translateX(-5px);
   }
 `;
 
@@ -220,12 +255,12 @@ const ReadMoreButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   margin-right: auto;
   outline: none;
 
   &:hover {
-    opacity: 0.9;
+    transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
@@ -272,12 +307,12 @@ const AdButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   outline: none;
 
   &:hover {
-    opacity: 0.9;
+    transform: scale(1.05);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   }
 
@@ -321,27 +356,18 @@ const EditorButton = styled.button`
   margin: 6px 0;
   width: 100%;
   max-width: 280px;
-  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   outline: none;
 
   &:hover {
-    opacity: 0.9;
+    transform: scale(1.03);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   &:focus {
     outline: none;
   }
-`;
-
-const LoadingSpinner = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  font-size: 18px;
-  color: #d4a944;
 `;
 
 const ErrorMessage = styled.div`
@@ -354,29 +380,8 @@ const ErrorMessage = styled.div`
   margin: 20px auto;
   max-width: 600px;
 `;
-export const Increase = keyframes`
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
-`;
 
-export const LoadingWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  direction: rtl;
-  color: #444;
-  background: #f7f2e6;
-  font-size: 1.2rem;
-  font-weight: 600;
-  min-height: 100dvh;
-`;
-
-export const LoadingBar = styled.div`
+const LoadingBar = styled.div`
   width: 200px;
   height: 8px;
   background-color: rgba(246, 224, 94, 0.2);
@@ -386,16 +391,174 @@ export const LoadingBar = styled.div`
   position: relative;
 `;
 
-export const LoadingSp = styled.span`
-  margin-bottom: 12px;
+const SubscribeCon = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba (0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
 `;
 
-export const LoadingBarFill = styled.div`
-  height: 100%;
-  background-color: #f6e05e;
-  border-radius: 4px;
-  animation: ${Increase} 3s ease-out forwards;
-  width: 0%;
+const ModalContainer = styled.div`
+  background: white;
+  border-radius: 16px;
+  padding: 40px 32px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  direction: rtl;
+  text-align: center;
+  @media (max-width: 768px) {
+    padding: 32px 24px;
+    max-width: 90%;
+  }
+`;
+const CloseButton = styled.button`
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  outline: none;
+
+  &:hover {
+    background: rgba(248, 196, 79, 0.1);
+    color: #d4a944;
+  }
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const ModalIcon = styled.div`
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135 deg, #f8c44f 0 %, #f5b93a 100 %);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 32px;
+`;
+const ModalIconImg = styled.img`
+  width: 64px;
+  height: 64px;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+`;
+
+const ModalSubtitle = styled.p`
+  font-size: 16px;
+
+  color: #666;
+
+  margin: 0 0 32px 0;
+
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+  }
+`;
+const InputWrapper = styled.div`
+  margin-bottom: 24px;
+`;
+const EmailInput = styled.input`
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 16px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  direction: rtl;
+  text-align: right;
+  &::placeholder {
+    color: #999;
+  }
+
+  &:focus {
+    border-color: #f8c44f;
+
+    box-shadow: 0 0 0 4px rgba(248, 196, 79, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+
+    padding: 12px 16px;
+  }
+`;
+const SubscribeButton = styled.button`
+  width: 100%;
+  background: #f7c24b;
+  border: none;
+  color: white;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(248, 196, 79, 0.3);
+  outline: none;
+  &:hover {
+    transform: translateY (-2px);
+    box-shadow: 0 6px 16px rgba(248, 196, 79, 0.4);
+  }
+
+  &:active {
+    transform: translateY (0);
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 15px;
+    padding: 12px 28px;
+  }
+`;
+const PrivacyText = styled.p`
+  font-size: 12px;
+  color: #999;
+  margin-top: 16px;
+  line-height: 1.5;
 `;
 
 // Helper function to format time ago
@@ -419,6 +582,7 @@ const Publish = () => {
   const [newsletters, setNewsletters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [subscribe, setSubscribe] = useState(true);
 
   useEffect(() => {
     fetchNewsletters();
@@ -429,7 +593,6 @@ const Publish = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch the latest 8 newsletters using publicRequest
       const response = await publicRequest.get("/newsletter?limit=8&page=1");
 
       // Handle both response formats
@@ -447,6 +610,35 @@ const Publish = () => {
     // Navigate to newsletter detail page
     window.location.href = `/knowledge/${id}`;
   };
+
+  const handleClose = () => setSubscribe(false);
+
+  if (subscribe)
+    return (
+      <SubscribeCon>
+        <ModalContainer>
+          <CloseButton onClick={handleClose}>x</CloseButton>
+          <ModalIcon>
+            <ModalIconImg src={Mail} alt="" />
+          </ModalIcon>
+          <ModalTitle>اشترك في نشرتنا </ModalTitle>
+          <ModalSubtitle>
+            احصل على آخر الأخبار والمقالات المميزة مباشرة في بريدك الالكتروني
+          </ModalSubtitle>
+          <InputWrapper>
+            <EmailInput
+              type="email"
+              placeholder="أدخل بريدك الإلكتروني"
+              dir="rtl"
+            />
+          </InputWrapper>
+          <SubscribeButton>اشترك</SubscribeButton>
+          <PrivacyText>
+            نحن نحترم خصوصيتك. لن نشارك بريدك الإلكتروني مع أي طرف ثالث.
+          </PrivacyText>
+        </ModalContainer>
+      </SubscribeCon>
+    );
 
   if (loading)
     return (
