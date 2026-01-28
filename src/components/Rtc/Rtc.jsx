@@ -10,7 +10,6 @@ import {
   Users,
   Video,
 } from "lucide-react";
-import axios from "axios";
 
 const fadeIn = keyframes`
   from {
@@ -370,8 +369,19 @@ const Button = styled(ControlButton)`
   font-weight: 600;
 `;
 
-const API_BASE_URL = "theknot-30278e2ff419.herokuapp.com";
-const WS_URL = "ws://theknot-30278e2ff419.herokuapp.com";
+// Get WebSocket URL based on environment
+const getWebSocketUrl = () => {
+  // Check if REACT_APP_WS_URL is provided
+  if ("wss://theknot-30278e2ff419.herokuapp.com") {
+    return "wss://theknot-30278e2ff419.herokuapp.com";
+  }
+
+  // Otherwise, construct it from the current location
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const host = window.location.host;
+
+  return `${protocol}//${host}`;
+};
 
 const VideoCall = () => {
   const [isCallActive, setIsCallActive] = useState(false);
@@ -406,7 +416,10 @@ const VideoCall = () => {
 
   const initializeWebSocket = () => {
     return new Promise((resolve, reject) => {
-      socketRef.current = new WebSocket(WS_URL);
+      const wsUrl = getWebSocketUrl();
+      console.log("Connecting to WebSocket:", wsUrl);
+
+      socketRef.current = new WebSocket(wsUrl);
 
       socketRef.current.onopen = () => {
         console.log("Connected to signaling server");
@@ -439,10 +452,8 @@ const VideoCall = () => {
       case "joined-room":
         console.log("Joined room:", data.roomId);
         if (data.userCount > 1) {
-          // We're not the first, so we should wait for an offer
           isInitiatorRef.current = false;
         } else {
-          // We're the first, we'll create the offer when someone joins
           isInitiatorRef.current = true;
         }
         break;
@@ -451,7 +462,6 @@ const VideoCall = () => {
         console.log("User joined room");
         setIsWaiting(false);
         if (isInitiatorRef.current && peerConnectionRef.current) {
-          // Create and send offer
           await createOffer();
         }
         break;
