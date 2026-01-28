@@ -4,7 +4,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import GlobalStyle from "./globalStyles";
 import Home from "./pages/Home";
 import Test from "./pages/Test";
-import { Practice, Recommendation } from "./components";
+import { Practice, Recommendation, Rtc } from "./components";
 import Onboarding from "./pages/Onboarding";
 import Outcome from "./pages/Outcome";
 import Product from "./pages/Product";
@@ -35,6 +35,7 @@ const App = () => {
       <div style={{ width: "100%", overflow: "hidden" }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/rtc" element={<Rtc />} />
           <Route path="/rate/:slug/:quota" element={<Rate />} />
           <Route path="/desktop" element={<PostHog />} />
           <Route path="/reservation/:major" element={<Reservation />} />

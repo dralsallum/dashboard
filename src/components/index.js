@@ -33,3 +33,4 @@ export { default as Allcategories } from "./Allcategories/Allcategories";
 export { default as Publish } from "./Publish/Publish";
 export { default as Last } from "./Last/Last";
 export { default as News } from "./News/News";
+export { default as Rtc } from "./Rtc/Rtc";
