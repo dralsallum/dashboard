@@ -370,8 +370,8 @@ const Button = styled(ControlButton)`
   font-weight: 600;
 `;
 
-const API_BASE_URL = "https://theknot-30278e2ff419.herokuapp.com";
-const WS_URL = "ws://https://theknot-30278e2ff419.herokuapp.com";
+const API_BASE_URL = "theknot-30278e2ff419.herokuapp.com";
+const WS_URL = "ws://theknot-30278e2ff419.herokuapp.com";
 
 const VideoCall = () => {
   const [isCallActive, setIsCallActive] = useState(false);
