@@ -35,7 +35,7 @@ const Phone = () => {
     {
       text: "إدارة المواعيد بسهولة",
       subText:
-        "عدّل أو ألغِ الموعد بضغطة واحدة وتلقَّ تذكيرات تلقائية قبل الزيارة.",
+        "عدّل أو ألغِ الموعد بضغطة واحدة وتلقَّ تذكيرات تلقائية قبل الزيارة.",
       imgSrc: Booking,
     },
     {
@@ -45,24 +45,14 @@ const Phone = () => {
     },
   ];
 
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % articles.length);
-  };
-
-  const handlePrevious = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + articles.length) % articles.length
-    );
-  };
-
-  const handleDotClick = (index) => {
-    setCurrentIndex(index);
-  };
+  const handleNext = () =>
+    setCurrentIndex((prev) => (prev + 1) % articles.length);
+  const handlePrevious = () =>
+    setCurrentIndex((prev) => (prev - 1 + articles.length) % articles.length);
+  const handleDotClick = (index) => setCurrentIndex(index);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      handleNext();
-    }, 2500);
+    const interval = setInterval(handleNext, 2500);
     return () => clearInterval(interval);
   }, [currentIndex]);
 
@@ -102,7 +92,7 @@ const Phone = () => {
             key={index}
             onClick={() => handleDotClick(index)}
             style={{
-              background: currentIndex === index ? "#f4df5f" : "#d6d6ea",
+              background: currentIndex === index ? "#2D5A4E" : "#d6d6ea",
             }}
           />
         ))}

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const BenefitsContainer = styled.section`
-  background: linear-gradient(180deg, #fff0bb 0%, #fffaed 100%);
+  background: linear-gradient(180deg, #e8f0ee 0%, #f4f9f7 100%);
   padding: 60px 16px 40px;
   min-height: 100vh;
   display: flex;
@@ -56,13 +56,15 @@ export const BenefitCard = styled.div`
   align-items: center;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   position: relative;
   min-height: 320px;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 16px rgba(45, 90, 78, 0.15);
   }
 
   @media screen and (max-width: 480px) {
@@ -135,12 +137,12 @@ export const BenefitTitle = styled.h3`
 
 export const BenefitButton = styled.button`
   background: transparent;
-  border: 2px solid #2c2c2c;
+  border: 2px solid #2d5a4e;
   border-radius: 8px;
   padding: 12px 32px;
   font-size: 1rem;
   font-weight: 500;
-  color: #2c2c2c;
+  color: #2d5a4e;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: auto;
@@ -149,7 +151,7 @@ export const BenefitButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background: #2c2c2c;
+    background: #2d5a4e;
     color: white;
   }
 

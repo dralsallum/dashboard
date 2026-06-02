@@ -5,8 +5,9 @@ export const CategoryContainer = styled.div`
   background: #fff;
   margin: 0 auto;
   padding: 60px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   direction: rtl;
   text-align: right;
 
@@ -69,8 +70,8 @@ export const InsuranceCard = styled.div`
   min-height: 120px;
 
   &:hover {
-    border-color: #c0c0c0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: #2d5a4e;
+    box-shadow: 0 2px 8px rgba(45, 90, 78, 0.12);
   }
 
   @media (max-width: 768px) {
@@ -108,7 +109,7 @@ export const AddInsuranceButton = styled.button`
   display: inline-block;
 
   &:hover {
-    background: #f5f5f5;
+    background: #f0f5f4;
   }
 `;
 
@@ -117,14 +118,14 @@ export const SeeAllLink = styled.div`
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
-  color: #333;
+  color: #2d5a4e;
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
   min-height: 120px;
 
   &:hover {
-    color: #000;
+    color: #234a40;
   }
 `;
 
@@ -141,6 +142,7 @@ export const SpecialtiesTitle = styled.h2`
   font-weight: 400;
   color: #1a1a1a;
   margin-bottom: 26px;
+
   @media (max-width: 768px) {
     font-size: 34px;
     margin-bottom: 18px;
@@ -164,17 +166,17 @@ export const SpecialtyCard = styled.div`
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background: #fff0bb;
+  background: #e8f0ee;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: 200px;
   flex: 1 1 180px;
   max-width: calc(25% - 15px);
-  border: 1px solid #ebdcab;
+  border: 1px solid #c5d9d5;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(45, 90, 78, 0.15);
   }
 
   @media (max-width: 768px) {

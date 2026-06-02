@@ -6,14 +6,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/userRedux";
 import Menu from "../../assets/menu.png";
 
-/* ====== Styled Components for Navigation Bar ====== */
 const Header = styled.header`
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: #fdfaee;
+  background: #f4f9f7;
   position: relative;
 
   @media (max-width: 768px) {
@@ -90,7 +89,7 @@ const BrowseButton = styled.button`
 `;
 
 const SubscribeButton = styled(Link)`
-  background: #fece04;
+  background: #2d5a4e;
   color: #fff;
   padding: 0.6rem 1.2rem;
   border-radius: 999px;
@@ -104,7 +103,7 @@ const SubscribeButton = styled(Link)`
   transition: background 0.2s ease;
 
   &:hover {
-    background: #e5b803;
+    background: #234a40;
     color: #fff;
   }
 
@@ -119,7 +118,7 @@ const SubscribeButton = styled(Link)`
 `;
 
 const SignOutButton = styled.button`
-  background: #fece04;
+  background: #2d5a4e;
   color: #fff;
   padding: 0.6rem 1.2rem;
   border-radius: 999px;
@@ -130,7 +129,7 @@ const SignOutButton = styled.button`
   transition: background 0.2s ease;
 
   &:hover {
-    background: #e5b803;
+    background: #234a40;
     color: #fff;
   }
 
@@ -161,8 +160,8 @@ const UploadButton = styled(Link)`
     justify-content: center;
     align-items: center;
     background: #fff;
-    color: #fece04;
-    border: 2px solid #ffc801;
+    color: #2d5a4e;
+    border: 2px solid #2d5a4e;
     height: 40px;
     padding: 0 0.75rem;
     border-radius: 8px;
@@ -174,13 +173,13 @@ const UploadButton = styled(Link)`
     white-space: nowrap;
 
     &:active {
-      background: #f8f6f2;
+      background: #f0f5f4;
       outline: none;
     }
 
     &:focus {
       outline: none;
-      color: #fece04;
+      color: #2d5a4e;
     }
   }
 `;
@@ -192,7 +191,7 @@ const MenuButton = styled.button`
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #fece04;
+    background: #2d5a4e;
     color: #fff;
     border: none;
     width: 44px;
@@ -203,7 +202,7 @@ const MenuButton = styled.button`
     padding: 0;
 
     &:active {
-      background: #e5b803;
+      background: #234a40;
     }
   }
   &:focus {
@@ -279,7 +278,7 @@ const MobileBrowseButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background: #f8f6f2;
+    background: #f0f5f4;
   }
 
   &:focus {
@@ -287,7 +286,7 @@ const MobileBrowseButton = styled.button`
   }
 
   &:active {
-    background: #f0ede5;
+    background: #e0eeeb;
   }
 
   @media (max-width: 480px) {
@@ -322,11 +321,11 @@ const MobileMenuLink = styled(Link)`
   text-align: right;
 
   &:hover {
-    background: #f8f6f2;
+    background: #f0f5f4;
   }
 
   &:active {
-    background: #f0ede5;
+    background: #e0eeeb;
   }
 
   @media (max-width: 480px) {
@@ -337,7 +336,7 @@ const MobileMenuLink = styled(Link)`
 
 const MobileAuthButton = styled(Link)`
   display: block;
-  background: #fece04;
+  background: #2d5a4e;
   color: #fff;
   padding: 0.875rem 1rem;
   margin-top: 0.75rem;
@@ -351,12 +350,12 @@ const MobileAuthButton = styled(Link)`
   transition: background 0.2s ease;
 
   &:hover {
-    background: #e5b803;
+    background: #234a40;
     color: #fff;
   }
 
   &:active {
-    background: #d4a903;
+    background: #1b3b33;
   }
 
   &:focus {
@@ -372,7 +371,7 @@ const MobileAuthButton = styled(Link)`
 const MobileSignOutButton = styled.button`
   display: block;
   width: 100%;
-  background: #fece04;
+  background: #2d5a4e;
   color: #fff;
   padding: 0.875rem 1rem;
   margin-top: 0.75rem;
@@ -385,12 +384,12 @@ const MobileSignOutButton = styled.button`
   transition: background 0.2s ease;
 
   &:hover {
-    background: #e5b803;
+    background: #234a40;
     color: #fff;
   }
 
   &:active {
-    background: #d4a903;
+    background: #1b3b33;
   }
 
   &:focus {
@@ -403,7 +402,6 @@ const MobileSignOutButton = styled.button`
   }
 `;
 
-/* ====== Improved Browse Modal Styled Components ====== */
 const BrowseModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -447,7 +445,6 @@ const BrowseModalContent = styled.div`
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Custom scrollbar for desktop */
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -589,7 +586,7 @@ const Tab = styled.button`
   cursor: pointer;
   color: ${(props) => (props.active ? "#000" : "#999")};
   border-bottom: 3px solid
-    ${(props) => (props.active ? "#fece04" : "transparent")};
+    ${(props) => (props.active ? "#2D5A4E" : "transparent")};
   margin-bottom: -2px;
   transition: all 0.25s ease;
   position: relative;
@@ -605,7 +602,7 @@ const Tab = styled.button`
     left: 0;
     right: 0;
     height: 3px;
-    background: #fece04;
+    background: #2d5a4e;
     transform: scaleX(${(props) => (props.active ? "1" : "0")});
     transition: transform 0.25s ease;
   }
@@ -659,7 +656,7 @@ const SpecialtyLink = styled(Link)`
 
   &:hover {
     color: #000;
-    background: #f8f6f2;
+    background: #f0f5f4;
     transform: translateX(-2px);
   }
 
@@ -680,7 +677,7 @@ const SpecialtyLink = styled(Link)`
 
 const SeeMoreLink = styled(Link)`
   text-decoration: none;
-  color: #fece04;
+  color: #2d5a4e;
   font-size: 0.975rem;
   font-weight: 600;
   text-align: right;
@@ -697,9 +694,8 @@ const SeeMoreLink = styled(Link)`
   }
 
   &:hover {
-    color: #e5b803;
-    background: #fff9e6;
-    transform: translateX(-2px);
+    color: #234a40;
+    background: #e8f0ee;
 
     &::before {
       transform: translateX(-3px);
@@ -724,9 +720,7 @@ const NavTech = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.user.currentUser);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const toggleBrowse = () => {
     setIsBrowseOpen(!isBrowseOpen);
@@ -805,7 +799,6 @@ const NavTech = () => {
         </MobileButtonGroup>
       </Header>
 
-      {/* Browse Modal */}
       {isBrowseOpen && (
         <BrowseModalOverlay onClick={toggleBrowse}>
           <BrowseModalContent onClick={(e) => e.stopPropagation()}>
@@ -860,7 +853,6 @@ const NavTech = () => {
         </BrowseModalOverlay>
       )}
 
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <MobileMenuContainer>
           <MobileMenuList>

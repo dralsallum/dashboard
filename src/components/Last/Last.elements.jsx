@@ -6,7 +6,7 @@ export const ArWra = styled.div`
   flex-direction: row-reverse;
   flex-wrap: wrap;
   padding: 2.5rem;
-  background-color: #fff;
+  background-color: #f4f9f7;
 
   @media screen and (max-width: 700px) {
     display: flex;
@@ -40,7 +40,7 @@ export const ArHe = styled.h3`
   font-family: "FS Albert Extra Bold", Helvetica, Arial, sans-serif;
   font-size: 1.5rem;
   line-height: 1;
-  color: #f6bb3f;
+  color: #2d5a4e;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 0.75rem;
@@ -53,7 +53,7 @@ export const ArHe = styled.h3`
     font-family: "FS Albert Extra Bold", Helvetica, Arial, sans-serif;
     font-size: 1.25rem;
     line-height: 1;
-    color: #f6bb3f;
+    color: #2d5a4e;
     text-transform: uppercase;
     letter-spacing: 1px;
     word-wrap: break-word;
@@ -92,7 +92,7 @@ export const ArAt = styled.a`
   border-left: none;
   border-bottom: dotted 1px #d3d3d3;
   padding: 0;
-  color: #1a55ad;
+  color: #2d5a4e;
   text-decoration: none;
   outline: 0;
   transition: color 0.15s ease-out;
@@ -108,7 +108,7 @@ export const ArAt = styled.a`
     align-items: center;
     border-bottom: dotted 1px #d3d3d3;
     height: 25%;
-    color: #1a55ad;
+    color: #2d5a4e;
     text-decoration: none;
     outline: 0;
     transition: color 0.15s ease-out;
@@ -164,7 +164,7 @@ export const CoTe = styled.h3`
   font-family: "FS Albert Extra Bold", Helvetica, Arial, sans-serif;
   font-size: 1.5rem;
   line-height: 1.2;
-  color: #f6bb3f;
+  color: #2d5a4e;
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 0.25rem;
@@ -176,7 +176,7 @@ export const CoTe = styled.h3`
     font-family: "FS Albert Extra Bold", Helvetica, Arial, sans-serif;
     font-size: 1.5rem;
     line-height: 1.2;
-    color: #f6bb3f;
+    color: #2d5a4e;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 0.15rem;
@@ -190,7 +190,7 @@ export const CoCon = styled.div`
   flex-direction: row-reverse;
   padding: 2rem 1.5rem;
   margin-left: 0.3125rem;
-  background: linear-gradient(135deg, #ffd37c 0%, #ffdb91 100%);
+  background: linear-gradient(135deg, #2d5a4e 0%, #1e3d35 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
   @media screen and (max-width: 700px) {
@@ -262,8 +262,8 @@ export const CoAt = styled.a`
   border: 0;
   outline: 0;
   text-decoration: none;
-  background: #f6bb3f;
-  color: #fff;
+  background: white;
+  color: #2d5a4e;
   font-weight: 600;
   font-size: 0.9rem;
   line-height: 1;
@@ -272,12 +272,12 @@ export const CoAt = styled.a`
   transition:
     background 0.3s ease,
     box-shadow 0.3s ease;
-  box-shadow: 0 2px 8px rgba(246, 187, 63, 0.3);
+  box-shadow: 0 2px 8px rgba(45, 90, 78, 0.3);
   margin-top: 1rem;
 
   &:hover {
-    background: #e5aa2e;
-    box-shadow: 0 4px 12px rgba(246, 187, 63, 0.4);
+    background: #f0f6f4;
+    box-shadow: 0 4px 12px rgba(45, 90, 78, 0.4);
   }
 
   @media screen and (max-width: 700px) {
@@ -290,8 +290,8 @@ export const CoAt = styled.a`
     border-bottom-right-radius: 0;
     outline: 0;
     border: 0;
-    background: #f6bb3f;
-    color: #fff;
+    background: white;
+    color: #2d5a4e;
     line-height: 1;
     text-decoration: none;
     text-align: center;
@@ -337,7 +337,7 @@ export const CoLa = styled.div`
   width: 100%;
   font-family: Merriweather, Verdana, Arial, serif;
   font-size: 1rem;
-  color: #212121;
+  color: rgba(255, 255, 255, 0.95);
   padding-left: 0rem;
   line-height: 1.5;
   text-align: center;
@@ -368,13 +368,13 @@ export const CoDiv = styled.div`
   font-size: 1.4rem;
   line-height: 1.4;
   margin-bottom: 1rem;
-  color: #13404f;
+  color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
 
   @media screen and (max-width: 700px) {
     margin-bottom: 1rem;
     line-height: 1.4;
-    color: #13404f;
+    color: rgba(255, 255, 255, 0.95);
     font-size: 1.15rem;
     padding-left: 0;
   }

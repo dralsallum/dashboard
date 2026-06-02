@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes, css } from "styled-components";
 import { publicRequest } from "../../requestMethods";
-import Mail from "../../assets/gmail.png";
+
 export const Increase = keyframes`
   0% {
     width: 0%;
@@ -18,7 +18,7 @@ export const LoadingWrapper = styled.div`
   flex-direction: column;
   direction: rtl;
   color: #444;
-  background: #f7f2e6;
+  background: #f4f9f7;
   font-size: 1.2rem;
   font-weight: 600;
   min-height: 100dvh;
@@ -30,13 +30,14 @@ export const LoadingSp = styled.span`
 
 export const LoadingBarFill = styled.div`
   height: 100%;
-  background-color: #f6e05e;
+  background-color: #2d5a4e;
   border-radius: 4px;
   animation: ${Increase} 3s ease-out forwards;
   width: 0%;
 `;
+
 const Container = styled.div`
-  background: #f5f5f5;
+  background: #f4f9f7;
   min-height: 100vh;
   padding: 20px;
   font-family:
@@ -69,7 +70,6 @@ const FirstRow = styled.div`
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
 
-    /* Reorder cards on mobile - Ad card (3rd in RTL) appears first */
     & > *:nth-child(1) {
       order: 3;
     }
@@ -96,12 +96,12 @@ const Card = styled.article`
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(248, 196, 79, 0.08);
+  box-shadow: 0 2px 12px rgba(45, 90, 78, 0.08);
   display: flex;
   flex-direction: column;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid rgba(248, 196, 79, 0.1);
+  border: 1px solid rgba(45, 90, 78, 0.1);
   outline: none;
 
   &:focus {
@@ -110,7 +110,7 @@ const Card = styled.article`
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(248, 196, 79, 0.12);
+    box-shadow: 0 4px 16px rgba(45, 90, 78, 0.12);
   }
 `;
 
@@ -132,7 +132,7 @@ const CardImage = styled.div`
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      rgba(248, 196, 79, 0.08) 100%
+      rgba(45, 90, 78, 0.08) 100%
     );
   }
 `;
@@ -156,12 +156,12 @@ const CardContent = styled.div`
 const Category = styled.div`
   font-size: 12px;
   font-weight: 700;
-  color: #d4a944;
+  color: #2d5a4e;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
   display: inline-block;
-  background: rgba(248, 196, 79, 0.1);
+  background: rgba(45, 90, 78, 0.1);
   padding: 4px 12px;
   border-radius: 16px;
   align-self: flex-end;
@@ -184,12 +184,12 @@ const CardMeta = styled.div`
 `;
 
 const NewsCard = styled(Card)`
-  background: linear-gradient(135deg, #f8c44f 0%, #f5b93a 100%);
+  background: linear-gradient(135deg, #2d5a4e 0%, #1e3d35 100%);
   border: none;
 `;
 
 const NewsHeader = styled.div`
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
   padding: 16px 24px;
   font-size: 14px;
@@ -206,7 +206,7 @@ const NewsContent = styled.div`
 
 const NewsItem = styled.div`
   padding: 20px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
   transition: transform 0.2s ease;
 
@@ -245,7 +245,7 @@ const NewsTime = styled.span`
 const ReadMoreButton = styled.button`
   background: white;
   border: 2px solid white;
-  color: #d4a944;
+  color: #2d5a4e;
   padding: 12px 24px;
   border-radius: 24px;
   font-size: 14px;
@@ -270,7 +270,7 @@ const ReadMoreButton = styled.button`
 `;
 
 const AdCard = styled(Card)`
-  background: linear-gradient(135deg, #f8c44f 0%, #f5b93a 100%);
+  background: linear-gradient(135deg, #2d5a4e 0%, #1e3d35 100%);
   justify-content: space-between;
   text-align: center;
   padding: 20px 15px;
@@ -301,7 +301,7 @@ const AdTitle = styled.h2`
 const AdButton = styled.button`
   background: white;
   border: none;
-  color: #d4a944;
+  color: #2d5a4e;
   padding: 14px 32px;
   border-radius: 24px;
   font-size: 16px;
@@ -322,7 +322,7 @@ const AdButton = styled.button`
 `;
 
 const EditorsCard = styled(Card)`
-  background: linear-gradient(135deg, #f8c44f 0%, #f5b93a 100%);
+  background: linear-gradient(135deg, #2d5a4e 0%, #1e3d35 100%);
   text-align: center;
   padding: 24px 16px;
   justify-content: center;
@@ -347,7 +347,7 @@ const EditorsSubtitle = styled.p`
 const EditorButton = styled.button`
   background: white;
   border: 2px solid white;
-  color: #d4a944;
+  color: #2d5a4e;
   padding: 10px 20px;
   border-radius: 24px;
   font-size: 14px;
@@ -371,9 +371,9 @@ const EditorButton = styled.button`
 `;
 
 const ErrorMessage = styled.div`
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  color: #856404;
+  background: #e8f0ee;
+  border: 1px solid #2d5a4e;
+  color: #1e3d35;
   padding: 20px;
   border-radius: 12px;
   text-align: center;
@@ -384,181 +384,10 @@ const ErrorMessage = styled.div`
 const LoadingBar = styled.div`
   width: 200px;
   height: 8px;
-  background-color: rgba(246, 224, 94, 0.2);
+  background-color: rgba(45, 90, 78, 0.2);
   border-radius: 4px;
   overflow: hidden;
-
   position: relative;
-`;
-
-const SubscribeCon = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba (0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  backdrop-filter: blur(4px);
-`;
-
-const ModalContainer = styled.div`
-  background: white;
-  border-radius: 16px;
-  padding: 40px 32px;
-  max-width: 500px;
-  width: 100%;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  direction: rtl;
-  text-align: center;
-  @media (max-width: 768px) {
-    padding: 32px 24px;
-    max-width: 90%;
-  }
-`;
-const CloseButton = styled.button`
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  background: transparent;
-  border: none;
-  font-size: 28px;
-  color: #666;
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  outline: none;
-
-  &:hover {
-    background: rgba(248, 196, 79, 0.1);
-    color: #d4a944;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const ModalIcon = styled.div`
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135 deg, #f8c44f 0 %, #f5b93a 100 %);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px;
-  font-size: 32px;
-`;
-const ModalIconImg = styled.img`
-  width: 64px;
-  height: 64px;
-`;
-
-const ModalTitle = styled.h2`
-  font-size: 28px;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 12px 0;
-  line-height: 1.3;
-
-  @media (max-width: 768px) {
-    font-size: 24px;
-  }
-`;
-
-const ModalSubtitle = styled.p`
-  font-size: 16px;
-
-  color: #666;
-
-  margin: 0 0 32px 0;
-
-  line-height: 1.6;
-
-  @media (max-width: 768px) {
-    font-size: 15px;
-  }
-`;
-const InputWrapper = styled.div`
-  margin-bottom: 24px;
-`;
-const EmailInput = styled.input`
-  width: 100%;
-  padding: 14px 20px;
-  font-size: 16px;
-  background: #fff;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  outline: none;
-  transition: all 0.3s ease;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
-  direction: rtl;
-  text-align: right;
-  &::placeholder {
-    color: #999;
-  }
-
-  &:focus {
-    border-color: #f8c44f;
-
-    box-shadow: 0 0 0 4px rgba(248, 196, 79, 0.1);
-  }
-
-  @media (max-width: 768px) {
-    font-size: 15px;
-
-    padding: 12px 16px;
-  }
-`;
-const SubscribeButton = styled.button`
-  width: 100%;
-  background: #f7c24b;
-  border: none;
-  color: white;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(248, 196, 79, 0.3);
-  outline: none;
-  &:hover {
-    transform: translateY (-2px);
-    box-shadow: 0 6px 16px rgba(248, 196, 79, 0.4);
-  }
-
-  &:active {
-    transform: translateY (0);
-  }
-
-  &:focus {
-    outline: none;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 15px;
-    padding: 12px 28px;
-  }
-`;
-const PrivacyText = styled.p`
-  font-size: 12px;
-  color: #999;
-  margin-top: 16px;
-  line-height: 1.5;
 `;
 
 // Helper function to format time ago
@@ -582,7 +411,6 @@ const Publish = () => {
   const [newsletters, setNewsletters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [subscribe, setSubscribe] = useState(true);
 
   useEffect(() => {
     fetchNewsletters();
@@ -595,7 +423,6 @@ const Publish = () => {
 
       const response = await publicRequest.get("/newsletter?limit=8&page=1");
 
-      // Handle both response formats
       const newsletterData = response.data.data || response.data;
       setNewsletters(Array.isArray(newsletterData) ? newsletterData : []);
     } catch (err) {
@@ -607,38 +434,8 @@ const Publish = () => {
   };
 
   const handleNewsletterClick = (id) => {
-    // Navigate to newsletter detail page
     window.location.href = `/knowledge/${id}`;
   };
-
-  const handleClose = () => setSubscribe(false);
-
-  if (subscribe)
-    return (
-      <SubscribeCon>
-        <ModalContainer>
-          <CloseButton onClick={handleClose}>x</CloseButton>
-          <ModalIcon>
-            <ModalIconImg src={Mail} alt="" />
-          </ModalIcon>
-          <ModalTitle>اشترك في نشرتنا </ModalTitle>
-          <ModalSubtitle>
-            احصل على آخر الأخبار والمقالات المميزة مباشرة في بريدك الالكتروني
-          </ModalSubtitle>
-          <InputWrapper>
-            <EmailInput
-              type="email"
-              placeholder="أدخل بريدك الإلكتروني"
-              dir="rtl"
-            />
-          </InputWrapper>
-          <SubscribeButton>اشترك</SubscribeButton>
-          <PrivacyText>
-            نحن نحترم خصوصيتك. لن نشارك بريدك الإلكتروني مع أي طرف ثالث.
-          </PrivacyText>
-        </ModalContainer>
-      </SubscribeCon>
-    );
 
   if (loading)
     return (
@@ -658,17 +455,14 @@ const Publish = () => {
     );
   }
 
-  // Split newsletters for display
-  const featuredNewsletter = newsletters[0]; // Main featured article
-  const newsItems = newsletters.slice(1, 5); // 4 items for news card
-  const bottomNewsletters = newsletters.slice(5, 8); // 3 items for bottom row
+  const featuredNewsletter = newsletters[0];
+  const newsItems = newsletters.slice(1, 5);
+  const bottomNewsletters = newsletters.slice(5, 8);
 
   return (
     <Container>
       <Grid>
-        {/* FIRST ROW - 3 columns (reversed order for RTL) */}
         <FirstRow>
-          {/* Ad Card - Featured Newsletter or First Newsletter */}
           {featuredNewsletter && (
             <AdCard
               onClick={() => handleNewsletterClick(featuredNewsletter._id)}
@@ -681,7 +475,6 @@ const Publish = () => {
             </AdCard>
           )}
 
-          {/* News and Trending Card */}
           <NewsCard>
             <NewsHeader>الأخبار والشائع</NewsHeader>
             <NewsContent>
@@ -711,7 +504,6 @@ const Publish = () => {
             </NewsContent>
           </NewsCard>
 
-          {/* Main Featured Article - Second Newsletter */}
           {newsletters[1] && (
             <Card onClick={() => handleNewsletterClick(newsletters[1]._id)}>
               <FeaturedCardImage src={newsletters[1].titleImg} />
@@ -728,9 +520,7 @@ const Publish = () => {
           )}
         </FirstRow>
 
-        {/* SECOND ROW - 4 columns (reversed order for RTL) */}
         <SecondRow>
-          {/* Editors' Picks Card */}
           <EditorsCard>
             <div>
               <EditorsTitle>اختيارات المحررين</EditorsTitle>
@@ -762,7 +552,6 @@ const Publish = () => {
             </div>
           </EditorsCard>
 
-          {/* Display remaining newsletters */}
           {bottomNewsletters.map((newsletter) => (
             <Card
               key={newsletter._id}

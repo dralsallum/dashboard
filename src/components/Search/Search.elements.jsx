@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const ArWrapper = styled.section`
   width: 100%;
   min-height: 500px;
-  background: #fdfaee;
+  background: #f4f9f7;
   padding: 2rem 0 2rem 0;
   position: relative;
   overflow: hidden;
@@ -85,7 +85,9 @@ export const Input = styled.input`
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   color: ${(props) => props.$textColor || "#2d3748"};
   font-family: inherit;
   background: #fff;
@@ -95,12 +97,10 @@ export const Input = styled.input`
     color: #a0aec0;
   }
 
-  /* Style for the placeholder option */
   option:first-child {
     color: ${(props) => props.$placeholderColor || "#a0aebf"};
   }
 
-  /* Style for selected values */
   &:not(:placeholder-shown) {
     color: ${(props) =>
       props.value && props.value !== props.$placeholderText
@@ -109,7 +109,8 @@ export const Input = styled.input`
   }
 
   &:focus {
-    border-color: #ffd52b;
+    border-color: #2d5a4e;
+    box-shadow: 0 0 0 3px rgba(45, 90, 78, 0.12);
   }
 
   @media screen and (max-width: 968px) {
@@ -121,8 +122,8 @@ export const Input = styled.input`
 `;
 
 export const FindButton = styled.button`
-  background: #ffd52b;
-  color: #2d3748;
+  background: #2d5a4e;
+  color: #fff;
   border: none;
   padding: 16px 40px;
   font-size: 16px;
@@ -136,21 +137,21 @@ export const FindButton = styled.button`
   transition: all 0.2s ease-in-out;
   white-space: nowrap;
   height: fit-content;
-  box-shadow: 0 2px 8px rgba(255, 213, 43, 0.3);
+  box-shadow: 0 2px 8px rgba(45, 90, 78, 0.3);
 
   @media screen and (max-width: 968px) {
     width: 100%;
   }
 
   &:hover:not(:disabled) {
-    background: #ffc800;
+    background: #234a40;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(255, 213, 43, 0.45);
+    box-shadow: 0 6px 16px rgba(45, 90, 78, 0.4);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(255, 213, 43, 0.3);
+    box-shadow: 0 2px 6px rgba(45, 90, 78, 0.3);
   }
 
   &:focus-visible {
@@ -195,13 +196,13 @@ export const YellowBlob = styled.div`
   position: absolute;
   width: 500px;
   height: 500px;
-  background: #ffd52b;
+  background: #2d5a4e;
   border-radius: 50% 50% 0 50%;
   top: -80px;
   right: -100px;
   z-index: 1;
   transform: rotate(35deg);
-  box-shadow: 0 10px 40px rgba(255, 213, 43, 0.25);
+  box-shadow: 0 10px 40px rgba(45, 90, 78, 0.25);
 
   @media screen and (max-width: 968px) {
     width: 400px;
@@ -270,7 +271,7 @@ export const MedicalCard = styled.div`
   .cross {
     font-size: 36px;
     font-weight: 300;
-    color: #6dd5b4;
+    color: #2d5a4e;
     line-height: 1;
   }
 
@@ -290,11 +291,9 @@ export const MedicalCard = styled.div`
       &:nth-child(1) {
         width: 100%;
       }
-
       &:nth-child(2) {
         width: 80%;
       }
-
       &:nth-child(3) {
         width: 60%;
       }
@@ -342,16 +341,6 @@ export const OrangeHand = styled.div`
     transform: rotate(-30deg);
   }
 
-  /* Fingers */
-  span:nth-child(1),
-  span:nth-child(2),
-  span:nth-child(3),
-  span:nth-child(4) {
-    position: absolute;
-    background: linear-gradient(135deg, #ff9966 0%, #ff7744 100%);
-    border-radius: 15px;
-  }
-
   @media screen and (max-width: 968px) {
     width: 160px;
     height: 180px;
@@ -367,7 +356,6 @@ export const SearchIcon = styled.span`
 export const TopWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
   align-items: center;
   gap: 20px;
 
