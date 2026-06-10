@@ -12,7 +12,7 @@ export const ArWrapper = styled.section`
 
   @media screen and (max-width: 968px) {
     padding: 0.5rem 0 1rem 0;
-    min-height: 480px;
+    min-height: 400px;
   }
 `;
 

@@ -107,11 +107,6 @@ const Card = styled.article`
   &:focus {
     outline: none;
   }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(45, 90, 78, 0.12);
-  }
 `;
 
 const CardImage = styled.div`
@@ -208,14 +203,9 @@ const NewsItem = styled.div`
   padding: 20px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  transition: transform 0.2s ease;
 
   &:last-child {
     border-bottom: none;
-  }
-
-  &:hover {
-    transform: translateX(-5px);
   }
 `;
 
@@ -255,14 +245,8 @@ const ReadMoreButton = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
   margin-right: auto;
   outline: none;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
 
   &:focus {
     outline: none;
@@ -307,14 +291,8 @@ const AdButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   outline: none;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  }
 
   &:focus {
     outline: none;
@@ -356,14 +334,8 @@ const EditorButton = styled.button`
   margin: 6px 0;
   width: 100%;
   max-width: 280px;
-  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   outline: none;
-
-  &:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
 
   &:focus {
     outline: none;

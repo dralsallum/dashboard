@@ -387,7 +387,7 @@ const LoadingBar = styled.div`
 `;
 
 const ArticleWrapper = styled.div`
-  background-color: #ffffff;
+  background-color: #f4f9f7;
   min-height: 100vh;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
@@ -421,7 +421,7 @@ export const LoadingSp = styled.span`
 
 export const LoadingBarFill = styled.div`
   height: 100%;
-  background-color: #f6e05e;
+  background-color: #2d5a4e;
   border-radius: 4px;
   animation: ${Increase} 3s ease-out forwards;
   width: 0%;
@@ -508,7 +508,7 @@ const BackButton = styled.button`
 
 // ARTICLE
 const Article = styled.article`
-  background: white;
+  background: #f4f9f7;
 `;
 
 const Header = styled.header`

@@ -1,7 +1,7 @@
 // File: src/requestMethods.js
 import axios from "axios";
 
-const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
+const BASE_URL = "https://amanapi-f8ce9693a253.herokuapp.com/api";
 
 export const publicRequest = axios.create({
   baseURL: BASE_URL,
@@ -27,5 +27,5 @@ userRequest.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );

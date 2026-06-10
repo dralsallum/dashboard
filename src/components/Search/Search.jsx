@@ -20,17 +20,14 @@ const Search = () => {
   const navigate = useNavigate();
   const [specialty, setSpecialty] = useState("");
   const [location, setLocation] = useState("");
-  const [insurance, setInsurance] = useState("");
 
-  const main = ["طبيب باطنة", "طبيب جلدية", "طبيب تجميل"];
+  const main = ["رعاية طبية منزلية", "زيارة العيادة"];
   const cities = ["الرياض", "جدة", "الدمام"];
 
   const handleSearch = () => {
-    // Build the navigation path and query parameters
     const major = specialty.trim() || "all";
     const params = new URLSearchParams();
 
-    // Parse location (assuming format: "city, country")
     if (location.trim()) {
       const locationParts = location.split(",").map((part) => part.trim());
       if (locationParts.length >= 2) {
@@ -41,24 +38,12 @@ const Search = () => {
       }
     }
 
-    // Add insurance if provided
-    if (insurance.trim()) {
-      params.set("insurance", insurance);
-    }
-
-    // Navigate to reservation page with major and query params
     const queryString = params.toString();
     const path = queryString
       ? `/reservation/${encodeURIComponent(major)}?${queryString}`
       : `/reservation/${encodeURIComponent(major)}`;
 
     navigate(path);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
   };
 
   return (
@@ -79,7 +64,7 @@ const Search = () => {
               <Input
                 as="select"
                 id="search-input"
-                aria-label="اختر التخصص"
+                aria-label="اختر الخدمة"
                 value={specialty}
                 onChange={(e) => setSpecialty(e.target.value)}
                 style={{
@@ -120,19 +105,6 @@ const Search = () => {
                   </option>
                 ))}
               </Input>
-            </InputGroup>
-
-            <InputGroup>
-              <Label htmlFor="insurance-input">إضافة التأمين</Label>
-              <Input
-                id="insurance-input"
-                type="text"
-                placeholder="شركة التأمين (اختياري)"
-                aria-label="أدخل معلومات التأمين"
-                value={insurance}
-                onChange={(e) => setInsurance(e.target.value)}
-                onKeyPress={handleKeyPress}
-              />
             </InputGroup>
 
             <FindButton
