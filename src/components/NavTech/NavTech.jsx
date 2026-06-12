@@ -4,19 +4,32 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../../redux/userRedux";
+import { logout as patientLogout } from "../../redux/patientAuth";
 import Menu from "../../assets/menu.png";
 
+// ── Theme ─────────────────────────────────────────────────────────
+const G = {
+  primary: "#2D5A4E",
+  dark: "#1e3e36",
+  light: "#e6f0ee",
+  hover: "#234a40",
+  active: "#1b3b33",
+  border: "#c2d6d1",
+  bg: "#f4f9f7",
+};
+
+// ── Styled components ─────────────────────────────────────────────
 const Header = styled.header`
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: #f4f9f7;
+  background: ${G.bg};
   position: relative;
 
   @media (max-width: 768px) {
-    padding: 1rem 1rem;
+    padding: 1rem;
   }
 `;
 
@@ -27,7 +40,6 @@ const Logo = styled(Link)`
   font-weight: bold;
   color: #000;
   text-decoration: none;
-
   &:focus {
     outline: none;
   }
@@ -37,11 +49,9 @@ const LogoImage = styled.img`
   width: 150px;
   height: auto;
   margin-right: 0.5rem;
-
   @media (max-width: 768px) {
     width: 100px;
   }
-
   @media (max-width: 480px) {
     width: 80px;
   }
@@ -50,7 +60,6 @@ const LogoImage = styled.img`
 const NavLinks = styled.nav`
   display: flex;
   gap: 1.5rem;
-
   @media (max-width: 768px) {
     display: none;
   }
@@ -78,18 +87,26 @@ const BrowseButton = styled.button`
   align-items: center;
   gap: 0.3rem;
   padding: 0;
-
   &:hover {
     text-decoration: underline;
   }
-
   &:focus {
     outline: none;
   }
 `;
 
-const SubscribeButton = styled(Link)`
-  background: #2d5a4e;
+// Auth button group (desktop) — shown when either user type is logged in
+const DesktopAuthGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const PrimaryBtn = styled(Link)`
+  background: ${G.primary};
   color: #fff;
   padding: 0.6rem 1.2rem;
   border-radius: 999px;
@@ -101,24 +118,18 @@ const SubscribeButton = styled(Link)`
   display: inline-block;
   text-align: center;
   transition: background 0.2s ease;
-
   &:hover {
-    background: #234a40;
+    background: ${G.hover};
     color: #fff;
   }
-
   &:focus {
     outline: none;
     color: #fff;
   }
-
-  @media (max-width: 768px) {
-    display: none;
-  }
 `;
 
-const SignOutButton = styled.button`
-  background: #2d5a4e;
+const SignOutBtn = styled.button`
+  background: ${G.primary};
   color: #fff;
   padding: 0.6rem 1.2rem;
   border-radius: 999px;
@@ -127,24 +138,41 @@ const SignOutButton = styled.button`
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s ease;
-
   &:hover {
-    background: #234a40;
+    background: ${G.hover};
     color: #fff;
   }
-
   &:focus {
     outline: none;
   }
+`;
 
-  @media (max-width: 768px) {
-    display: none;
+// Patient-specific portal link (secondary style)
+const PortalBtn = styled(Link)`
+  background: transparent;
+  color: ${G.primary};
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid ${G.primary};
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.2s ease;
+  &:hover {
+    background: ${G.light};
+    color: ${G.dark};
+  }
+  &:focus {
+    outline: none;
   }
 `;
 
+// Mobile
 const MobileButtonGroup = styled.div`
   display: none;
-
   @media (max-width: 768px) {
     display: flex;
     gap: 0.5rem;
@@ -154,14 +182,13 @@ const MobileButtonGroup = styled.div`
 
 const UploadButton = styled(Link)`
   display: none;
-
   @media (max-width: 768px) {
     display: flex;
     justify-content: center;
     align-items: center;
     background: #fff;
-    color: #2d5a4e;
-    border: 2px solid #2d5a4e;
+    color: ${G.primary};
+    border: 2px solid ${G.primary};
     height: 40px;
     padding: 0 0.75rem;
     border-radius: 8px;
@@ -171,27 +198,24 @@ const UploadButton = styled(Link)`
     font-size: 1rem;
     font-weight: 800;
     white-space: nowrap;
-
     &:active {
-      background: #f0f5f4;
+      background: ${G.light};
       outline: none;
     }
-
     &:focus {
       outline: none;
-      color: #2d5a4e;
+      color: ${G.primary};
     }
   }
 `;
 
 const MenuButton = styled.button`
   display: none;
-
   @media (max-width: 768px) {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #2d5a4e;
+    background: ${G.primary};
     color: #fff;
     border: none;
     width: 44px;
@@ -200,15 +224,13 @@ const MenuButton = styled.button`
     cursor: pointer;
     transition: background 0.2s ease;
     padding: 0;
-
     &:active {
-      background: #234a40;
+      background: ${G.hover};
     }
   }
   &:focus {
     outline: none;
   }
-
   @media (max-width: 480px) {
     width: 40px;
     height: 40px;
@@ -220,7 +242,6 @@ const MenuIcon = styled.img`
   height: 24px;
   filter: brightness(0) invert(1);
   transition: transform 0.2s ease;
-
   @media (max-width: 480px) {
     width: 20px;
     height: 20px;
@@ -231,7 +252,6 @@ const CloseIcon = styled.span`
   font-size: 1.3rem;
   line-height: 1;
   color: #fff;
-
   @media (max-width: 480px) {
     font-size: 1.2rem;
   }
@@ -239,7 +259,6 @@ const CloseIcon = styled.span`
 
 const MobileMenuContainer = styled.div`
   display: none;
-
   @media (max-width: 768px) {
     display: block;
     background: #fff;
@@ -254,7 +273,6 @@ const MobileMenuContainer = styled.div`
     max-height: calc(100vh - 90px);
     overflow-y: auto;
   }
-
   @media (max-width: 480px) {
     top: 60px;
     right: 0.5rem;
@@ -276,19 +294,15 @@ const MobileBrowseButton = styled.button`
   width: 100%;
   text-align: right;
   cursor: pointer;
-
   &:hover {
-    background: #f0f5f4;
+    background: ${G.light};
   }
-
   &:focus {
     outline: none;
   }
-
   &:active {
-    background: #e0eeeb;
+    background: #d0e8e3;
   }
-
   @media (max-width: 480px) {
     font-size: 0.95rem;
     padding: 0.75rem 0.5rem;
@@ -304,7 +318,6 @@ const MobileMenuList = styled.ul`
 const MobileMenuItem = styled.li`
   margin: 0;
   border-bottom: 1px solid #f0f0f0;
-
   &:last-child {
     border-bottom: none;
   }
@@ -319,15 +332,12 @@ const MobileMenuLink = styled(Link)`
   padding: 0.875rem 0.5rem;
   transition: background 0.2s ease;
   text-align: right;
-
   &:hover {
-    background: #f0f5f4;
+    background: ${G.light};
   }
-
   &:active {
-    background: #e0eeeb;
+    background: #d0e8e3;
   }
-
   @media (max-width: 480px) {
     font-size: 0.95rem;
     padding: 0.75rem 0.5rem;
@@ -336,7 +346,7 @@ const MobileMenuLink = styled(Link)`
 
 const MobileAuthButton = styled(Link)`
   display: block;
-  background: #2d5a4e;
+  background: ${G.primary};
   color: #fff;
   padding: 0.875rem 1rem;
   margin-top: 0.75rem;
@@ -348,20 +358,42 @@ const MobileAuthButton = styled(Link)`
   text-align: center;
   text-decoration: none;
   transition: background 0.2s ease;
-
   &:hover {
-    background: #234a40;
+    background: ${G.hover};
     color: #fff;
   }
-
   &:active {
-    background: #1b3b33;
+    background: ${G.active};
   }
-
   &:focus {
     outline: none;
   }
+  @media (max-width: 480px) {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+`;
 
+const MobilePortalButton = styled(Link)`
+  display: block;
+  background: transparent;
+  color: ${G.primary};
+  padding: 0.875rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  border: 2px solid ${G.primary};
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  &:hover {
+    background: ${G.light};
+  }
+  &:focus {
+    outline: none;
+  }
   @media (max-width: 480px) {
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
@@ -371,7 +403,7 @@ const MobileAuthButton = styled(Link)`
 const MobileSignOutButton = styled.button`
   display: block;
   width: 100%;
-  background: #2d5a4e;
+  background: ${G.primary};
   color: #fff;
   padding: 0.875rem 1rem;
   margin-top: 0.75rem;
@@ -382,26 +414,30 @@ const MobileSignOutButton = styled.button`
   font-size: 1rem;
   text-align: center;
   transition: background 0.2s ease;
-
   &:hover {
-    background: #234a40;
+    background: ${G.hover};
     color: #fff;
   }
-
   &:active {
-    background: #1b3b33;
+    background: ${G.active};
   }
-
   &:focus {
     outline: none;
   }
-
   @media (max-width: 480px) {
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
   }
 `;
 
+// Divider between logout buttons on mobile
+const MobileDivider = styled.div`
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0.5rem 0 0;
+`;
+
+// Browse modal
 const BrowseModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -428,7 +464,7 @@ const BrowseModalOverlay = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 0rem;
+    padding: 0;
     align-items: center;
   }
 `;
@@ -448,19 +484,13 @@ const BrowseModalContent = styled.div`
   &::-webkit-scrollbar {
     width: 8px;
   }
-
   &::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
   }
-
   &::-webkit-scrollbar-thumb {
     background: #d0d0d0;
     border-radius: 10px;
-
-    &:hover {
-      background: #b0b0b0;
-    }
   }
 
   @keyframes slideDown {
@@ -480,7 +510,6 @@ const BrowseModalContent = styled.div`
     border-radius: 16px;
     padding: 2rem 1.5rem 2.5rem;
     max-height: 80vh;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
     animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
     @keyframes popIn {
@@ -518,21 +547,17 @@ const CloseButton = styled.button`
   border-radius: 8px;
   transition: all 0.2s ease;
   z-index: 10;
-
   &:hover {
     background: #e8e8e8;
     color: #333;
     transform: scale(1.05);
   }
-
   &:active {
     transform: scale(0.95);
   }
-
   &:focus {
     outline: none;
   }
-
   @media (max-width: 768px) {
     top: 1rem;
     left: 1rem;
@@ -549,12 +574,10 @@ const BrowseTitle = styled.h2`
   text-align: right;
   color: #1a1a1a;
   letter-spacing: -0.02em;
-
   @media (max-width: 768px) {
     font-size: 1.5rem;
     margin-bottom: 1.25rem;
   }
-
   @media (max-width: 480px) {
     font-size: 1.35rem;
   }
@@ -566,12 +589,10 @@ const TabContainer = styled.div`
   border-bottom: 2px solid #e8e8e8;
   margin-bottom: 2rem;
   justify-content: flex-end;
-
   @media (max-width: 768px) {
     gap: 2rem;
     margin-bottom: 1.5rem;
   }
-
   @media (max-width: 480px) {
     gap: 1.5rem;
   }
@@ -586,36 +607,19 @@ const Tab = styled.button`
   cursor: pointer;
   color: ${(props) => (props.active ? "#000" : "#999")};
   border-bottom: 3px solid
-    ${(props) => (props.active ? "#2D5A4E" : "transparent")};
+    ${(props) => (props.active ? G.primary : "transparent")};
   margin-bottom: -2px;
   transition: all 0.25s ease;
-  position: relative;
-
   &:hover {
     color: #000;
   }
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: #2d5a4e;
-    transform: scaleX(${(props) => (props.active ? "1" : "0")});
-    transition: transform 0.25s ease;
-  }
-
   &:focus {
     outline: none;
   }
-
   @media (max-width: 768px) {
     font-size: 1rem;
     padding: 0.65rem 0.25rem;
   }
-
   @media (max-width: 480px) {
     font-size: 0.95rem;
   }
@@ -626,17 +630,14 @@ const SpecialtiesGrid = styled.div`
   grid-template-columns: repeat(4, 1fr);
   gap: 1.75rem 2.5rem;
   padding: 0.5rem 0;
-
   @media (max-width: 968px) {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem 2rem;
   }
-
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem 1.5rem;
   }
-
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
     gap: 0.75rem;
@@ -652,23 +653,18 @@ const SpecialtyLink = styled(Link)`
   padding: 0.65rem 0.5rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  position: relative;
-
   &:hover {
     color: #000;
-    background: #f0f5f4;
+    background: ${G.light};
     transform: translateX(-2px);
   }
-
   &:active {
     transform: translateX(-1px);
   }
-
   @media (max-width: 768px) {
     font-size: 0.95rem;
     padding: 0.75rem 0.5rem;
   }
-
   @media (max-width: 480px) {
     font-size: 1rem;
     padding: 0.85rem 0.75rem;
@@ -677,7 +673,7 @@ const SpecialtyLink = styled(Link)`
 
 const SeeMoreLink = styled(Link)`
   text-decoration: none;
-  color: #2d5a4e;
+  color: ${G.primary};
   font-size: 0.975rem;
   font-weight: 600;
   text-align: right;
@@ -687,41 +683,40 @@ const SeeMoreLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-
   &::before {
     content: "←";
     transition: transform 0.2s ease;
   }
-
   &:hover {
-    color: #234a40;
-    background: #e8f0ee;
-
+    color: ${G.hover};
+    background: ${G.light};
     &::before {
       transform: translateX(-3px);
     }
   }
-
   @media (max-width: 768px) {
     font-size: 0.95rem;
     padding: 0.75rem 0.5rem;
   }
-
   @media (max-width: 480px) {
     font-size: 1rem;
     padding: 0.85rem 0.75rem;
   }
 `;
 
+// ── Component ─────────────────────────────────────────────────────
 const NavTech = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBrowseOpen, setIsBrowseOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("specialties");
+
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.user.currentUser);
+  const currentPatient = useSelector(
+    (state) => state.patientAuth?.currentPatient ?? null,
+  );
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   const toggleBrowse = () => {
     setIsBrowseOpen(!isBrowseOpen);
     setIsMenuOpen(false);
@@ -729,13 +724,16 @@ const NavTech = () => {
 
   const handleMobileBrowseClick = () => {
     setIsMenuOpen(false);
-    setTimeout(() => {
-      setIsBrowseOpen(true);
-    }, 150);
+    setTimeout(() => setIsBrowseOpen(true), 150);
   };
 
   const handleSignOut = () => {
     dispatch(signOut());
+    setIsMenuOpen(false);
+  };
+
+  const handlePatientLogout = () => {
+    dispatch(patientLogout());
     setIsMenuOpen(false);
   };
 
@@ -763,11 +761,40 @@ const NavTech = () => {
     { name: "أطباء الرعاية الأولية", path: "/reservation/primary-care" },
   ];
 
+  // ── Desktop right-side auth area ─────────────────────────────
+  // Shows logout for whichever user type(s) are logged in,
+  // or a single "login" button when nobody is logged in.
+  const renderDesktopAuth = () => {
+    if (!currentUser && !currentPatient) {
+      return (
+        <DesktopAuthGroup>
+          <PrimaryBtn to="/patientlogin">بوابة المريض</PrimaryBtn>
+          <PrimaryBtn to="/login">دخول المنشأة</PrimaryBtn>
+        </DesktopAuthGroup>
+      );
+    }
+    return (
+      <DesktopAuthGroup>
+        {currentPatient && (
+          <>
+            <PortalBtn to="/">بوابة المريض</PortalBtn>
+            <SignOutBtn onClick={handlePatientLogout}>خروج المريض</SignOutBtn>
+          </>
+        )}
+        {currentUser && (
+          <SignOutBtn onClick={() => dispatch(signOut())}>
+            تسجيل الخروج
+          </SignOutBtn>
+        )}
+      </DesktopAuthGroup>
+    );
+  };
+
   return (
     <>
       <Header>
         <Logo to="/">
-          <LogoImage src={logo} alt="شعار درس السلوم" />
+          <LogoImage src={logo} alt="شعار" />
         </Logo>
 
         <NavLinks>
@@ -777,15 +804,7 @@ const NavTech = () => {
           <NavLinkStyled to="/newsletter">النشرة البريدية</NavLinkStyled>
         </NavLinks>
 
-        {currentUser ? (
-          <SignOutButton onClick={() => dispatch(signOut())}>
-            تسجيل الخروج
-          </SignOutButton>
-        ) : (
-          <SubscribeButton to="/login">
-            تسجيل الدخول / حساب جديد
-          </SubscribeButton>
-        )}
+        {renderDesktopAuth()}
 
         <MobileButtonGroup>
           <MenuButton onClick={toggleMenu}>
@@ -799,11 +818,11 @@ const NavTech = () => {
         </MobileButtonGroup>
       </Header>
 
+      {/* Browse modal */}
       {isBrowseOpen && (
         <BrowseModalOverlay onClick={toggleBrowse}>
           <BrowseModalContent onClick={(e) => e.stopPropagation()}>
             <CloseButton onClick={toggleBrowse}>✕</CloseButton>
-
             <TabContainer>
               <Tab
                 active={activeTab === "procedures"}
@@ -818,18 +837,13 @@ const NavTech = () => {
                 التخصصات
               </Tab>
             </TabContainer>
-
             {activeTab === "specialties" && (
               <>
                 <BrowseTitle>تصفح أفضل التخصصات</BrowseTitle>
                 <SpecialtiesGrid>
-                  {specialties.map((specialty, index) => (
-                    <SpecialtyLink
-                      key={index}
-                      to={specialty.path}
-                      onClick={toggleBrowse}
-                    >
-                      {specialty.name}
+                  {specialties.map((s, i) => (
+                    <SpecialtyLink key={i} to={s.path} onClick={toggleBrowse}>
+                      {s.name}
                     </SpecialtyLink>
                   ))}
                   <SeeMoreLink to="/" onClick={toggleBrowse}>
@@ -838,7 +852,6 @@ const NavTech = () => {
                 </SpecialtiesGrid>
               </>
             )}
-
             {activeTab === "procedures" && (
               <>
                 <BrowseTitle>تصفح الإجراءات الطبية</BrowseTitle>
@@ -853,6 +866,7 @@ const NavTech = () => {
         </BrowseModalOverlay>
       )}
 
+      {/* Mobile menu */}
       {isMenuOpen && (
         <MobileMenuContainer>
           <MobileMenuList>
@@ -862,12 +876,12 @@ const NavTech = () => {
               </MobileBrowseButton>
             </MobileMenuItem>
             <MobileMenuItem>
-              <MobileMenuLink to="/job" onClick={toggleMenu}>
+              <MobileMenuLink to="/support" onClick={toggleMenu}>
                 المساعدة
               </MobileMenuLink>
             </MobileMenuItem>
             <MobileMenuItem>
-              <MobileMenuLink to="/personality" onClick={toggleMenu}>
+              <MobileMenuLink to="/upload" onClick={toggleMenu}>
                 أضف عيادتك على منصة وقتنا
               </MobileMenuLink>
             </MobileMenuItem>
@@ -878,14 +892,34 @@ const NavTech = () => {
             </MobileMenuItem>
           </MobileMenuList>
 
-          {currentUser ? (
-            <MobileSignOutButton onClick={handleSignOut}>
-              تسجيل الخروج
-            </MobileSignOutButton>
-          ) : (
-            <MobileAuthButton to="/login" onClick={toggleMenu}>
-              تسجيل الدخول / حساب جديد
-            </MobileAuthButton>
+          {/* Mobile auth — show relevant buttons based on who's logged in */}
+          {!currentUser && !currentPatient && (
+            <>
+              <MobileAuthButton to="/patientlogin" onClick={toggleMenu}>
+                بوابة المريض
+              </MobileAuthButton>
+              <MobileAuthButton to="/login" onClick={toggleMenu}>
+                دخول المنشأة
+              </MobileAuthButton>
+            </>
+          )}
+          {currentPatient && (
+            <>
+              <MobilePortalButton to="/" onClick={toggleMenu}>
+                بوابة المريض
+              </MobilePortalButton>
+              <MobileSignOutButton onClick={handlePatientLogout}>
+                خروج المريض
+              </MobileSignOutButton>
+            </>
+          )}
+          {currentUser && (
+            <>
+              {currentPatient && <MobileDivider />}
+              <MobileSignOutButton onClick={handleSignOut}>
+                تسجيل الخروج
+              </MobileSignOutButton>
+            </>
           )}
         </MobileMenuContainer>
       )}

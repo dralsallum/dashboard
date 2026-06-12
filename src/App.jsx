@@ -25,6 +25,10 @@ import Rate from "./pages/pay";
 import Newsletter from "./pages/Newsletter";
 import Speciality from "./pages/Speciality";
 import Knowledge from "./pages/Knowledge";
+import PatientLogin from "./pages/PatinetLogin";
+import PatientRegister from "./pages/PatientRegister";
+import PatientResetPassword from "./pages/PatientResetPassword";
+import PatientDeleteAccount from "./pages/PatientDelete";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -66,6 +70,16 @@ const App = () => {
           <Route
             path="/control"
             element={user ? <Control /> : <Navigate to="/signup" replace />}
+          />
+          <Route path="/patientlogin" element={<PatientLogin />} />
+          <Route path="/patientregister" element={<PatientRegister />} />
+          <Route
+            path="/patient/deleteaccount"
+            element={<PatientDeleteAccount />}
+          />
+          <Route
+            path="/patient/resetpassword"
+            element={<PatientResetPassword />}
           />
         </Routes>
       </div>

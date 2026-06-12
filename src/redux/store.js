@@ -4,6 +4,7 @@ import userReducer from "./userRedux";
 import basketReducer from "./basketRedux";
 import tabReducer from "./tabRedux";
 import settingReducer from "./settingRedux";
+import patientAuthReducer from "./patientAuth";
 import {
   persistStore,
   persistReducer,
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   basket: basketReducer,
   tab: tabReducer,
   setting: settingReducer,
+  patientAuth: patientAuthReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
