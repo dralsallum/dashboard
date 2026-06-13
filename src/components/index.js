@@ -34,3 +34,5 @@ export { default as Publish } from "./Publish/Publish";
 export { default as Last } from "./Last/Last";
 export { default as News } from "./News/News";
 export { default as Rtc } from "./Rtc/Rtc";
+export { default as Therapy } from "./Therapy/Therapy";
+export { default as Onemedical } from "./Onemedical/Onemedical";

@@ -7,6 +7,7 @@ import {
   Category,
   Benefits,
   Search,
+  Therapy,
 } from "../components";
 
 const Home = () => {

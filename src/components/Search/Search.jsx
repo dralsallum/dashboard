@@ -112,7 +112,7 @@ const Search = () => {
               aria-label="ابحث عن الرعاية الصحية بالمعايير المحددة"
             >
               <SearchIconSVG size={20} />
-              <span>ابحث عن رعاية صحية</span>
+              <span>ابدا رعايتك الصحية</span>
             </FindButton>
           </SearchContainer>
         </ContentWrapper>
