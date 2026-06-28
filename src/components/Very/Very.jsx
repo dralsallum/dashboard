@@ -52,7 +52,7 @@ const MainHeading = styled.h1`
   text-align: right;
 
   @media screen and (max-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 2.3rem;
     text-align: center;
   }
 `;
@@ -267,7 +267,7 @@ const ArrowPara = styled.div`
   line-height: 1.4;
 
   @media screen and (max-width: 768px) {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     white-space: normal;
     text-align: right;
     border-radius: 12px;
