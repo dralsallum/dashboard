@@ -36,3 +36,6 @@ export { default as News } from "./News/News";
 export { default as Rtc } from "./Rtc/Rtc";
 export { default as Therapy } from "./Therapy/Therapy";
 export { default as Onemedical } from "./Onemedical/Onemedical";
+export { default as Medication } from "./Medication/Medication";
+export { default as Health } from "./Health/Health";
+export { default as Monitor } from "./Monitor/Monitor";

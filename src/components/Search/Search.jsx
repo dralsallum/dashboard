@@ -21,29 +21,11 @@ const Search = () => {
   const [specialty, setSpecialty] = useState("");
   const [location, setLocation] = useState("");
 
-  const main = ["رعاية طبية منزلية", "زيارة العيادة"];
-  const cities = ["الرياض", "جدة", "الدمام"];
+  const main = ["رعاية طبية منزلية"];
+  const cities = ["الرياض"];
 
   const handleSearch = () => {
-    const major = specialty.trim() || "all";
-    const params = new URLSearchParams();
-
-    if (location.trim()) {
-      const locationParts = location.split(",").map((part) => part.trim());
-      if (locationParts.length >= 2) {
-        params.set("city", locationParts[0]);
-        params.set("country", locationParts[1]);
-      } else if (locationParts.length === 1) {
-        params.set("city", locationParts[0]);
-      }
-    }
-
-    const queryString = params.toString();
-    const path = queryString
-      ? `/reservation/${encodeURIComponent(major)}?${queryString}`
-      : `/reservation/${encodeURIComponent(major)}`;
-
-    navigate(path);
+    navigate("/recommendation");
   };
 
   return (
@@ -60,7 +42,7 @@ const Search = () => {
 
           <SearchContainer role="search">
             <InputGroup>
-              <Label htmlFor="search-input">بحث</Label>
+              <Label htmlFor="search-input">اختر الخدمة</Label>
               <Input
                 as="select"
                 id="search-input"
@@ -74,7 +56,7 @@ const Search = () => {
                   MozAppearance: "none",
                 }}
               >
-                <option value="">اختر التخصص</option>
+                <option value="">نوع الخدمة</option>
                 {main.map((major) => (
                   <option key={major} value={major}>
                     {major}
@@ -112,7 +94,7 @@ const Search = () => {
               aria-label="ابحث عن الرعاية الصحية بالمعايير المحددة"
             >
               <SearchIconSVG size={20} />
-              <span>ابدا رعايتك الصحية</span>
+              <span>ابدا الان رعايتك الصحية</span>
             </FindButton>
           </SearchContainer>
         </ContentWrapper>

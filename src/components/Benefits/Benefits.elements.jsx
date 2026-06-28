@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const BenefitsContainer = styled.section`
-  background: linear-gradient(180deg, #e8f0ee 0%, #f4f9f7 100%);
+  background: #f4f9f7;
   padding: 60px 16px 40px;
   min-height: 100vh;
   display: flex;

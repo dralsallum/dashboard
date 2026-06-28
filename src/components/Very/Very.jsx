@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import Header from "../../assets/make.jpg";
 import ArrowCurve from "../../assets/arrowCurve.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const MaFirst = styled.div`
-  background: #fff;
+  background: #f4f9f7;
   padding: 5rem 4rem 5rem 4rem;
   direction: rtl;
   font-family: "Tajawal", "Arial", sans-serif;
@@ -22,7 +22,7 @@ const MaSec = styled.div`
 `;
 
 const MaAll = styled.div`
-  background-color: #ffeeb3;
+  background-color: #ddeae5;
   border-radius: 1rem;
   padding: 4rem 3.5rem;
   position: relative;
@@ -80,7 +80,6 @@ const ButtonContainer = styled.div`
   display: flex;
   position: relative;
   color: #000;
-  text-weight: 800;
 
   @media screen and (max-width: 768px) {
     align-items: center;
@@ -88,12 +87,9 @@ const ButtonContainer = styled.div`
 `;
 
 const ButtonSubContainer = styled.div`
-  grid-column-gap: 1rem;
-  grid-row-gap: 1rem;
   flex-flow: wrap;
   align-items: center;
   display: flex;
-  text-weight: 800;
 `;
 
 const ButtonAt = styled(Link)`
@@ -102,9 +98,9 @@ const ButtonAt = styled(Link)`
   color: #fff;
   text-align: center;
   white-space: nowrap;
-  background-color: #fecc04ff;
+  background-color: #2d5a4e;
   border-radius: 8px;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1.2rem;
   font-family: "Tajawal", "Arial", sans-serif;
   text-decoration: none;
   transition: background-color 0.2s;
@@ -121,7 +117,7 @@ const ButtonAt = styled(Link)`
   }
 
   &:hover {
-    background-color: #f3c300ff;
+    background-color: #255048;
   }
 
   &:focus {
@@ -156,24 +152,12 @@ const ImgContainer = styled.div`
 const ArrowImg = styled.img`
   width: 25px;
   position: absolute;
-  top: -2.4rem;
+  top: -2.2rem;
   right: -1.9rem;
   transform: scaleX(-1);
 
   @media screen and (max-width: 768px) {
     display: none;
-  }
-`;
-
-const ArrowPara = styled.p`
-  text-align: right;
-  height: auto;
-  font-family: "Tajawal", "Arial", sans-serif;
-  font-size: 1.15rem;
-
-  @media screen and (max-width: 768px) {
-    text-align: center;
-    font-size: 1rem;
   }
 `;
 
@@ -205,7 +189,10 @@ const LeftDiv = styled.div`
 
 const ImageSection = styled.img`
   width: 44%;
-  box-shadow: 0 24px 56px #1919180a, 0 12px 28px #19191808, 0 8px 14px #19191808;
+  box-shadow:
+    0 24px 56px #1919180a,
+    0 12px 28px #19191808,
+    0 8px 14px #19191808;
   object-fit: cover;
   object-position: center;
   border-radius: 16px;
@@ -218,7 +205,6 @@ const ImageSection = styled.img`
   position: absolute;
   vertical-align: middle;
   border: 0;
-  object-position: center top;
   object-position: 50% 20%;
 
   @media screen and (max-width: 768px) {
@@ -228,15 +214,82 @@ const ImageSection = styled.img`
     height: 300px;
     inset: auto;
     margin: 1rem 0 0 0;
-    object-position: center top;
     object-position: 50% 20%;
   }
 `;
 
+const BadgePill = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(45, 90, 78, 0.12);
+  border: 1px solid rgba(45, 90, 78, 0.22);
+  border-radius: 999px;
+  padding: 0.45rem 1rem 0.45rem 0.75rem;
+  font-size: 1rem;
+  color: #1a3d31;
+  font-family: "Tajawal", "Arial", sans-serif;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1.3;
+  margin-top: 1.25rem;
+`;
+
+const BadgeIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2d5a4e;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+`;
+
+/* ── Improved ArrowPara ── */
+const ArrowPara = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(45, 90, 78, 0.25);
+  border-radius: 999px;
+  padding: 0.4rem 1rem 0.4rem 0.85rem;
+  font-family: "Tajawal", "Arial", sans-serif;
+  font-size: 1.05rem;
+  color: #1a3d31;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.4;
+
+  @media screen and (max-width: 768px) {
+    font-size: 0.9rem;
+    white-space: normal;
+    text-align: right;
+    border-radius: 12px;
+  }
+`;
+
+const ArrowParaIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2d5a4e;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+`;
+
 const Very = ({ categoryRef }) => {
+  const navigation = useNavigate();
   const handleLocation = (e) => {
     e.preventDefault();
-    categoryRef.current?.scrollIntoView({ behavior: "smooth" });
+    navigation("/recommendation");
   };
 
   return (
@@ -246,17 +299,17 @@ const Very = ({ categoryRef }) => {
           <ContentSection>
             <LeftDiv>
               <MainHeading>
-                احجز موعدك
+                ابدأ بالاطمئنان
                 <br />
-                بسهولة وسرعة
+                قبل ما تحتاج العلاج
               </MainHeading>
 
               <SubText>
-                منصتنا تجمع كل ما تحتاجه في مكان واحد
+                كل ما تحتاجه لصحتك
                 <br />
-                لتحصل على موعدك بسعولة وبسرعة،
+                احجز موعدك، وابدا فحصك السنوي
                 <br />
-                احجز موعدك في ثوانٍ الان
+                بالتحليل في أقرب مختبر لك
               </SubText>
 
               <ButtonContainer>
@@ -264,18 +317,19 @@ const Very = ({ categoryRef }) => {
                   <ButtonAt as="button" onClick={handleLocation}>
                     ابدأ الآن
                   </ButtonAt>
-                  <ArrowContainer></ArrowContainer>
+                  <ArrowContainer />
                 </ButtonSubContainer>
               </ButtonContainer>
 
               <StatText>
                 <ArrowImg src={ArrowCurve} alt="" />
                 <ArrowPara>
-                  ٩٤٪ من المستخدمين قالوا إن الحجز أصبح أسهل معهم!
+                  باقات تبدأ من ٧٥٠ ريال، تشمل التحاليل والتوصيات
                 </ArrowPara>
               </StatText>
             </LeftDiv>
           </ContentSection>
+
           <ImgContainer>
             <ImageSection src={Header} alt="منصة حجز مواعيد" />
           </ImgContainer>

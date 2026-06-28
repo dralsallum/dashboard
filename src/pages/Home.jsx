@@ -8,6 +8,11 @@ import {
   Benefits,
   Search,
   Therapy,
+  Medication,
+  Onemedical,
+  Article,
+  Health,
+  Monitor,
 } from "../components";
 
 const Home = () => {
@@ -19,8 +24,9 @@ const Home = () => {
   return (
     <>
       <NavTech />
-      <Search />
-      <Category ref={categoryRef} />
+      <Very />
+      <Health />
+      <Monitor />
       <Benefits />
       <Phone />
       <Footer />

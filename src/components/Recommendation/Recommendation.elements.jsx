@@ -1,3 +1,4 @@
+//Recommendation.elements.jsx
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
@@ -66,8 +67,8 @@ export const ProgressHeader = styled.div`
 `;
 
 export const LogoCon = styled(Link)`
-  width: 35px;
-  height: 35px;
+  width: 55px;
+  height: 55px;
   display: block;
   vertical-align: middle;
   object-fit: contain;
@@ -76,8 +77,8 @@ export const LogoCon = styled(Link)`
   }
 `;
 export const Logoimg = styled.img`
-  width: 35px;
-  height: 35px;
+  width: 55px;
+  height: 55px;
   display: block;
   vertical-align: middle;
   object-fit: contain;
@@ -428,8 +429,8 @@ export const FooterBtn = styled.button`
   display: flex;
   min-width: 190px;
   width: fit-content;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke;
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.15s;
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
