@@ -161,7 +161,7 @@ const DayRow = styled.div`
   flex-direction: row-reverse;
 
   @media (max-width: 980px) {
-    gap: 6px;
+    gap: 5px;
   }
 `;
 
@@ -223,7 +223,7 @@ const TimeRow = styled.div`
   flex-direction: row-reverse;
 
   @media (max-width: 980px) {
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
   }
 `;
