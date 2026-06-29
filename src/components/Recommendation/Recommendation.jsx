@@ -311,7 +311,7 @@ const InfoCardContent = styled.div`
 
   @media (max-width: 480px) {
     p {
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.75rem;
       font-size: 0.85rem;
     }
   }
@@ -332,6 +332,7 @@ const FactBox = styled.div`
 
   @media (max-width: 480px) {
     margin-top: 0rem;
+    padding: 1rem;
   }
 `;
 const FactTitle = styled.h4`
