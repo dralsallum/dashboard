@@ -9,7 +9,7 @@ import Break1 from "../../assets/break1.png";
 import Break2 from "../../assets/break2.png";
 import Break3 from "../../assets/break3.png";
 import Basket from "../../assets/cart.png";
-import styled, { keyframes, createGlobalStyle, css } from "styled-components";
+import styled, { keyframes, createGlobalStyle } from "styled-components";
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const T = {
@@ -29,9 +29,7 @@ const T = {
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
   * { box-sizing: border-box; }
-  *:focus,
-  *:focus-visible,
-  *:focus-within {
+  *:focus, *:focus-visible, *:focus-within {
     outline: none !important;
     box-shadow: none !important;
   }
@@ -46,9 +44,7 @@ const slideInRight = keyframes`
   from { transform: translateX(50px); opacity: 0; }
   to   { transform: translateX(0); opacity: 1; }
 `;
-const spin = keyframes`
-  to { transform: rotate(360deg); }
-`;
+const spin = keyframes`to { transform: rotate(360deg); }`;
 const shake = keyframes`
   0%, 100% { transform: translateX(0); }
   25%       { transform: translateX(-3px); }
@@ -66,7 +62,6 @@ const Wrapper = styled.div`
   font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
   color: ${T.text};
 `;
-
 const Inner = styled.div`
   width: 100%;
   max-width: 780px;
@@ -75,7 +70,6 @@ const Inner = styled.div`
   flex-direction: column;
   flex: 1;
 `;
-
 const LoadingWrap = styled.div`
   min-height: 100dvh;
   display: flex;
@@ -87,7 +81,6 @@ const LoadingWrap = styled.div`
   color: ${T.textMuted};
   font-family: "IBM Plex Sans Arabic", "Segoe UI", sans-serif;
 `;
-
 const Spinner = styled.div`
   width: 40px;
   height: 40px;
@@ -103,19 +96,16 @@ const PageHeader = styled.header`
   max-width: 780px;
   padding: 1.1rem 1.25rem 0;
 `;
-
 const HeaderRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.75rem;
 `;
-
 const LogoImg = styled.img`
   height: 42px;
   object-fit: contain;
 `;
-
 const BackBtn = styled.button`
   background: none;
   border: none;
@@ -127,7 +117,6 @@ const BackBtn = styled.button`
   padding: 0.25rem 0;
   pointer-events: ${(p) => (p.disabled ? "none" : "auto")};
 `;
-
 const BasketWrap = styled.div`
   display: flex;
   align-items: center;
@@ -209,7 +198,6 @@ const StepWrap = styled.div`
   padding: 2rem 0 1rem;
   animation: ${fadeUp} 0.35s ease both;
 `;
-
 const StepTitle = styled.h1`
   font-size: 1.9rem;
   font-weight: 700;
@@ -219,7 +207,6 @@ const StepTitle = styled.h1`
     font-size: 1.5rem;
   }
 `;
-
 const StepSub = styled.p`
   font-size: 0.95rem;
   color: ${T.textMuted};
@@ -233,7 +220,6 @@ const AnsGrid = styled.div`
   flex-direction: column;
   gap: 0.55rem;
 `;
-
 const AnsBtn = styled.button`
   display: flex;
   align-items: center;
@@ -252,7 +238,6 @@ const AnsBtn = styled.button`
   outline: none;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 `;
-
 const CheckBox = styled.span`
   width: 20px;
   height: 20px;
@@ -271,7 +256,6 @@ const CheckBox = styled.span`
     font-weight: 700;
   }
 `;
-
 const TextInput = styled.input`
   padding: 0.875rem 1rem;
   border: 2px solid ${T.cardBorder};
@@ -298,14 +282,12 @@ const InfoCard = styled.div`
   direction: rtl;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 `;
-
 const InfoCardTitle = styled.h3`
   font-size: 1.4rem;
   font-weight: 700;
   color: ${T.green};
   margin-bottom: 1.25rem;
 `;
-
 const InfoCardContent = styled.div`
   color: #333;
   line-height: 1.65;
@@ -314,7 +296,6 @@ const InfoCardContent = styled.div`
     font-size: 0.95rem;
   }
 `;
-
 const FactBox = styled.div`
   background: ${T.greenPale};
   border: 1px solid ${T.greenBorder};
@@ -329,38 +310,33 @@ const FactBox = styled.div`
     font-size: 0.9rem;
   }
 `;
-
 const FactTitle = styled.h4`
   font-size: 0.9rem;
   font-weight: 700;
   color: ${T.green};
   margin-bottom: 0.5rem;
 `;
-
 const InfoImg = styled.img`
   width: 100%;
   height: 240px;
-  object-fit: contain; /* ← change from contain to cover */
+  object-fit: contain;
   border-radius: 10px;
   margin-top: 1.25rem;
   display: block;
 `;
 
 // ─── RESULT SCREEN ────────────────────────────────────────────────────────────
-
 const ResultTopRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.25rem;
 `;
-
 const ResultLabel = styled.span`
   font-size: 1rem;
   font-weight: 700;
   color: ${T.green};
 `;
-
 const CompareBtn = styled.button`
   background: none;
   border: none;
@@ -380,7 +356,6 @@ const PackagesGrid = styled.div`
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0.875rem;
   direction: rtl;
-
   @media (max-width: 560px) {
     display: none;
   }
@@ -392,15 +367,13 @@ const SliderOuter = styled.div`
   @media (max-width: 560px) {
     display: block;
     position: relative;
-    /* Bleed the slider to the full viewport width while inner stays padded */
     margin-left: -1.25rem;
     margin-right: -1.25rem;
   }
 `;
-
 const SliderTrack = styled.div`
   display: flex;
-  flex-direction: row; /* LTR so scroll math is straightforward */
+  flex-direction: row;
   direction: ltr;
   overflow-x: scroll;
   scroll-snap-type: x mandatory;
@@ -409,19 +382,15 @@ const SliderTrack = styled.div`
   &::-webkit-scrollbar {
     display: none;
   }
-  /* Side padding creates the peek effect for adjacent cards */
   padding: 1.5rem 0 1rem;
   gap: 0.75rem;
-  /* First/last spacers added via pseudo so the active card centres perfectly */
   &::before,
   &::after {
     content: "";
     flex-shrink: 0;
-    /* (viewport − card − gap) / 2 ≈ (100vw − 70vw) / 2 = 15vw; use calc to be exact */
     width: calc((100% - 75vw) / 2);
   }
 `;
-
 const SliderCard = styled.div`
   flex-shrink: 0;
   width: 75vw;
@@ -436,7 +405,6 @@ const SliderCard = styled.div`
   padding: 1rem 0.875rem 1.1rem;
   position: relative;
   cursor: pointer;
-  /* Dim non-active cards slightly for focus */
   opacity: ${(p) => (p.$selected ? 1 : 0.75)};
   transition:
     opacity 0.25s,
@@ -444,15 +412,12 @@ const SliderCard = styled.div`
     transform 0.25s;
   transform: ${(p) => (p.$selected ? "scale(1)" : "scale(0.96)")};
 `;
-
-// Dot indicators
 const SliderDots = styled.div`
   display: flex;
   justify-content: center;
   gap: 6px;
   margin-top: 0.5rem;
 `;
-
 const Dot = styled.span`
   width: ${(p) => (p.$active ? "18px" : "6px")};
   height: 6px;
@@ -478,7 +443,6 @@ const MostPopularPill = styled.div`
   white-space: nowrap;
   font-family: inherit;
 `;
-
 const SelectedMark = styled.div`
   position: absolute;
   top: 12px;
@@ -493,14 +457,12 @@ const SelectedMark = styled.div`
   justify-content: center;
   flex-shrink: 0;
 `;
-
 const SelectedMarkInner = styled.span`
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
   display: ${(p) => (p.$visible ? "block" : "none")};
 `;
-
 const PackageImg = styled.img`
   width: 100%;
   height: 160px;
@@ -508,7 +470,6 @@ const PackageImg = styled.img`
   border-radius: 10px;
   margin-bottom: 0.75rem;
 `;
-
 const PackageName = styled.h3`
   font-size: 1rem;
   font-weight: 700;
@@ -516,22 +477,18 @@ const PackageName = styled.h3`
   text-align: center;
   margin-bottom: 0.3rem;
 `;
-
 const PackageCount = styled.p`
   font-size: 0.82rem;
   color: ${T.textMuted};
   text-align: center;
   margin-bottom: 0.4rem;
 `;
-
 const PackagePrice = styled.p`
   font-size: 1rem;
   font-weight: 700;
   color: ${T.text};
   text-align: center;
 `;
-
-// Desktop-only card wrapper (reuses same internals)
 const PackageCard = styled.div`
   border: 2px solid ${(p) => (p.$selected ? T.green : T.cardBorder)};
   border-radius: 1.25rem;
@@ -549,14 +506,12 @@ const CompareSection = styled.div`
   margin-top: 1.5rem;
   direction: rtl;
 `;
-
 const CompareSub = styled.p`
   font-size: 0.88rem;
   color: ${T.textMuted};
   text-align: center;
   margin-bottom: 1rem;
 `;
-
 const AccordionItem = styled.div`
   border: 1px solid ${(p) => (p.$open ? T.green : T.cardBorder)};
   border-radius: 0.875rem;
@@ -564,7 +519,6 @@ const AccordionItem = styled.div`
   background: ${T.white};
   overflow: hidden;
 `;
-
 const AccordionHeader = styled.button`
   width: 100%;
   display: flex;
@@ -578,19 +532,16 @@ const AccordionHeader = styled.button`
   direction: rtl;
   text-align: right;
 `;
-
 const AccordionRight = styled.div`
   display: flex;
   align-items: center;
   gap: 0.6rem;
 `;
-
 const AccordionName = styled.span`
   font-size: 1.1rem;
   font-weight: 700;
   color: ${T.text};
 `;
-
 const MostPopularTag = styled.span`
   background: ${T.green};
   color: #fff;
@@ -599,31 +550,26 @@ const MostPopularTag = styled.span`
   padding: 3px 10px;
   border-radius: 999px;
 `;
-
 const AccordionCount = styled.span`
   font-size: 0.82rem;
   color: ${T.textMuted};
 `;
-
 const AccordionChevron = styled.span`
   font-size: 1rem;
   color: ${T.textMuted};
   flex-shrink: 0;
 `;
-
 const AccordionBody = styled.div`
   padding: 0 1.1rem 1.1rem;
   border-top: 1px solid ${T.cardBorder};
   direction: rtl;
 `;
-
 const AccordionIntro = styled.p`
   font-size: 0.85rem;
   color: ${T.textMuted};
   margin: 0.75rem 0 0.5rem;
   text-align: right;
 `;
-
 const MarkerCategory = styled.p`
   font-size: 0.88rem;
   font-weight: 700;
@@ -631,13 +577,11 @@ const MarkerCategory = styled.p`
   margin: 0.75rem 0 0.3rem;
   text-align: right;
 `;
-
 const MarkerRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.2rem 0.5rem;
 `;
-
 const MarkerItem = styled.span`
   font-size: 0.82rem;
   color: ${T.text};
@@ -653,14 +597,12 @@ const OrderSummary = styled.div`
   padding: 1.25rem;
   margin-top: 1.5rem;
 `;
-
 const OrderTitle = styled.h3`
   font-size: 1.05rem;
   font-weight: 700;
   color: ${T.text};
   margin-bottom: 1rem;
 `;
-
 const OrderItem = styled.div`
   display: flex;
   justify-content: space-between;
@@ -672,7 +614,6 @@ const OrderItem = styled.div`
   }
   font-size: 0.9rem;
 `;
-
 const OrderTotal = styled.div`
   padding-top: 0.875rem;
   margin-top: 0.875rem;
@@ -681,7 +622,6 @@ const OrderTotal = styled.div`
   color: ${T.green};
   text-align: center;
 `;
-
 const SubmitBtn = styled.button`
   width: 100%;
   margin-top: 1rem;
@@ -707,7 +647,6 @@ const InfoForm = styled.div`
   flex-direction: column;
   gap: 1.1rem;
 `;
-
 const FieldRow = styled.div`
   display: grid;
   grid-template-columns: ${(p) => p.$cols || "1fr"};
@@ -716,20 +655,17 @@ const FieldRow = styled.div`
     grid-template-columns: 1fr;
   }
 `;
-
 const Field = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 `;
-
 const Label = styled.label`
   font-size: 0.85rem;
   font-weight: 600;
   color: ${T.text};
   text-align: right;
 `;
-
 const FormInput = styled.input`
   padding: 0.8rem 1rem;
   border: 1.5px solid ${T.cardBorder};
@@ -745,7 +681,6 @@ const FormInput = styled.input`
     color: ${T.textMuted};
   }
 `;
-
 const PhoneWrap = styled.div`
   display: flex;
   flex-direction: row-reverse;
@@ -754,7 +689,6 @@ const PhoneWrap = styled.div`
   overflow: hidden;
   background: ${T.white};
 `;
-
 const PhonePrefix = styled.span`
   padding: 0.8rem 0.875rem;
   background: ${T.greenPale};
@@ -766,7 +700,6 @@ const PhonePrefix = styled.span`
   display: flex;
   align-items: center;
 `;
-
 const PhoneInput = styled.input`
   flex: 1;
   border: none;
@@ -782,7 +715,6 @@ const PhoneInput = styled.input`
     color: ${T.textMuted};
   }
 `;
-
 const FieldHint = styled.span`
   font-size: 0.72rem;
   color: ${T.textMuted};
@@ -799,7 +731,6 @@ const Footer = styled.footer`
   align-items: center;
   gap: 0.6rem;
 `;
-
 const ContinueBtn = styled.button`
   width: 100%;
   padding: 1rem;
@@ -813,7 +744,6 @@ const ContinueBtn = styled.button`
   cursor: ${(p) => (p.disabled ? "not-allowed" : "pointer")};
   outline: none;
 `;
-
 const FooterBackBtn = styled.button`
   background: none;
   border: none;
@@ -822,7 +752,6 @@ const FooterBackBtn = styled.button`
   cursor: pointer;
   font-family: inherit;
 `;
-
 const PrivacyNote = styled.p`
   font-size: 0.72rem;
   color: ${T.textMuted};
@@ -1046,161 +975,48 @@ const infoBreaks = [
   },
 ];
 
-// ─── PRODUCT DATA ─────────────────────────────────────────────────────────────
-const getRecommendedProducts = (userAnswers) => {
-  const goal = userAnswers.weight;
+// ─── STATIC PACKAGES — always shown regardless of quiz answers ────────────────
+const STATIC_PRODUCTS = [
+  {
+    _id: "pkg-basic",
+    tier: "basic",
+    name: "الأساسية",
+    analysisCount: 37,
+    price: 720,
+    img: "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png",
+    inStock: true,
+    category: "annual-checkup",
+    mostPopular: false,
+  },
+  {
+    _id: "pkg-plus",
+    tier: "plus",
+    name: "الشاملة",
+    analysisCount: 43,
+    price: 1200,
+    img: "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png",
+    inStock: true,
+    category: "annual-checkup",
+    mostPopular: true,
+  },
+  {
+    _id: "pkg-premium",
+    tier: "premium",
+    name: "المتقدمة",
+    analysisCount: 51,
+    price: 2700,
+    img: "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png",
+    inStock: true,
+    category: "annual-checkup",
+    mostPopular: false,
+  },
+];
 
-  const tierMap = {
-    "المساعدة في تحسين القلب والأوعية الدموية": [
-      {
-        _id: "cardio-basic",
-        tier: "basic",
-        name: "وقتنا أساس",
-        analysisCount: 37,
-        price: 720,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/cardioWork.png",
-        inStock: true,
-        category: "cardio-improvement",
-        mostPopular: false,
-      },
-      {
-        _id: "cardio-shamel",
-        tier: "shamel",
-        name: "وقتنا شامل",
-        analysisCount: 43,
-        price: 1200,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/cardioWork.png",
-        inStock: true,
-        category: "cardio-improvement",
-        mostPopular: true,
-      },
-      {
-        _id: "cardio-advanced",
-        tier: "advanced",
-        name: "وقتنا متقدم",
-        analysisCount: 51,
-        price: 2700,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/cardioWork.png",
-        inStock: true,
-        category: "cardio-improvement",
-        mostPopular: false,
-      },
-    ],
-    "المساعدة في كسب العضلات": [
-      {
-        _id: "muscle-basic",
-        tier: "basic",
-        name: "وقتنا أساس",
-        analysisCount: 37,
-        price: 720,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/muscleGain.png",
-        inStock: true,
-        category: "muscle-gain",
-        mostPopular: false,
-      },
-      {
-        _id: "muscle-shamel",
-        tier: "shamel",
-        name: "وقتنا شامل",
-        analysisCount: 43,
-        price: 1200,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/muscleGain.png",
-        inStock: true,
-        category: "muscle-gain",
-        mostPopular: true,
-      },
-      {
-        _id: "muscle-advanced",
-        tier: "advanced",
-        name: "وقتنا متقدم",
-        analysisCount: 51,
-        price: 2700,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/muscleGain.png",
-        inStock: true,
-        category: "muscle-gain",
-        mostPopular: false,
-      },
-    ],
-    "المساعدة في فقدان الوزن": [
-      {
-        _id: "wl-basic",
-        tier: "basic",
-        name: "وقتنا أساس",
-        analysisCount: 37,
-        price: 720,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/weightLoss.png",
-        inStock: true,
-        category: "weight-loss",
-        mostPopular: false,
-      },
-      {
-        _id: "wl-shamel",
-        tier: "shamel",
-        name: "وقتنا شامل",
-        analysisCount: 43,
-        price: 1200,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/weightLoss.png",
-        inStock: true,
-        category: "weight-loss",
-        mostPopular: true,
-      },
-      {
-        _id: "wl-advanced",
-        tier: "advanced",
-        name: "وقتنا متقدم",
-        analysisCount: 51,
-        price: 2700,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/weightLoss.png",
-        inStock: true,
-        category: "weight-loss",
-        mostPopular: false,
-      },
-    ],
-    "المساعدة في كسب الوزن": [
-      {
-        _id: "wg-basic",
-        tier: "basic",
-        name: "وقتنا أساس",
-        analysisCount: 37,
-        price: 720,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/weightGain.png",
-        inStock: true,
-        category: "weight-gain",
-        mostPopular: false,
-      },
-      {
-        _id: "wg-shamel",
-        tier: "shamel",
-        name: "وقتنا شامل",
-        analysisCount: 43,
-        price: 1200,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/weightGain.png",
-        inStock: true,
-        category: "weight-gain",
-        mostPopular: true,
-      },
-      {
-        _id: "wg-advanced",
-        tier: "advanced",
-        name: "وقتنا متقدم",
-        analysisCount: 51,
-        price: 2700,
-        img: "https://alsallum.s3.eu-north-1.amazonaws.com/weightGain.png",
-        inStock: true,
-        category: "weight-gain",
-        mostPopular: false,
-      },
-    ],
-  };
-
-  const defaultKey = "المساعدة في تحسين القلب والأوعية الدموية";
-  return tierMap[goal] || tierMap[defaultKey];
-};
-
+// ─── COMPARE TIERS ────────────────────────────────────────────────────────────
 const COMPARE_TIERS = [
   {
     id: "basic",
-    name: "وقتنا أساس",
+    name: "الأساسية",
     count: 37,
     mostPopular: false,
     intro: null,
@@ -1241,11 +1057,11 @@ const COMPARE_TIERS = [
     ],
   },
   {
-    id: "shamel",
-    name: "وقتنا شامل",
+    id: "plus",
+    name: "الشاملة",
     count: 43,
     mostPopular: true,
-    intro: "إضافةً إلى كل مؤشرات وقتنا أساس:",
+    intro: "إضافةً إلى كل مؤشرات الباقة الأساسية:",
     categories: [
       {
         title: "الغدة الدرقية",
@@ -1268,15 +1084,15 @@ const COMPARE_TIERS = [
     ],
   },
   {
-    id: "advanced",
-    name: "وقتنا متقدم",
+    id: "premium",
+    name: "المتقدمة",
     count: 51,
     mostPopular: false,
-    intro: "إضافةً إلى كل مؤشرات وقتنا شامل:",
+    intro: "إضافةً إلى كل مؤشرات الباقة الشاملة:",
     categories: [
       {
-        title: "صحة القلب",
-        items: ["ليبوبروتين (أ)", "أبوليبوبروتين ب"],
+        title: "صحة القلب المتقدمة",
+        items: ["ليبوبروتين (أ)", "أبوليبوبروتين ب", "hsCRP"],
       },
       {
         title: "المعادن الثقيلة",
@@ -1290,8 +1106,8 @@ const COMPARE_TIERS = [
         ],
       },
       {
-        title: "الهرمونات الأنثوية",
-        items: ["الهرمون اللوتيني", "الهرمون المنبه للجريب"],
+        title: "الهرمونات",
+        items: ["الهرمون اللوتيني", "الهرمون المنبه للجريب", "التستوستيرون"],
       },
     ],
   },
@@ -1341,15 +1157,16 @@ const Recommendation = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState(null);
 
-  // Slider active index (for dot indicator)
-  const [sliderActiveIdx, setSliderActiveIdx] = useState(1); // default: middle card
+  // Products are always the same 3 static tiers — no dynamic fetching
+  const products = STATIC_PRODUCTS;
+  const [selectedProductId, setSelectedProductId] = useState(
+    STATIC_PRODUCTS.find((p) => p.mostPopular)?._id ?? null,
+  );
 
+  const [sliderActiveIdx, setSliderActiveIdx] = useState(1); // default: middle = "الشاملة"
   const [showCompare, setShowCompare] = useState(false);
   const [openTiers, setOpenTiers] = useState({});
-
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [notif, setNotif] = useState("");
   const [shakeBasket, setShakeBasket] = useState(false);
@@ -1362,16 +1179,14 @@ const Recommendation = () => {
     dispatch(clearCart());
   }, [dispatch]);
 
-  // Scroll slider to middle card (index 1) on mount / when products load
+  // Scroll slider to centre card (index 1 = "الشاملة") when result screen mounts
   useEffect(() => {
-    if (flowStep === "result" && products.length > 0 && sliderRef.current) {
-      // Use rAF to wait for layout then scroll to center card
+    if (flowStep === "result" && sliderRef.current) {
       requestAnimationFrame(() => {
         const track = sliderRef.current;
         if (!track) return;
         const cards = track.querySelectorAll("[data-slider-card]");
         if (cards[1]) {
-          // Scroll so card index 1 is centred
           const cardLeft = cards[1].offsetLeft;
           const cardWidth = cards[1].offsetWidth;
           const trackWidth = track.offsetWidth;
@@ -1379,19 +1194,19 @@ const Recommendation = () => {
         }
       });
     }
-  }, [flowStep, products]);
+  }, [flowStep]);
 
-  // Track which card is centred as user scrolls
   const handleSliderScroll = () => {
     const track = sliderRef.current;
     if (!track) return;
     const cards = track.querySelectorAll("[data-slider-card]");
     const trackCenter = track.scrollLeft + track.offsetWidth / 2;
-    let closest = 0;
-    let closestDist = Infinity;
+    let closest = 0,
+      closestDist = Infinity;
     cards.forEach((card, idx) => {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-      const dist = Math.abs(trackCenter - cardCenter);
+      const dist = Math.abs(
+        card.offsetLeft + card.offsetWidth / 2 - trackCenter,
+      );
       if (dist < closestDist) {
         closestDist = dist;
         closest = idx;
@@ -1410,8 +1225,7 @@ const Recommendation = () => {
     if (flowStep === "intro") return 0;
     if (flowStep === "result") return 100;
     if (flowStep === "userInfo") return 90;
-    const answered = Object.keys(answers).length;
-    return (answered / totalQuizSteps) * 85;
+    return (Object.keys(answers).length / totalQuizSteps) * 85;
   })();
 
   const currentQ = questions[currentQuestion];
@@ -1440,20 +1254,12 @@ const Recommendation = () => {
   };
 
   const canGoBack = () => {
-    if (flowStep === "intro") return false;
-    if (flowStep === "result") return false;
-    if (flowStep === "userInfo") return true;
-    if (flowStep === "breakInfo") return true;
-    if (flowStep === "quiz") return true;
-    return false;
+    if (flowStep === "intro" || flowStep === "result") return false;
+    return true;
   };
 
   const goBack = () => {
-    if (flowStep === "userInfo") {
-      setFlowStep("quiz");
-      return;
-    }
-    if (flowStep === "breakInfo") {
+    if (flowStep === "userInfo" || flowStep === "breakInfo") {
       setFlowStep("quiz");
       return;
     }
@@ -1488,7 +1294,12 @@ const Recommendation = () => {
       return;
     }
     if (flowStep === "userInfo") {
-      fetchRecommendedProducts(answers);
+      // Brief loading animation, then show the static packages
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        setFlowStep("result");
+      }, 1200);
       return;
     }
     if (flowStep === "quiz") {
@@ -1537,26 +1348,6 @@ const Recommendation = () => {
     );
   };
 
-  const fetchRecommendedProducts = async (userAnswers) => {
-    setLoading(true);
-    try {
-      await new Promise((r) => setTimeout(r, 1500));
-      const prods = getRecommendedProducts(userAnswers);
-      setProducts(prods);
-      const popular = prods.find((p) => p.mostPopular);
-      if (popular) setSelectedProductId(popular._id);
-      setFlowStep("result");
-    } catch {
-      const prods = getRecommendedProducts({});
-      setProducts(prods);
-      const popular = prods.find((p) => p.mostPopular);
-      if (popular) setSelectedProductId(popular._id);
-      setFlowStep("result");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSelectProduct = (product) => {
     setSelectedProductId(product._id);
     dispatch(clearCart());
@@ -1567,10 +1358,7 @@ const Recommendation = () => {
   };
 
   const toggleCompareTier = (tierId) => {
-    setOpenTiers((prev) => {
-      const alreadyOpen = !!prev[tierId];
-      return alreadyOpen ? {} : { [tierId]: true };
-    });
+    setOpenTiers((prev) => (prev[tierId] ? {} : { [tierId]: true }));
   };
 
   const submitOrder = async () => {
@@ -1637,10 +1425,10 @@ const Recommendation = () => {
   const showFooter = flowStep !== "result";
   const selectedProduct = products.find((p) => p._id === selectedProductId);
 
-  // Desktop: reversed display [advanced, shamel, basic]
-  // Slider: natural order [basic, shamel, advanced] so middle (index 1) = shamel (1200 SAR / mostPopular)
-  const displayProducts = [...products].reverse(); // for desktop grid
-  const sliderProducts = [...products]; // [basic, shamel, advanced] — shamel is index 1
+  // Desktop RTL grid: show [premium, plus, basic] left-to-right visually = right-to-left in RTL
+  const displayProducts = [...products].reverse();
+  // Slider: [basic(0), plus(1), premium(2)] — plus is centre
+  const sliderProducts = [...products];
 
   return (
     <>
@@ -1858,17 +1646,17 @@ const Recommendation = () => {
           {flowStep === "result" && (
             <StepWrap key="result">
               <ResultTopRow>
-                <ResultLabel>اختر باقتك</ResultLabel>
+                <ResultLabel>اختر باقة الفحص السنوي</ResultLabel>
                 <CompareBtn onClick={() => setShowCompare((v) => !v)}>
                   {showCompare ? "اخفاء المقارنات" : "قارن الباقات"}
                 </CompareBtn>
               </ResultTopRow>
 
               <StepSub style={{ marginBottom: "1rem" }}>
-                اختر باقتك، وأضف فحوصات متخصصة إن رغبت
+                باقات شاملة للفحوصات السنوية — اختر ما يناسب احتياجاتك الصحية
               </StepSub>
 
-              {/* ── DESKTOP GRID ── */}
+              {/* Desktop grid */}
               <PackagesGrid>
                 {displayProducts.map((product) => {
                   const isSelected = selectedProductId === product._id;
@@ -1887,10 +1675,10 @@ const Recommendation = () => {
                 })}
               </PackagesGrid>
 
-              {/* ── MOBILE SLIDER ── */}
+              {/* Mobile slider */}
               <SliderOuter>
                 <SliderTrack ref={sliderRef} onScroll={handleSliderScroll}>
-                  {sliderProducts.map((product, idx) => {
+                  {sliderProducts.map((product) => {
                     const isSelected = selectedProductId === product._id;
                     return (
                       <SliderCard
@@ -1914,7 +1702,7 @@ const Recommendation = () => {
                 </SliderDots>
               </SliderOuter>
 
-              {/* Compare section */}
+              {/* Compare accordion */}
               {showCompare && (
                 <CompareSection>
                   <CompareSub>
