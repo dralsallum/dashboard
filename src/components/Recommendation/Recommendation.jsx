@@ -287,13 +287,24 @@ const InfoCardTitle = styled.h3`
   font-weight: 700;
   color: ${T.green};
   margin-bottom: 1.25rem;
+
+  @media (max-width: 480px) {
+    margin-bottom: 0.5rem;
+  }
 `;
 const InfoCardContent = styled.div`
   color: #333;
   line-height: 1.65;
   p {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    p {
+      margin-bottom: 0.85rem;
+      font-size: 0.95rem;
+    }
   }
 `;
 const FactBox = styled.div`
@@ -315,7 +326,12 @@ const FactTitle = styled.h4`
   font-weight: 700;
   color: ${T.green};
   margin-bottom: 0.5rem;
+
+  @media (max-width: 480px) {
+    margin-bottom: 0.25rem;
+  }
 `;
+
 const InfoImg = styled.img`
   width: 100%;
   height: 240px;
@@ -323,6 +339,10 @@ const InfoImg = styled.img`
   border-radius: 10px;
   margin-top: 1.25rem;
   display: block;
+
+  @media (max-width: 480px) {
+    margin-top: 0.5rem;
+  }
 `;
 
 // ─── RESULT SCREEN ────────────────────────────────────────────────────────────
@@ -330,7 +350,7 @@ const ResultTopRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 `;
 const ResultLabel = styled.span`
   font-size: 1rem;
