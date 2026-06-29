@@ -13,20 +13,23 @@ const Section = styled.section`
   width: 100%;
   min-height: 1200px;
   overflow: hidden;
-  /* rich dark-walnut brown — matches the reference background exactly */
   background: #3b2a18;
+  direction: rtl;
+
+  @media screen and (max-width: 768px) {
+    min-height: 800px;
+  }
 `;
 
 /*
-  Diagonal light-beam overlay — the signature element from the reference.
-  A single conic-gradient band sweeps from top-right, exactly like the photo.
+  Diagonal light-beam overlay — mirrored for RTL (origin from top-left).
 */
 const LightBeam = styled.div`
   position: absolute;
   inset: 0;
   z-index: 1;
   background: conic-gradient(
-    from 215deg at 90% 0%,
+    from 325deg at 10% 0%,
     transparent 0deg,
     rgba(220, 185, 120, 0.18) 12deg,
     rgba(220, 185, 120, 0.1) 22deg,
@@ -60,17 +63,17 @@ const TopText = styled.div`
 
 const H1 = styled.h1`
   margin: 0;
-  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-family: "Cairo", "Tajawal", "Arial", sans-serif;
   font-size: clamp(1.9rem, 4.2vw, 3.4rem);
-  font-weight: 300; /* light — matches the thin strokes in reference */
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: #f5efe6; /* warm off-white */
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: #f5efe6;
 `;
 
 const GoldLine = styled.span`
   display: block;
-  color: #d4a12a; /* amber-gold matching "breakthrough is here" */
+  color: #d4a12a;
   font-weight: 300;
 `;
 
@@ -88,11 +91,11 @@ const BottomText = styled.div`
 
 const Body = styled.p`
   margin: 0 0 22px;
-  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-family: "Cairo", "Tajawal", "Arial", sans-serif;
   font-size: clamp(0.88rem, 1.35vw, 1.05rem);
   font-weight: 400;
-  line-height: 1.65;
-  color: rgba(245, 235, 218, 0.88); /* warm white */
+  line-height: 1.9;
+  color: rgba(245, 235, 218, 0.88);
   max-width: 420px;
   margin-left: auto;
   margin-right: auto;
@@ -103,24 +106,17 @@ const Body = styled.p`
   }
 `;
 
-const Sup = styled.sup`
-  font-size: 0.58em;
-  vertical-align: super;
-  line-height: 0;
-`;
-
 const CTA = styled.button`
   display: inline-block;
   padding: 11px 34px;
   border-radius: 50px;
   border: none;
-  /* light tan pill — exactly like the reference "Get started" button */
   background: #e8d8bc;
   color: #2a1a08;
-  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-family: "Cairo", "Tajawal", "Arial", sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -150,18 +146,18 @@ const Medications = () => (
     {/* headline pinned TOP, z=10 — video floats behind */}
     <TopText>
       <H1>
-        Your weight loss
-        <GoldLine>breakthrough is here</GoldLine>
+        أدويتك في متناول يدك
+        <GoldLine>في كل وقت وفي كل مكان</GoldLine>
       </H1>
     </TopText>
 
     {/* body + CTA pinned BOTTOM, z=10 — video floats behind */}
     <BottomText>
       <Body>
-        Lose up to <strong>25%</strong> body weight with Wegovy
-        <Sup>®*</Sup>, now with more options than ever.
+        تتبّع جرعاتك، وسجل ادويتك، وتواصل مع طبيبك — كل ذلك من مكان{" "}
+        <strong>واحد</strong> وبكل سهولة.
       </Body>
-      <CTA>Get started</CTA>
+      <CTA>ابدأ الآن</CTA>
     </BottomText>
   </Section>
 );
