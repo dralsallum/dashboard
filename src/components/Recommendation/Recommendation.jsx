@@ -281,6 +281,10 @@ const InfoCard = styled.div`
   text-align: right;
   direction: rtl;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 480px) {
+    padding: 1.25rem;
+  }
 `;
 const InfoCardTitle = styled.h3`
   font-size: 1.4rem;
@@ -289,7 +293,8 @@ const InfoCardTitle = styled.h3`
   margin-bottom: 1.25rem;
 
   @media (max-width: 480px) {
-    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
   }
 `;
 const InfoCardContent = styled.div`
@@ -303,7 +308,7 @@ const InfoCardContent = styled.div`
   @media (max-width: 480px) {
     p {
       margin-bottom: 0.85rem;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
     }
   }
 `;
@@ -318,7 +323,11 @@ const FactBox = styled.div`
     margin-bottom: 0;
     font-style: italic;
     color: #3d6b5a;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 0rem;
   }
 `;
 const FactTitle = styled.h4`
@@ -342,6 +351,7 @@ const InfoImg = styled.img`
 
   @media (max-width: 480px) {
     margin-top: 0.5rem;
+    height: 230px;
   }
 `;
 
@@ -976,7 +986,7 @@ const infoBreaks = [
     title: "العلم الجديد للعمر الطويل",
     content:
       "الطول العمري ليس مجرد وراثة — فالأبحاث تُظهر أن 80٪ من عوامل الشيخوخة تحت سيطرتنا. العلماء اليوم يميّزون بين العمر الزمني والعمر البيولوجي، وكثيرون منا يحملون أجسادًا أصغر أو أكبر بسنوات من أعمارهم الحقيقية.",
-    fact: "دراسة نشرتها جامعة هارفارد تتبّعت أكثر من 100,000 شخص لمدة 30 عامًا، ووجدت أن خمسة أنماط سلوكية صحية تُطيل العمر بمعدل 14 سنة إضافية للرجال و12 سنة للنساء.",
+    fact: "دراسة نشرتها جامعة هارفارد تتبّعت أكثر من 100,000 شخص لمدة 30 عامًا، ووجدت أن خمسة أنماط سلوكية صحية تُطيل العمر بمعدل ١٢ الى ١٤ سنة إضافية.",
     img: Break1,
   },
   {
