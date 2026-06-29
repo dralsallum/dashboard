@@ -27,7 +27,7 @@ const Section = styled.section`
   direction: rtl;
 
   @media screen and (max-width: 768px) {
-    min-height: 70vh;
+    min-height: 80vh;
   }
 `;
 
