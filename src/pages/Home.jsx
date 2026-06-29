@@ -26,7 +26,6 @@ const Home = () => {
       <NavTech />
       <Very />
       <Health />
-      <Medication />
       <Monitor />
       <Benefits />
       <Phone />
