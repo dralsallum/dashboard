@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import Header from "../../assets/make.jpg";
+import Header from "../../assets/make1.png";
 import ArrowCurve from "../../assets/arrowCurve.png";
 import { Link, useNavigate } from "react-router-dom";
 
