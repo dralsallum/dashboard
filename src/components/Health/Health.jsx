@@ -229,7 +229,7 @@ const TimeRow = styled.div`
 `;
 
 const TimeChip = styled.div`
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
@@ -248,6 +248,10 @@ const TimeChip = styled.div`
           background: #fff;
           color: #1a2e27;
         `}
+
+  @media (max-width: 980px) {
+    font-size: 11px;
+  }
 `;
 
 /* ─── Card 2: Chart ──────────────────────────────────── */
