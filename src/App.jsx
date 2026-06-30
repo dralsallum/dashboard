@@ -29,6 +29,7 @@ import PatientLogin from "./pages/PatinetLogin";
 import PatientRegister from "./pages/PatientRegister";
 import PatientResetPassword from "./pages/PatientResetPassword";
 import PatientDeleteAccount from "./pages/PatientDelete";
+import HowItWorks from "./pages/HowItWorks";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -59,6 +60,7 @@ const App = () => {
           <Route path="/outcome" element={<Outcome />} />
 
           <Route path="/recommendation" element={<Recommendation />} />
+          <Route path="/work" element={<HowItWorks />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/pay" element={<Pay />} />
 

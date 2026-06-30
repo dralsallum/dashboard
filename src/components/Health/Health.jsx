@@ -443,8 +443,7 @@ const Health = () => {
   const [visible, setVisible] = useState(false);
   const navigation = useNavigate();
   const handleLocation = (e) => {
-    e.preventDefault();
-    navigation("/recommendation");
+    navigation(e);
   };
 
   useEffect(() => {
@@ -731,10 +730,15 @@ const Health = () => {
       </Grid>
 
       <BtnRow $visible={visible}>
-        <BtnPrimary as="button" onClick={handleLocation}>
+        <BtnPrimary
+          as="button"
+          onClick={() => handleLocation("recommendation")}
+        >
           ابدأ الفحص
         </BtnPrimary>
-        <BtnOutline>شاهد كيف يعمل</BtnOutline>
+        <BtnOutline onClick={() => handleLocation("/work")}>
+          شاهد كيف يعمل
+        </BtnOutline>
       </BtnRow>
     </Section>
   );
