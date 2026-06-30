@@ -21,7 +21,7 @@ const G = {
 // ── Styled components ─────────────────────────────────────────────
 const Header = styled.header`
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
@@ -175,6 +175,7 @@ const MobileButtonGroup = styled.div`
   display: none;
   @media (max-width: 768px) {
     display: flex;
+    flex-direction: row-reverse;
     gap: 0.5rem;
     align-items: center;
   }
