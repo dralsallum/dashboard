@@ -31,6 +31,7 @@ import PatientResetPassword from "./pages/PatientResetPassword";
 import PatientDeleteAccount from "./pages/PatientDelete";
 import HowItWorks from "./pages/HowItWorks";
 import Reach from "./pages/Reach";
+import NewsSignup from "./pages/NewsSignup";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -63,6 +64,7 @@ const App = () => {
           <Route path="/recommendation" element={<Recommendation />} />
           <Route path="/work" element={<HowItWorks />} />
           <Route path="/contact" element={<Reach />} />
+          <Route path="/newslettersignup" element={<NewsSignup />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/pay" element={<Pay />} />
 

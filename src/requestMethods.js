@@ -1,7 +1,7 @@
 // File: src/requestMethods.js
 import axios from "axios";
 
-const BASE_URL = "https://amanapi-f8ce9693a253.herokuapp.com/api";
+const BASE_URL = "http://localhost:8000/api";
 
 export const publicRequest = axios.create({
   baseURL: BASE_URL,
