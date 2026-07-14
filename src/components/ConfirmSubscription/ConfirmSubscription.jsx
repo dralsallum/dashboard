@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { publicRequest } from "../requestMethods"; // adjust path to match where requestMethods.js actually lives relative to /pages
+import { publicRequest } from "../../requestMethods"; // adjust path to match where requestMethods.js actually lives relative to /pages
 
 const Wrapper = styled.div`
   background: #f4f9f7;
