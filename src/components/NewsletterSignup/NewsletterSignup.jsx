@@ -377,9 +377,7 @@ const NewsletterSignup = () => {
               {status === "idle" && (
                 <StatText>
                   <ArrowImg src={ArrowCurve} alt="" />
-                  <ArrowPara>
-                    لن نرسل لك أي رسائل مزعجة، ويمكنك إلغاء الاشتراك في أي وقت
-                  </ArrowPara>
+                  <ArrowPara>يمكنك إلغاء الاشتراك في أي وقت</ArrowPara>
                 </StatText>
               )}
             </LeftDiv>
