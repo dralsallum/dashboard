@@ -32,6 +32,7 @@ import PatientDeleteAccount from "./pages/PatientDelete";
 import HowItWorks from "./pages/HowItWorks";
 import Reach from "./pages/Reach";
 import NewsSignup from "./pages/NewsSignup";
+import Confirm from "./pages/Confirm";
 
 const App = () => {
   const user = useSelector((state) => state.user.currentUser);
@@ -67,6 +68,7 @@ const App = () => {
           <Route path="/newslettersignup" element={<NewsSignup />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/pay" element={<Pay />} />
+          <Route path="/confirm-subscription" element={<Confirm />} />
 
           <Route path="/:slug" element={<Appointment />} />
           <Route path="/quota/:id" element={<Quota />} />
