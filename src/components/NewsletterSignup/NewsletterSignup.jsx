@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useState } from "react";
-import Header from "../../assets/make1.png"; // swap for a relevant newsletter/mail illustration if you have one
+import Header from "../../assets/make2.png"; // swap for a relevant newsletter/mail illustration if you have one
 import ArrowCurve from "../../assets/arrowCurve.png";
 import { publicRequest } from "../../requestMethods"; // adjust relative path to match where requestMethods.js lives
 
