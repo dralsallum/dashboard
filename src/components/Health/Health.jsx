@@ -447,17 +447,19 @@ const Health = () => {
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0, rootMargin: "0px 0px -15% 0px" },
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    const checkVisibility = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      // Trigger once the section's top has scrolled up into the bottom
+      // ~85% of the viewport. This only ever runs on an actual scroll
+      // event, so it can never fire before the user scrolls.
+      if (rect.top < window.innerHeight * 0.85) {
+        setVisible(true);
+        window.removeEventListener("scroll", checkVisibility);
+      }
+    };
+    window.addEventListener("scroll", checkVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", checkVisibility);
   }, []);
 
   const days = [
