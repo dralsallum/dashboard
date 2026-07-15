@@ -67,7 +67,7 @@ const Heading = styled.h1`
   ${({ $visible }) =>
     $visible &&
     css`
-      animation: ${slideUp} 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+      animation: ${slideUp} 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0s forwards;
     `}
 
   em {
@@ -113,7 +113,7 @@ const Card = styled.div`
     $visible &&
     css`
       animation: ${slideUp} 0.7s cubic-bezier(0.22, 1, 0.36, 1)
-        ${$delay ?? 0.15}s forwards;
+        ${$delay ?? 0.05}s forwards;
     `}
 
   @media (max-width: 980px) {
@@ -278,7 +278,7 @@ const AnimatedLine = styled.line`
     $visible &&
     css`
       animation: ${drawLine} 0.8s cubic-bezier(0.22, 1, 0.36, 1)
-        ${$delay ?? 0.1}s forwards;
+        ${$delay ?? 0.05}s forwards;
     `}
 `;
 
@@ -354,7 +354,7 @@ const BtnRow = styled.div`
   ${({ $visible }) =>
     $visible &&
     css`
-      animation: ${slideUp} 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.8s forwards;
+      animation: ${slideUp} 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
     `}
 
   @media (max-width: 980px) {
@@ -454,7 +454,7 @@ const Health = () => {
           observer.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0, rootMargin: "0px 0px -15% 0px" },
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
@@ -481,7 +481,7 @@ const Health = () => {
 
       <Grid>
         {/* Card 1 - Calendar */}
-        <Card $visible={visible} $delay={0.15}>
+        <Card $visible={visible} $delay={0.05}>
           <StepNum>٠١</StepNum>
           <CardTitle>+160 فحصاً مخبرياً</CardTitle>
           <CardSub>حدد موعدك في +2000 موقع لـ Quest Diagnostics</CardSub>
@@ -509,7 +509,7 @@ const Health = () => {
         </Card>
 
         {/* Card 2 - Results */}
-        <Card $visible={visible} $delay={0.28}>
+        <Card $visible={visible} $delay={0.1}>
           <StepNum>٠٢</StepNum>
           <CardTitle>نتائج مفسَّرة</CardTitle>
           <CardSub>من كبار الأطباء وآلاف ساعات البحث</CardSub>
@@ -603,7 +603,7 @@ const Health = () => {
                 vectorEffect="non-scaling-stroke"
                 pathLength="1"
                 $visible={visible}
-                $delay={0.6}
+                $delay={0.2}
               />
 
               {/* Animated dashed line P2→P3 */}
@@ -619,7 +619,7 @@ const Health = () => {
                 vectorEffect="non-scaling-stroke"
                 pathLength="1"
                 $visible={visible}
-                $delay={0.85}
+                $delay={0.3}
               />
 
               {/* Dots */}
@@ -629,7 +629,7 @@ const Health = () => {
                 r="5"
                 fill="#2d5a4e"
                 $visible={visible}
-                $delay={0.65}
+                $delay={0.22}
               />
               <AnimatedCircle
                 cx="240"
@@ -637,7 +637,7 @@ const Health = () => {
                 r="5"
                 fill="#2d5a4e"
                 $visible={visible}
-                $delay={0.78}
+                $delay={0.28}
               />
               <AnimatedCircle
                 cx="320"
@@ -645,7 +645,7 @@ const Health = () => {
                 r="5"
                 fill="#2d5a4e"
                 $visible={visible}
-                $delay={1}
+                $delay={0.35}
               />
 
               {/* Value labels */}
@@ -658,7 +658,7 @@ const Health = () => {
                 fontWeight="500"
                 textAnchor="middle"
                 $visible={visible}
-                $delay={0.6}
+                $delay={0.2}
               >
                 ١٤٫٧
               </AnimatedText>
@@ -671,7 +671,7 @@ const Health = () => {
                 fontWeight="500"
                 textAnchor="middle"
                 $visible={visible}
-                $delay={0.83}
+                $delay={0.3}
               >
                 ١٠٫٠
               </AnimatedText>
@@ -684,7 +684,7 @@ const Health = () => {
                 fontWeight="500"
                 textAnchor="middle"
                 $visible={visible}
-                $delay={1.02}
+                $delay={0.38}
               >
                 ١٢٫٥
               </AnimatedText>
@@ -693,12 +693,12 @@ const Health = () => {
         </Card>
 
         {/* Card 3 - Protocol */}
-        <Card $visible={visible} $delay={0.4}>
+        <Card $visible={visible} $delay={0.15}>
           <StepNum>٠٣</StepNum>
           <CardTitle>اتبع بروتوكولك</CardTitle>
           <CardSub>تصرّف. افحص مجدداً.</CardSub>
           <ProtocolList>
-            <ProtocolItem $visible={visible} $delay={0.58}>
+            <ProtocolItem $visible={visible} $delay={0.2}>
               <IconBox>
                 <IconImg src={Food} alt="الغذاء" />
               </IconBox>
@@ -707,7 +707,7 @@ const Health = () => {
                 <p>سلمون بري ٦ أوقية، بقدونس عضوي…</p>
               </ProtocolText>
             </ProtocolItem>
-            <ProtocolItem $visible={visible} $delay={0.7}>
+            <ProtocolItem $visible={visible} $delay={0.26}>
               <IconBox>
                 <IconImg src={Pill} alt="المكملات" />
               </IconBox>
@@ -716,7 +716,7 @@ const Health = () => {
                 <p>إينوزيتول ٧٥٠ مجم، CoQ10 ١٠٠ مجم…</p>
               </ProtocolText>
             </ProtocolItem>
-            <ProtocolItem $visible={visible} $delay={0.82}>
+            <ProtocolItem $visible={visible} $delay={0.32}>
               <IconBox>
                 <IconImg src={Exercise} alt="الصحة اليومية" />
               </IconBox>
