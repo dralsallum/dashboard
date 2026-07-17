@@ -802,6 +802,14 @@ const PrivacyNote = styled.p`
   text-align: center;
 `;
 
+const WaitNote = styled.p`
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: ${T.textMuted};
+  text-align: center;
+`;
+
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const questions = [
   {
@@ -809,17 +817,6 @@ const questions = [
     question: "ما جنسك؟",
     type: "multiple",
     options: ["ذكر", "أنثى"],
-  },
-  {
-    id: "weight",
-    question: "بماذا يمكننا مساعدتك؟",
-    type: "multiple",
-    options: [
-      "المساعدة في تحسين القلب والأوعية الدموية",
-      "المساعدة في كسب العضلات",
-      "المساعدة في فقدان الوزن",
-      "المساعدة في كسب الوزن",
-    ],
   },
   {
     id: "pastVitamins",
@@ -945,13 +942,6 @@ const questions = [
     question: "كم حصة من الفواكه والخضروات تأكل في معظم الأيام؟",
     type: "multiple",
     options: ["0-1", "2-3", "4-5", "6+"],
-  },
-  {
-    id: "fermentedFoods",
-    question:
-      "كم مرة تأكل الأطعمة المتخمرة (مثل الزبادي أو الكمبوتشا أو الكيمتشي)؟",
-    type: "multiple",
-    options: ["يومياً", "عدة مرات في الأسبوع", "نادراً", "أبداً"],
   },
   {
     id: "fiber",
@@ -1807,6 +1797,10 @@ const Waitlist = () => {
                       ? "جارٍ التسجيل..."
                       : "انضم لقائمة الانتظار"}
                   </SubmitBtn>
+                  <WaitNote>
+                    الإقبال مرتفع حالياً والدفع غير متاح مؤقتاً — سجّل بقائمة
+                    الانتظار وسنتواصل معك فور فتح الحجز.
+                  </WaitNote>
                 </OrderSummary>
               )}
             </StepWrap>

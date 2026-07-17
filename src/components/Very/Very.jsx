@@ -289,7 +289,7 @@ const Very = ({ categoryRef }) => {
   const navigation = useNavigate();
   const handleLocation = (e) => {
     e.preventDefault();
-    navigation("/recommendation");
+    navigation("/waitlist");
   };
 
   return (

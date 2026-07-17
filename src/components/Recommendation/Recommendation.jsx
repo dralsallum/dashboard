@@ -624,7 +624,7 @@ const MarkerItem = styled.span`
   padding: 0.15rem 0;
 `;
 
-// ─── ORDER SUMMARY ────────────────────────────────────────────────────────────
+// ─── ORDER / WAITLIST SUMMARY ─────────────────────────────────────────────────
 const OrderSummary = styled.div`
   background: ${T.white};
   border: 1px solid ${T.cardBorder};
@@ -756,6 +756,15 @@ const FieldHint = styled.span`
   text-align: right;
 `;
 
+// ─── WAITLIST CONFIRMATION ─────────────────────────────────────────────────────
+const ConfirmWrap = styled.div`
+  text-align: center;
+`;
+const ConfirmIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+`;
+
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 const Footer = styled.footer`
   width: 100%;
@@ -793,6 +802,14 @@ const PrivacyNote = styled.p`
   text-align: center;
 `;
 
+const WaitNote = styled.p`
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: ${T.textMuted};
+  text-align: center;
+`;
+
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 const questions = [
   {
@@ -800,17 +817,6 @@ const questions = [
     question: "ما جنسك؟",
     type: "multiple",
     options: ["ذكر", "أنثى"],
-  },
-  {
-    id: "weight",
-    question: "بماذا يمكننا مساعدتك؟",
-    type: "multiple",
-    options: [
-      "المساعدة في تحسين القلب والأوعية الدموية",
-      "المساعدة في كسب العضلات",
-      "المساعدة في فقدان الوزن",
-      "المساعدة في كسب الوزن",
-    ],
   },
   {
     id: "pastVitamins",
@@ -936,13 +942,6 @@ const questions = [
     question: "كم حصة من الفواكه والخضروات تأكل في معظم الأيام؟",
     type: "multiple",
     options: ["0-1", "2-3", "4-5", "6+"],
-  },
-  {
-    id: "fermentedFoods",
-    question:
-      "كم مرة تأكل الأطعمة المتخمرة (مثل الزبادي أو الكمبوتشا أو الكيمتشي)؟",
-    type: "multiple",
-    options: ["يومياً", "عدة مرات في الأسبوع", "نادراً", "أبداً"],
   },
   {
     id: "fiber",
@@ -1205,6 +1204,7 @@ const Recommendation = () => {
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [notif, setNotif] = useState("");
   const [shakeBasket, setShakeBasket] = useState(false);
+  const [alreadyOnWaitlist, setAlreadyOnWaitlist] = useState(false);
 
   const basketItems = useSelector((state) => state.cart?.products || []);
   const basketTotal = useSelector((state) => state.cart?.total || 0);
@@ -1258,7 +1258,7 @@ const Recommendation = () => {
   const totalQuizSteps = questions.length;
   const progressPct = (() => {
     if (flowStep === "intro") return 0;
-    if (flowStep === "result") return 100;
+    if (flowStep === "result" || flowStep === "waitlistConfirmed") return 100;
     if (flowStep === "userInfo") return 90;
     return (Object.keys(answers).length / totalQuizSteps) * 85;
   })();
@@ -1396,54 +1396,45 @@ const Recommendation = () => {
     setOpenTiers((prev) => (prev[tierId] ? {} : { [tierId]: true }));
   };
 
-  const submitOrder = async () => {
+  // ── Join the waitlist instead of placing a paid order ──────────────────────
+  const joinWaitlist = async () => {
     if (!selectedProductId) {
-      showNotif("يرجى اختيار باقة أولاً");
+      showNotif("يرجى اختيار الباقة التي تهمك أولاً");
       return;
     }
     setOrderSubmitting(true);
     try {
       const selectedProduct = products.find((p) => p._id === selectedProductId);
-      const orderData = {
-        patientData: {
-          answers,
-          userInfo,
-          timestamp: new Date().toISOString(),
-          questionnaireCompleted: true,
-        },
-        products: selectedProduct
-          ? [
-              {
-                productId: selectedProduct._id,
-                name: selectedProduct.name,
-                price: selectedProduct.price,
-                quantity: 1,
-                category: selectedProduct.category,
-              },
-            ]
-          : [],
-        orderSummary: {
-          totalItems: 1,
-          totalAmount: selectedProduct?.price || 0,
-          currency: "SAR",
-        },
-        orderDate: new Date().toISOString(),
-        status: "pending",
+      const payload = {
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        idNumber: userInfo.idNumber,
+        dob: userInfo.dob,
+        city: userInfo.city,
+        answers,
+        interestedPackage: selectedProduct
+          ? {
+              productId: selectedProduct._id,
+              name: selectedProduct.name,
+              price: selectedProduct.price,
+            }
+          : null,
       };
-      const res = await publicRequest.post("/orders", orderData);
+      const res = await publicRequest.post("/waitlist", payload);
       if (res.data) {
-        showNotif("تم إرسال طلبك بنجاح! سيتم التواصل معك قريباً.");
-        setTimeout(
-          () =>
-            navigate("/outcome", {
-              state: { orderId: res.data._id, orderData },
-            }),
-          2000,
+        setAlreadyOnWaitlist(!!res.data.alreadyJoined);
+        showNotif(
+          res.data.alreadyJoined
+            ? "أنت مسجّل بالفعل — تم تحديث بياناتك"
+            : "تم تسجيلك في قائمة الانتظار بنجاح!",
         );
+        setFlowStep("waitlistConfirmed");
       }
     } catch (err) {
       console.error(err);
-      showNotif("حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.");
+      showNotif("حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.");
     } finally {
       setOrderSubmitting(false);
     }
@@ -1457,7 +1448,7 @@ const Recommendation = () => {
       </LoadingWrap>
     );
 
-  const showFooter = flowStep !== "result";
+  const showFooter = flowStep !== "result" && flowStep !== "waitlistConfirmed";
   const selectedProduct = products.find((p) => p._id === selectedProductId);
 
   // Desktop RTL grid: show [premium, plus, basic] left-to-right visually = right-to-left in RTL
@@ -1576,7 +1567,7 @@ const Recommendation = () => {
           {flowStep === "userInfo" && (
             <StepWrap key="userInfo">
               <StepTitle>بياناتك</StepTitle>
-              <StepSub>نحتاجها لتجهيز خطتك الصحية وطلب فحصك للمختبر</StepSub>
+              <StepSub>نحتاجها لنُعلمك فور إطلاق باقات الفحص السنوي</StepSub>
               <InfoForm>
                 <FieldRow $cols="1fr 1fr">
                   <Field>
@@ -1677,18 +1668,19 @@ const Recommendation = () => {
             </StepWrap>
           )}
 
-          {/* RESULT */}
+          {/* RESULT — choose the package you're interested in */}
           {flowStep === "result" && (
             <StepWrap key="result">
               <ResultTopRow>
-                <ResultLabel>اختر باقة الفحص السنوي</ResultLabel>
+                <ResultLabel>أي باقة تهمك أكثر؟</ResultLabel>
                 <CompareBtn onClick={() => setShowCompare((v) => !v)}>
                   {showCompare ? "اخفاء المقارنات" : "قارن الباقات"}
                 </CompareBtn>
               </ResultTopRow>
 
               <StepSub style={{ marginBottom: "1rem" }}>
-                باقات شاملة للفحوصات السنوية — اختر ما يناسب احتياجاتك الصحية
+                باقات الفحص السنوي ستُطلق قريباً — اختر الباقة التي تهمك وانضم
+                لقائمة الانتظار لنُعلمك أولاً بأول
               </StepSub>
 
               {/* Desktop grid */}
@@ -1784,10 +1776,10 @@ const Recommendation = () => {
                 </CompareSection>
               )}
 
-              {/* Order summary */}
+              {/* Waitlist summary + submit */}
               {selectedProduct && (
                 <OrderSummary>
-                  <OrderTitle>ملخص الطلب</OrderTitle>
+                  <OrderTitle>باقتك المفضلة</OrderTitle>
                   <OrderItem>
                     <span style={{ color: T.textMuted, fontSize: "0.875rem" }}>
                       {selectedProduct.analysisCount} تحليلاً
@@ -1797,14 +1789,49 @@ const Recommendation = () => {
                     </span>
                   </OrderItem>
                   <OrderTotal>
-                    الإجمالي: {selectedProduct.price.toLocaleString("ar-SA")}{" "}
-                    ر.س.
+                    السعر المتوقع:{" "}
+                    {selectedProduct.price.toLocaleString("ar-SA")} ر.س.
                   </OrderTotal>
-                  <SubmitBtn onClick={submitOrder} disabled={orderSubmitting}>
-                    {orderSubmitting ? "جارٍ إرسال الطلب..." : "إرسال الطلب"}
+                  <SubmitBtn onClick={joinWaitlist} disabled={orderSubmitting}>
+                    {orderSubmitting
+                      ? "جارٍ التسجيل..."
+                      : "انضم لقائمة الانتظار"}
                   </SubmitBtn>
+                  <WaitNote>
+                    الإقبال مرتفع حالياً والدفع غير متاح مؤقتاً — سجّل بقائمة
+                    الانتظار وسنتواصل معك فور فتح الحجز.
+                  </WaitNote>
                 </OrderSummary>
               )}
+            </StepWrap>
+          )}
+
+          {/* WAITLIST CONFIRMED */}
+          {flowStep === "waitlistConfirmed" && (
+            <StepWrap key="waitlistConfirmed">
+              <InfoCard>
+                <ConfirmWrap>
+                  <ConfirmIcon>{alreadyOnWaitlist ? "👋" : "🎉"}</ConfirmIcon>
+                  <InfoCardTitle style={{ marginBottom: "0.75rem" }}>
+                    {alreadyOnWaitlist
+                      ? "أنت مسجّل بالفعل!"
+                      : "تم تسجيلك في قائمة الانتظار"}
+                  </InfoCardTitle>
+                  <InfoCardContent>
+                    <p>
+                      {alreadyOnWaitlist
+                        ? "لدينا بياناتك مسبقاً وقمنا بتحديثها بآخر اختياراتك. سنتواصل معك فور إطلاق الباقات."
+                        : "شكراً لك! سنعلمك عبر البريد الإلكتروني أو الجوال فور إطلاق باقات الفحص السنوي."}
+                    </p>
+                  </InfoCardContent>
+                  <ContinueBtn
+                    onClick={() => navigate("/")}
+                    style={{ marginTop: "0.5rem" }}
+                  >
+                    العودة للرئيسية
+                  </ContinueBtn>
+                </ConfirmWrap>
+              </InfoCard>
             </StepWrap>
           )}
         </Inner>
