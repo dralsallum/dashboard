@@ -13,7 +13,7 @@ const StickyPriceBar = ({
   const [visible, setVisible] = useState(false);
 
   const handleClick = () => {
-    if (onButtonClick) {
+    if (typeof onButtonClick === "function") {
       onButtonClick();
     } else {
       navigate("/waitlist");
