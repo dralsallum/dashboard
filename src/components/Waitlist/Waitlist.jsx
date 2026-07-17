@@ -831,7 +831,7 @@ const questions = [
   },
   {
     id: "currentSupplements",
-    question: "ما مدى دافعيتك لإجراء تغييرات لتحقيق أهدافك؟",
+    question: "ما مدى دافعيتك لإجراء تغييرات لتحسين صحتك",
     type: "multiple",
     options: ["أنا متحمس", "أنا مهتم", "أنا حذر", "أنا لست مستعد"],
   },
@@ -858,7 +858,6 @@ const questions = [
     question: "أي المجالات تود الحصول على دعم أكثر فيها؟",
     type: "multiple",
     options: [
-      "المساءلة",
       "نظام غذائي للإقصاء",
       "التمارين الرياضية",
       "الطب الوظيفي",
@@ -876,11 +875,11 @@ const questions = [
     question: "ما أنواع التمارين التي تمارسها عادة؟",
     type: "multiple",
     options: [
-      "تمارين القلب",
+      "تمارين اللياقة",
       "تمارين القوة",
       "اليوغا",
       "تمارين عالية الكثافة",
-      "أخرى / لا توجد تمارين",
+      "لا اتمرن",
     ],
     multiSelect: true,
   },
@@ -921,17 +920,6 @@ const questions = [
     options: ["نادراً (0-1)", "أحياناً (2-3)", "غالباً (4+)"],
   },
   {
-    id: "heartConcerns",
-    question: "هل لديك أي مخاوف محددة بشأن صحة القلب؟",
-    type: "multiple",
-    options: [
-      "لا توجد",
-      "ضغط دم مرتفع",
-      "كوليسترول مرتفع",
-      "مخاوف أخرى بشأن القلب",
-    ],
-  },
-  {
     id: "focusMemory",
     question: "هل تعاني من صعوبة في التركيز أو الذاكرة؟",
     type: "multiple",
@@ -948,19 +936,6 @@ const questions = [
     question: "هل تقول أنك تحصل على ما يكفي من الألياف في نظامك الغذائي؟",
     type: "multiple",
     options: ["قليل", "كافي", "عالي"],
-  },
-  {
-    id: "dietPattern",
-    question: "هل تتبع أي نظام غذائي أو نمط غذائي معين؟",
-    type: "multiple",
-    options: [
-      "لا توجد",
-      "نباتي",
-      "نباتي (لا يأكل اللحوم)",
-      "باليو",
-      "خالي من الغلوتين/سيلياك",
-      "أخرى",
-    ],
   },
   {
     id: "allergies",
@@ -1160,7 +1135,7 @@ const PackageCardContent = ({ product, isSelected }) => (
     />
     <PackageName>{product.name}</PackageName>
     <PackageCount>{product.analysisCount} تحليلاً</PackageCount>
-    <PackagePrice>{product.price.toLocaleString("ar-SA")} ر.س.</PackagePrice>
+    <PackagePrice>{product.price("ar-SA")} ر.س.</PackagePrice>
   </>
 );
 
