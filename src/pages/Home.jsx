@@ -35,9 +35,7 @@ const Home = () => {
         price="299 ر.س"
         description="فحص، تحليل، ٥٠٠+ مؤشراً حيوياً"
         buttonText="ابدأ فحصك"
-        onButtonClick={() => {
-          /* navigate to checkout/plan */
-        }}
+        onButtonClick={() => {}}
       />
     </>
   );
