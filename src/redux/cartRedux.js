@@ -14,7 +14,7 @@ const cartSlice = createSlice({
     addProduct: (state, action) => {
       const productToAdd = action.payload;
       const existingProductIndex = state.products.findIndex(
-        (p) => p._id === productToAdd._id
+        (p) => p._id === productToAdd._id,
       );
 
       if (existingProductIndex >= 0) {
@@ -22,7 +22,6 @@ const cartSlice = createSlice({
         state.products[existingProductIndex].quantity += productToAdd.quantity;
         state.total += productToAdd.price * productToAdd.quantity;
       } else {
-        // Add new product to cart
         state.quantity += 1;
         state.products.push(productToAdd);
         state.total += productToAdd.price * productToAdd.quantity;
@@ -33,14 +32,14 @@ const cartSlice = createSlice({
     removeProduct: (state, action) => {
       const productIdToRemove = action.payload;
       const productToRemove = state.products.find(
-        (p) => p._id === productIdToRemove
+        (p) => p._id === productIdToRemove,
       );
 
       if (productToRemove) {
         state.quantity -= 1;
         state.total -= productToRemove.price * productToRemove.quantity;
         state.products = state.products.filter(
-          (p) => p._id !== productIdToRemove
+          (p) => p._id !== productIdToRemove,
         );
       }
     },

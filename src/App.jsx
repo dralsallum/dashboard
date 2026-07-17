@@ -4,7 +4,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import GlobalStyle from "./globalStyles";
 import Home from "./pages/Home";
 import Test from "./pages/Test";
-import { Practice, Recommendation, Rtc } from "./components";
+import { Practice, Recommendation, Rtc, Waitlist } from "./components";
 import Onboarding from "./pages/Onboarding";
 import Outcome from "./pages/Outcome";
 import Product from "./pages/Product";
@@ -63,6 +63,7 @@ const App = () => {
           <Route path="/outcome" element={<Outcome />} />
 
           <Route path="/recommendation" element={<Recommendation />} />
+          <Route path="/waitlist" element={<Waitlist />} />
           <Route path="/work" element={<HowItWorks />} />
           <Route path="/contact" element={<Reach />} />
           <Route path="/newslettersignup" element={<NewsSignup />} />

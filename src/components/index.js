@@ -41,5 +41,6 @@ export { default as Health } from "./Health/Health";
 export { default as Monitor } from "./Monitor/Monitor";
 export { default as Work } from "./Work/Work";
 export { default as Contact } from "./Contact/Contact";
+export { default as Waitlist } from "./Waitlist/Waitlist";
 export { default as NewsletterSignup } from "./NewsletterSignup/NewsletterSignup";
 export { default as ConfirmSubscription } from "./ConfirmSubscription/ConfirmSubscription";
