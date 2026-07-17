@@ -44,3 +44,4 @@ export { default as Contact } from "./Contact/Contact";
 export { default as Waitlist } from "./Waitlist/Waitlist";
 export { default as NewsletterSignup } from "./NewsletterSignup/NewsletterSignup";
 export { default as ConfirmSubscription } from "./ConfirmSubscription/ConfirmSubscription";
+export { default as StickyPriceBar } from "./StickyPriceBar/StickyPriceBar";
