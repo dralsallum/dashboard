@@ -1,9 +1,9 @@
-// Quiz.jsx
+// Quiz.jsx  (real-payment version)
 import React, { useState, useEffect, useRef } from "react";
 import { publicRequest } from "../../requestMethods";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, clearCart } from "../../redux/cartRedux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import Break1 from "../../assets/break1.png";
 import Break2 from "../../assets/break2.png";
@@ -624,7 +624,7 @@ const MarkerItem = styled.span`
   padding: 0.15rem 0;
 `;
 
-// ─── ORDER / WAITLIST SUMMARY ─────────────────────────────────────────────────
+// ─── ORDER SUMMARY ────────────────────────────────────────────────────────────
 const OrderSummary = styled.div`
   background: ${T.white};
   border: 1px solid ${T.cardBorder};
@@ -656,6 +656,12 @@ const OrderTotal = styled.div`
   font-weight: 700;
   color: ${T.green};
   text-align: center;
+`;
+const OrderTotalHint = styled.p`
+  font-size: 0.72rem;
+  color: ${T.textMuted};
+  text-align: center;
+  margin-top: 0.15rem;
 `;
 const SubmitBtn = styled.button`
   width: 100%;
@@ -756,7 +762,7 @@ const FieldHint = styled.span`
   text-align: right;
 `;
 
-// ─── WAITLIST CONFIRMATION ─────────────────────────────────────────────────────
+// ─── PAYMENT RESULT ─────────────────────────────────────────────────────────
 const ConfirmWrap = styled.div`
   text-align: center;
 `;
@@ -811,6 +817,179 @@ const WaitNote = styled.p`
 `;
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
+const questions = [
+  {
+    id: "sex",
+    question: "ما جنسك؟",
+    type: "multiple",
+    options: ["ذكر", "أنثى"],
+  },
+  {
+    id: "pastVitamins",
+    question: "ما مستوى نشاطك الحالي؟",
+    type: "multiple",
+    options: [
+      "أنا نشط جداً",
+      "أنا نشط بشكل معتدل",
+      "أنا لست نشطاً جداً",
+      "أنا خامل",
+    ],
+  },
+  {
+    id: "currentSupplements",
+    question: "ما مدى دافعيتك لإجراء تغييرات لتحقيق أهدافك؟",
+    type: "multiple",
+    options: ["أنا متحمس", "أنا مهتم", "أنا حذر", "أنا لست مستعد"],
+  },
+  {
+    id: "familiarity",
+    question: "ما مدى معرفتك بالفيتامينات والمكملات الغذائية؟",
+    type: "multiple",
+    options: [
+      "غير مألوف على الإطلاق",
+      "مألوف قليلاً",
+      "مألوف بشكل معتدل",
+      "مألوف جداً",
+    ],
+  },
+  {
+    id: "powders",
+    question:
+      "هل تستخدم أي مساحيق تكميلية (مثل مخفوقات البروتين أو خلطات المشروبات)؟",
+    type: "multiple",
+    options: ["نعم", "لا"],
+  },
+  {
+    id: "healthGoals",
+    question: "أي المجالات تود الحصول على دعم أكثر فيها؟",
+    type: "multiple",
+    options: [
+      "المساءلة",
+      "نظام غذائي للإقصاء",
+      "التمارين الرياضية",
+      "الطب الوظيفي",
+      "الأكل البديهي",
+      "فحوصات المختبر",
+      "التخطيط للوجبات",
+      "المغذيات الكبرى الشخصية",
+      "العلاقة مع الطعام",
+      "النوم",
+    ],
+    multiSelect: true,
+  },
+  {
+    id: "exerciseTypes",
+    question: "ما أنواع التمارين التي تمارسها عادة؟",
+    type: "multiple",
+    options: [
+      "تمارين القلب",
+      "تمارين القوة",
+      "اليوغا",
+      "تمارين عالية الكثافة",
+      "أخرى / لا توجد تمارين",
+    ],
+    multiSelect: true,
+  },
+  {
+    id: "stressLevel",
+    question: "كيف تقيم مستوى التوتر المعتاد لديك؟",
+    type: "multiple",
+    options: ["منخفض", "معتدل", "عالي"],
+  },
+  {
+    id: "sleepHours",
+    question: "كم ساعة من النوم تحصل عليها عادة في الليلة؟",
+    type: "multiple",
+    options: [
+      "أقل من 5 ساعات",
+      "5-6 ساعات",
+      "6-7 ساعات",
+      "7-8 ساعات",
+      "8+ ساعات",
+    ],
+  },
+  {
+    id: "energyLevels",
+    question: "كيف تصف مستويات الطاقة اليومية لديك؟",
+    type: "multiple",
+    options: ["غالباً متعب", "بعض التقلبات", "نشيط بشكل عام"],
+  },
+  {
+    id: "digestiveDiscomfort",
+    question: "كم مرة تعاني من عدم الراحة الهضمية (مثل الانتفاخ أو عسر الهضم)؟",
+    type: "multiple",
+    options: ["نادراً", "أحياناً", "بكثرة"],
+  },
+  {
+    id: "getSick",
+    question: "كم مرة تميل للإصابة بالمرض (مثل نزلات البرد في السنة)؟",
+    type: "multiple",
+    options: ["نادراً (0-1)", "أحياناً (2-3)", "غالباً (4+)"],
+  },
+  {
+    id: "heartConcerns",
+    question: "هل لديك أي مخاوف محددة بشأن صحة القلب؟",
+    type: "multiple",
+    options: [
+      "لا توجد",
+      "ضغط دم مرتفع",
+      "كوليسترول مرتفع",
+      "مخاوف أخرى بشأن القلب",
+    ],
+  },
+  {
+    id: "focusMemory",
+    question: "هل تعاني من صعوبة في التركيز أو الذاكرة؟",
+    type: "multiple",
+    options: ["نعم", "لا"],
+  },
+  {
+    id: "fruitVeggies",
+    question: "كم حصة من الفواكه والخضروات تأكل في معظم الأيام؟",
+    type: "multiple",
+    options: ["0-1", "2-3", "4-5", "6+"],
+  },
+  {
+    id: "fiber",
+    question: "هل تقول أنك تحصل على ما يكفي من الألياف في نظامك الغذائي؟",
+    type: "multiple",
+    options: ["قليل", "كافي", "عالي"],
+  },
+  {
+    id: "dietPattern",
+    question: "هل تتبع أي نظام غذائي أو نمط غذائي معين؟",
+    type: "multiple",
+    options: [
+      "لا توجد",
+      "نباتي",
+      "نباتي (لا يأكل اللحوم)",
+      "باليو",
+      "خالي من الغلوتين/سيلياك",
+      "أخرى",
+    ],
+  },
+  {
+    id: "allergies",
+    question: "هل لديك أي حساسية أو حساسيات غذائية؟",
+    type: "multiple",
+    options: [
+      "لا توجد",
+      "الألبان",
+      "الصويا",
+      "الغلوتين",
+      "المحار",
+      "الرجيد",
+      "أخرى",
+    ],
+    multiSelect: true,
+  },
+  {
+    id: "smoke",
+    question: "هل تدخن؟",
+    type: "multiple",
+    options: ["نعم", "لا"],
+  },
+];
 const questions = [
   {
     id: "sex",
@@ -1171,6 +1350,7 @@ const Recommendation = () => {
   const sliderRef = useRef();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [flowStep, setFlowStep] = useState("intro");
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -1204,7 +1384,11 @@ const Recommendation = () => {
   const [orderSubmitting, setOrderSubmitting] = useState(false);
   const [notif, setNotif] = useState("");
   const [shakeBasket, setShakeBasket] = useState(false);
-  const [alreadyOnWaitlist, setAlreadyOnWaitlist] = useState(false);
+
+  // Payment-result state — populated when Tap redirects the browser back
+  const [paymentStatus, setPaymentStatus] = useState(null); // "paid" | "failed" | "pending" | null
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [paidProductName, setPaidProductName] = useState("");
 
   const basketItems = useSelector((state) => state.cart?.products || []);
   const basketTotal = useSelector((state) => state.cart?.total || 0);
@@ -1213,6 +1397,26 @@ const Recommendation = () => {
   useEffect(() => {
     dispatch(clearCart());
   }, [dispatch]);
+
+  // If Tap just redirected the browser back here with ?orderId=..., verify payment
+  useEffect(() => {
+    const orderId = searchParams.get("orderId");
+    if (!orderId) return;
+    setFlowStep("paymentResult");
+    setVerifyingPayment(true);
+    publicRequest
+      .get(`/checkout/verify/${orderId}`)
+      .then((res) => {
+        setPaymentStatus(res.data?.status ?? "failed");
+        setPaidProductName(res.data?.product?.name ?? "");
+      })
+      .catch((err) => {
+        console.error(err);
+        setPaymentStatus("failed");
+      })
+      .finally(() => setVerifyingPayment(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Scroll slider to centre card (index 1 = "الشاملة") when result screen mounts
   useEffect(() => {
@@ -1258,7 +1462,7 @@ const Recommendation = () => {
   const totalQuizSteps = questions.length;
   const progressPct = (() => {
     if (flowStep === "intro") return 0;
-    if (flowStep === "result" || flowStep === "waitlistConfirmed") return 100;
+    if (flowStep === "result" || flowStep === "paymentResult") return 100;
     if (flowStep === "userInfo") return 90;
     return (Object.keys(answers).length / totalQuizSteps) * 85;
   })();
@@ -1396,45 +1600,39 @@ const Recommendation = () => {
     setOpenTiers((prev) => (prev[tierId] ? {} : { [tierId]: true }));
   };
 
-  // ── Join the waitlist instead of placing a paid order ──────────────────────
-  const joinWaitlist = async () => {
+  // ── Create the order + Tap charge, then hand the browser off to Tap's
+  //    hosted checkout page. Payment result is picked up when Tap redirects
+  //    back to this same route with ?orderId=... (see the useEffect above).
+  const startCheckout = async () => {
     if (!selectedProductId) {
-      showNotif("يرجى اختيار الباقة التي تهمك أولاً");
+      showNotif("يرجى اختيار باقة أولاً");
       return;
     }
     setOrderSubmitting(true);
     try {
       const selectedProduct = products.find((p) => p._id === selectedProductId);
       const payload = {
-        firstName: userInfo.firstName,
-        lastName: userInfo.lastName,
-        email: userInfo.email,
-        phone: userInfo.phone,
-        idNumber: userInfo.idNumber,
-        dob: userInfo.dob,
-        city: userInfo.city,
+        userInfo,
         answers,
-        interestedPackage: selectedProduct
+        product: selectedProduct
           ? {
               productId: selectedProduct._id,
               name: selectedProduct.name,
               price: selectedProduct.price,
+              analysisCount: selectedProduct.analysisCount,
             }
           : null,
       };
-      const res = await publicRequest.post("/waitlist", payload);
-      if (res.data) {
-        setAlreadyOnWaitlist(!!res.data.alreadyJoined);
-        showNotif(
-          res.data.alreadyJoined
-            ? "أنت مسجّل بالفعل — تم تحديث بياناتك"
-            : "تم تسجيلك في قائمة الانتظار بنجاح!",
-        );
-        setFlowStep("waitlistConfirmed");
+      const res = await publicRequest.post("/checkout/create-order", payload);
+      if (res.data?.checkoutUrl) {
+        // Full browser navigation to Tap's hosted payment page
+        window.location.href = res.data.checkoutUrl;
+      } else {
+        showNotif("تعذّر إنشاء رابط الدفع، يرجى المحاولة مرة أخرى");
       }
     } catch (err) {
       console.error(err);
-      showNotif("حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.");
+      showNotif("حدث خطأ أثناء إنشاء عملية الدفع. يرجى المحاولة مرة أخرى.");
     } finally {
       setOrderSubmitting(false);
     }
@@ -1448,7 +1646,7 @@ const Recommendation = () => {
       </LoadingWrap>
     );
 
-  const showFooter = flowStep !== "result" && flowStep !== "waitlistConfirmed";
+  const showFooter = flowStep !== "result" && flowStep !== "paymentResult";
   const selectedProduct = products.find((p) => p._id === selectedProductId);
 
   // Desktop RTL grid: show [premium, plus, basic] left-to-right visually = right-to-left in RTL
@@ -1567,7 +1765,7 @@ const Recommendation = () => {
           {flowStep === "userInfo" && (
             <StepWrap key="userInfo">
               <StepTitle>بياناتك</StepTitle>
-              <StepSub>نحتاجها لنُعلمك فور إطلاق باقات الفحص السنوي</StepSub>
+              <StepSub>نحتاجها لتجهيز خطتك الصحية وإتمام طلبك</StepSub>
               <InfoForm>
                 <FieldRow $cols="1fr 1fr">
                   <Field>
@@ -1668,19 +1866,18 @@ const Recommendation = () => {
             </StepWrap>
           )}
 
-          {/* RESULT — choose the package you're interested in */}
+          {/* RESULT — choose a package and pay */}
           {flowStep === "result" && (
             <StepWrap key="result">
               <ResultTopRow>
-                <ResultLabel>أي باقة تهمك أكثر؟</ResultLabel>
+                <ResultLabel>اختر باقة الفحص السنوي</ResultLabel>
                 <CompareBtn onClick={() => setShowCompare((v) => !v)}>
                   {showCompare ? "اخفاء المقارنات" : "قارن الباقات"}
                 </CompareBtn>
               </ResultTopRow>
 
               <StepSub style={{ marginBottom: "1rem" }}>
-                باقات الفحص السنوي ستُطلق قريباً — اختر الباقة التي تهمك وانضم
-                لقائمة الانتظار لنُعلمك أولاً بأول
+                باقات شاملة للفحوصات السنوية — اختر ما يناسب احتياجاتك الصحية
               </StepSub>
 
               {/* Desktop grid */}
@@ -1776,10 +1973,10 @@ const Recommendation = () => {
                 </CompareSection>
               )}
 
-              {/* Waitlist summary + submit */}
+              {/* Order summary + pay */}
               {selectedProduct && (
                 <OrderSummary>
-                  <OrderTitle>باقتك المفضلة</OrderTitle>
+                  <OrderTitle>ملخص الطلب</OrderTitle>
                   <OrderItem>
                     <span style={{ color: T.textMuted, fontSize: "0.875rem" }}>
                       {selectedProduct.analysisCount} تحليلاً
@@ -1789,13 +1986,17 @@ const Recommendation = () => {
                     </span>
                   </OrderItem>
                   <OrderTotal>
-                    السعر المتوقع:{" "}
-                    {selectedProduct.price.toLocaleString("ar-SA")} ر.س.
+                    الإجمالي (شامل الضريبة):{" "}
+                    {(selectedProduct.price * 1.15).toLocaleString("ar-SA", {
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    ر.س.
                   </OrderTotal>
-                  <SubmitBtn onClick={joinWaitlist} disabled={orderSubmitting}>
-                    {orderSubmitting
-                      ? "جارٍ التسجيل..."
-                      : "انضم لقائمة الانتظار"}
+                  <OrderTotalHint>
+                    سيتم تحويلك إلى صفحة الدفع الآمنة لإتمام العملية
+                  </OrderTotalHint>
+                  <SubmitBtn onClick={startCheckout} disabled={orderSubmitting}>
+                    {orderSubmitting ? "جارٍ تجهيز الدفع..." : "الدفع الآن"}
                   </SubmitBtn>
                   <WaitNote>
                     الإقبال مرتفع حالياً والدفع غير متاح مؤقتاً — سجّل بقائمة
@@ -1806,24 +2007,46 @@ const Recommendation = () => {
             </StepWrap>
           )}
 
-          {/* WAITLIST CONFIRMED */}
-          {flowStep === "waitlistConfirmed" && (
-            <StepWrap key="waitlistConfirmed">
+          {/* PAYMENT RESULT — reached when Tap redirects the browser back */}
+          {flowStep === "paymentResult" && (
+            <StepWrap key="paymentResult">
               <InfoCard>
                 <ConfirmWrap>
-                  <ConfirmIcon>{alreadyOnWaitlist ? "👋" : "🎉"}</ConfirmIcon>
-                  <InfoCardTitle style={{ marginBottom: "0.75rem" }}>
-                    {alreadyOnWaitlist
-                      ? "أنت مسجّل بالفعل!"
-                      : "تم تسجيلك في قائمة الانتظار"}
-                  </InfoCardTitle>
-                  <InfoCardContent>
-                    <p>
-                      {alreadyOnWaitlist
-                        ? "لدينا بياناتك مسبقاً وقمنا بتحديثها بآخر اختياراتك. سنتواصل معك فور إطلاق الباقات."
-                        : "شكراً لك! سنعلمك عبر البريد الإلكتروني أو الجوال فور إطلاق باقات الفحص السنوي."}
-                    </p>
-                  </InfoCardContent>
+                  {verifyingPayment ? (
+                    <>
+                      <Spinner style={{ margin: "0 auto 1rem" }} />
+                      <InfoCardTitle style={{ marginBottom: "0.5rem" }}>
+                        جارٍ التحقق من الدفع...
+                      </InfoCardTitle>
+                    </>
+                  ) : paymentStatus === "paid" ? (
+                    <>
+                      <ConfirmIcon>✅</ConfirmIcon>
+                      <InfoCardTitle style={{ marginBottom: "0.75rem" }}>
+                        تم الدفع بنجاح!
+                      </InfoCardTitle>
+                      <InfoCardContent>
+                        <p>
+                          شكراً لك، تم تأكيد طلب باقة{" "}
+                          {paidProductName || "الفحص السنوي"}. سيتم التواصل معك
+                          قريباً لتنسيق موعد سحب العينة.
+                        </p>
+                      </InfoCardContent>
+                    </>
+                  ) : (
+                    <>
+                      <ConfirmIcon>⚠️</ConfirmIcon>
+                      <InfoCardTitle style={{ marginBottom: "0.75rem" }}>
+                        لم تكتمل عملية الدفع
+                      </InfoCardTitle>
+                      <InfoCardContent>
+                        <p>
+                          حدث خطأ أو تم إلغاء عملية الدفع، ولم يتم خصم أي مبلغ.
+                          يمكنك المحاولة مرة أخرى.
+                        </p>
+                      </InfoCardContent>
+                    </>
+                  )}
                   <ContinueBtn
                     onClick={() => navigate("/")}
                     style={{ marginTop: "0.5rem" }}
