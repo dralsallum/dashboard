@@ -15,9 +15,11 @@ import {
   Monitor,
   StickyPriceBar,
 } from "../components";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const categoryRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
