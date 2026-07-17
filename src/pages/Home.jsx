@@ -32,7 +32,7 @@ const Home = () => {
       <Phone />
       <Footer />
       <StickyPriceBar
-        price="299 ر.س"
+        price="٧٥٠ ر.س"
         description="فحص، تحليل، ٥٠٠+ مؤشراً حيوياً"
         buttonText="ابدأ فحصك"
         onButtonClick={() => {}}

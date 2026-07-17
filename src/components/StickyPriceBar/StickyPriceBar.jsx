@@ -2,20 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-/**
- * Sticky bottom bar that fades/slides in once the user scrolls past
- * the hero section. Matches the dark-green CTA bar shown in the
- * reference screenshot (RTL, Arabic copy, "ابدأ فحصك" button + price).
- * Only visible on small/phone screens (<= 480px).
- *
- * Usage:
- *   <StickyPriceBar
- *     price="299 ر.س"
- *     description="فحص، تحليل، ٥٠٠+ مؤشراً حيوياً"
- *     buttonText="ابدأ فحصك"
- *     onButtonClick={() => navigate("/start")}
- *   />
- */
 const StickyPriceBar = ({
   price = "299 ر.س",
   description = "فحص، تحليل، ٥٠٠+ مؤشراً حيوياً",
@@ -67,7 +53,7 @@ const Wrapper = styled.div`
   right: 0;
   bottom: 0;
   z-index: 50;
-  background-color: #2d5a4e;
+  background-color: #fffffff2;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
   transition:
     transform 280ms ease,
@@ -86,6 +72,7 @@ const Inner = styled.div`
   margin: 0 auto;
   display: flex;
   align-items: center;
+  flex-direction: row-reverse;
   justify-content: space-between;
   gap: 12px;
   padding: 12px 16px;
@@ -93,10 +80,10 @@ const Inner = styled.div`
 
 const Button = styled.button`
   flex-shrink: 0;
-  background-color: #f3f1ea;
-  color: #1b3b2b;
+  background-color: #2d5a4e;
+  color: #fff;
   border: none;
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 12px 22px;
   font-size: 15px;
   font-weight: 600;
@@ -107,17 +94,17 @@ const Button = styled.button`
 const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   line-height: 1.4;
 `;
 
 const Description = styled.span`
-  color: rgba(255, 255, 255, 0.65);
+  color: #526660;
   font-size: 12px;
 `;
 
 const Price = styled.span`
-  color: #ffffff;
+  color: #000;
   font-size: 16px;
   font-weight: 700;
 `;
