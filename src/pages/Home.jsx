@@ -32,10 +32,10 @@ const Home = () => {
       <Phone />
       <Footer />
       <StickyPriceBar
-        price="٧٥٠ ر.س"
-        description="فحص، تحليل، ٥٠٠+ مؤشراً حيوياً"
+        price="٧٢٠ ر.س"
+        description="فحص، تحليل، 37+ مؤشراً حيوياً"
         buttonText="ابدأ فحصك"
-        onButtonClick={() => {}}
+        onButtonClick={() => navigate("/waitlist")}
       />
     </>
   );
