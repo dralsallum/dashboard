@@ -75,7 +75,7 @@ const Inner = styled.div`
   flex-direction: row-reverse;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 14px;
 `;
 
 const Button = styled.button`
@@ -84,7 +84,7 @@ const Button = styled.button`
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 12px 22px;
+  padding: 10px 20px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -105,7 +105,7 @@ const Description = styled.span`
 
 const Price = styled.span`
   color: #000;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 `;
 
