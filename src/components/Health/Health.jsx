@@ -429,12 +429,22 @@ const IconImg = styled.img`
   flex-shrink: 0;
 `;
 
-const StyledText = styled.text`
+/* Fix: iOS Safari's SVG <text> engine doesn't reliably run Arabic
+   letter shaping + bidi together (letters came out disconnected AND
+   reversed, worse than the original mirroring). SVG <text> is simply
+   unreliable for Arabic on WebKit. The robust fix is to render these
+   labels as real HTML via <foreignObject>, since HTML text layout
+   handles Arabic shaping/bidi correctly everywhere. */
+const ZoneLabel = styled.div`
   font-size: 9.5px;
-  fill: #5a7a70;
+  color: #5a7a70;
   font-family: "Tajawal", sans-serif;
   letter-spacing: 0.7px;
   font-weight: 600;
+  direction: rtl;
+  text-align: right;
+  white-space: nowrap;
+  line-height: 1.2;
 `;
 
 /* ─── Component ───────────────────────────────────────── */
@@ -552,16 +562,22 @@ const Health = () => {
                 strokeWidth="1.2"
               />
 
-              {/* Zone labels */}
-              <StyledText x="374" y="50">
-                فوق المعدل
-              </StyledText>
-              <StyledText x="376" y="125">
-                ضمن المعدل
-              </StyledText>
-              <StyledText x="374" y="195">
-                دون المعدل
-              </StyledText>
+              {/* Zone labels (HTML via foreignObject — see ZoneLabel note above) */}
+              <foreignObject x="264" y="42" width="110" height="16">
+                <ZoneLabel xmlns="http://www.w3.org/1999/xhtml">
+                  فوق المعدل
+                </ZoneLabel>
+              </foreignObject>
+              <foreignObject x="266" y="117" width="110" height="16">
+                <ZoneLabel xmlns="http://www.w3.org/1999/xhtml">
+                  ضمن المعدل
+                </ZoneLabel>
+              </foreignObject>
+              <foreignObject x="264" y="187" width="110" height="16">
+                <ZoneLabel xmlns="http://www.w3.org/1999/xhtml">
+                  دون المعدل
+                </ZoneLabel>
+              </foreignObject>
 
               {/* Dashed dividers */}
               <line
