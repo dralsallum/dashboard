@@ -429,18 +429,12 @@ const IconImg = styled.img`
   flex-shrink: 0;
 `;
 
-/* Fix: iOS Safari's SVG <text> bidi handling doesn't reliably
-   auto-detect Arabic script the way desktop browsers do. Forcing
-   direction + bidi-override makes RTL rendering consistent across
-   platforms. */
 const StyledText = styled.text`
   font-size: 9.5px;
   fill: #5a7a70;
   font-family: "Tajawal", sans-serif;
   letter-spacing: 0.7px;
   font-weight: 600;
-  direction: rtl;
-  unicode-bidi: bidi-override;
 `;
 
 /* ─── Component ───────────────────────────────────────── */
@@ -559,13 +553,13 @@ const Health = () => {
               />
 
               {/* Zone labels */}
-              <StyledText x="374" y="50" textAnchor="end">
+              <StyledText x="374" y="50">
                 فوق المعدل
               </StyledText>
-              <StyledText x="376" y="125" textAnchor="end">
+              <StyledText x="376" y="125">
                 ضمن المعدل
               </StyledText>
-              <StyledText x="374" y="195" textAnchor="end">
+              <StyledText x="374" y="195">
                 دون المعدل
               </StyledText>
 
