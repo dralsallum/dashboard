@@ -486,7 +486,7 @@ const Health = () => {
         <Card $visible={visible} $delay={0.05}>
           <StepNum>٠١</StepNum>
           <CardTitle>+160 فحصاً مخبرياً</CardTitle>
-          <CardSub>حدد موعدك في +2000 موقع لـ Quest Diagnostics</CardSub>
+          <CardSub>حدد موعدك في +١٠٠ مختبر متعاقد مع وقتنا</CardSub>
           <Calendar>
             <DayRow>
               {days.map((d) => (
@@ -715,7 +715,7 @@ const Health = () => {
               </IconBox>
               <ProtocolText>
                 <h4>المكملات الغذائية</h4>
-                <p>إينوزيتول ٧٥٠ مجم، CoQ10 ١٠٠ مجم…</p>
+                <p>إينوزيتول ٧٥٠ مجم، بروتين ١٠٠ جرام…</p>
               </ProtocolText>
             </ProtocolItem>
             <ProtocolItem $visible={visible} $delay={0.32}>
