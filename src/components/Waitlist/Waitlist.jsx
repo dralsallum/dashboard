@@ -1135,7 +1135,7 @@ const PackageCardContent = ({ product, isSelected }) => (
     />
     <PackageName>{product.name}</PackageName>
     <PackageCount>{product.analysisCount} تحليلاً</PackageCount>
-    <PackagePrice>{product.price("ar-SA")} ر.س.</PackagePrice>
+    <PackagePrice>{product.price.toLocaleString("ar-SA")} ر.س.</PackagePrice>
   </>
 );
 
