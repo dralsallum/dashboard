@@ -6149,7 +6149,7 @@ const BroadcastComposer = memo(
       setAudience((a) => ({ ...a, counting: true }));
       const timer = setTimeout(async () => {
         try {
-          const { data } = await userRequest.post("/messages/audience", {
+          const { data } = await userRequest.post("/broadcasts/audience", {
             segment,
           });
           if (!cancelled) setAudience({ count: data.count, counting: false });
@@ -6177,7 +6177,7 @@ const BroadcastComposer = memo(
       setError("");
       try {
         await callApi(
-          () => userRequest.post("/messages/send", { ...content, segment }),
+          () => userRequest.post("/broadcasts/send", { ...content, segment }),
           onAuthError,
         );
         onSent();
@@ -6244,7 +6244,8 @@ const BroadcastComposer = memo(
               }
               onSend={async (to) => {
                 const { data } = await callApi(
-                  () => userRequest.post("/messages/test", { ...content, to }),
+                  () =>
+                    userRequest.post("/broadcasts/test", { ...content, to }),
                   onAuthError,
                 );
                 return data.message;
@@ -6270,7 +6271,11 @@ const BroadcastComposer = memo(
 
 const MarketingTab = memo(({ accessToken, onAuthError, onGoTab }) => {
   const [composing, setComposing] = useState(false);
-  const status = useAdminGet(accessToken, onAuthError, "/messages/status").data;
+  const status = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/broadcasts/status",
+  ).data;
   const campaigns = useAdminGet(
     accessToken,
     onAuthError,
@@ -6281,7 +6286,7 @@ const MarketingTab = memo(({ accessToken, onAuthError, onGoTab }) => {
     onAuthError,
     "/automations/admin",
   );
-  const messages = useAdminGet(accessToken, onAuthError, "/messages/admin");
+  const messages = useAdminGet(accessToken, onAuthError, "/broadcasts/admin");
   const sendingNow = (messages.data || []).some((m) => m.status === "sending");
 
   // Refresh every 5s while a broadcast is still going out
@@ -7248,7 +7253,11 @@ const AutomationEditor = memo(
 const AutomationsTab = memo(({ accessToken, onAuthError }) => {
   const [editing, setEditing] = useState(null); // null | { id } | { template }
   const [busyId, setBusyId] = useState(null);
-  const status = useAdminGet(accessToken, onAuthError, "/messages/status").data;
+  const status = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/broadcasts/status",
+  ).data;
   const { data, setData, loading, error, reload } = useAdminGet(
     accessToken,
     onAuthError,
