@@ -1,4 +1,3 @@
-// SignForm.jsx
 import React, { useState } from "react";
 import {
   SignContainer,
@@ -13,6 +12,7 @@ import {
   LoginSignPara,
   Loader,
 } from "./SignForm.elements";
+
 import { useDispatch } from "react-redux";
 import { register } from "../../redux/userRedux";
 import { Link, useNavigate } from "react-router-dom";
@@ -21,27 +21,32 @@ const SignForm = () => {
   const [inputs, setInputs] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Capitalize first letter if it's the username field
     const processedValue =
       name === "username" && value.length > 0
         ? value.charAt(0).toUpperCase() + value.slice(1)
         : value;
 
-    setInputs((prev) => ({ ...prev, [name]: processedValue }));
+    setInputs((prev) => ({
+      ...prev,
+      [name]: processedValue,
+    }));
   };
 
   const getArabicErrorMessage = (msg) => {
     switch (msg) {
       case "The email address is already in use by another account.":
         return "عنوان البريد الإلكتروني مستخدم بالفعل من قبل حساب آخر.";
+
       case "Invalid password":
         return "يجب أن تكون كلمة المرور مكونة من 6 عناصر وتحتوي على أحرف وأرقام.";
+
       default:
         return "حدث خطأ غير معروف. يرجى المحاولة مرة أخرى.";
     }
@@ -49,9 +54,12 @@ const SignForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (isLoading) return;
 
     setIsLoading(true);
+    setErrorMessage("");
+
     try {
       await dispatch(register(inputs)).unwrap();
       navigate("/control");
@@ -66,39 +74,46 @@ const SignForm = () => {
     <SignContainer>
       <LoginContainer>
         <LoginSignHeader>تسجيل حساب جديد</LoginSignHeader>
+
         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
 
         <LoginSignForm onSubmit={handleSubmit}>
           <LoginSignSubHeader>اسم المستخدم</LoginSignSubHeader>
+
           <LoginSignInput
             name="username"
             placeholder="اسم المستخدم"
             value={inputs.username || ""}
             onChange={handleChange}
+            autoComplete="username"
             required
           />
 
           <LoginSignSubHeader>الايميل</LoginSignSubHeader>
+
           <LoginSignInput
             name="email"
             type="email"
             placeholder="example@domain.com"
             value={inputs.email || ""}
             onChange={handleChange}
+            autoComplete="email"
             required
           />
 
           <LoginSignSubHeader>كلمة المرور</LoginSignSubHeader>
+
           <LoginSignInput
             type="password"
             name="password"
             placeholder="••••••••"
             value={inputs.password || ""}
             onChange={handleChange}
+            autoComplete="new-password"
             required
           />
 
-          <SignButton disabled={isLoading}>
+          <SignButton type="submit" disabled={isLoading}>
             {isLoading ? <Loader /> : "إنشاء حساب"}
           </SignButton>
         </LoginSignForm>
@@ -109,8 +124,10 @@ const SignForm = () => {
           <Link to="/condition">اضغط هنا</Link>
         </LoginSignPara>
 
-        <Link to="/login">
-          <RegistarButton>لديك حساب مسبقاً؟ تسجيل دخول</RegistarButton>
+        <Link to="/login" className="register-link">
+          <RegistarButton type="button">
+            لديك حساب مسبقاً؟ تسجيل دخول
+          </RegistarButton>
         </Link>
       </LoginContainer>
     </SignContainer>

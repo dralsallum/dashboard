@@ -85,7 +85,6 @@ import logo from "../../assets/logoWhite.png";
    Constants & helpers
    ============================================================ */
 
-const BASE_URL = "https://amanapi-f8ce9693a253.herokuapp.com/api";
 const T = S.theme;
 
 const DAY_KEYS = [
@@ -958,7 +957,6 @@ const MarketsTab = memo(({ title, action }) => (
 
 const ORDER_VIEWS = [
   { id: "quota", label: "طلبات الحجز" },
-  { id: "paid", label: "الطلبات المدفوعة" },
   { id: "waitlist", label: "قائمة الانتظار" },
 ];
 
@@ -972,7 +970,6 @@ const WAITLIST_STATUS = {
 
 const VIEW_FILTERS = {
   quota: ORDER_FILTERS,
-  paid: ["الكل"],
   waitlist: ["الكل", ...Object.values(WAITLIST_STATUS).map((s) => s.label)],
 };
 
@@ -1008,6 +1005,32 @@ const formatPhone = (p) => {
   if (!p) return "—";
   return /^(\+|00)/.test(p) ? p : `+966 ${String(p).replace(/^0/, "")}`;
 };
+
+// Booking requests live on the theknot server; everything else is on amanapi (userRequest)
+const QUOTA_URL = "https://theknot-30278e2ff419.herokuapp.com/api/quota";
+
+const amanapiError = (status, fallback) =>
+  status === 401 || status === 403
+    ? "انتهت صلاحية الجلسة أو لا تملك صلاحية — سجّل الدخول من جديد"
+    : fallback;
+
+// Turns a raw Waitlist document from GET /api/waitlist into a table row
+const normalizeWaitlistEntry = (w) => ({
+  _id: w._id,
+  source: "waitlist",
+  createdAt: w.createdAt,
+  name: [w.firstName, w.lastName].filter(Boolean).join(" "),
+  phone: w.phone ?? "",
+  email: w.email ?? "",
+  city: w.city ?? "",
+  idNumber: w.idNumber ?? "",
+  dob: w.dob ?? "",
+  packageName: w.interestedPackage?.name ?? null,
+  amount: w.interestedPackage?.price ?? null,
+  status: w.status || "pending",
+  notes: w.notes ?? "",
+  answers: w.answers ?? {},
+});
 
 const quotaName = (q) =>
   `${q.firstName || ""} ${q.lastName || ""}`.trim() || "—";
@@ -1064,49 +1087,6 @@ const VIEW_COLUMNS = {
       render: (r) => r.guestCount ?? "—",
     },
     { label: "تاريخ الزواج", w: "1fr", render: (r) => r.weddingDate || "—" },
-  ],
-  paid: [
-    { label: "تاريخ الدفع", w: "1fr", render: (r) => formatDate(r.createdAt) },
-    {
-      label: "الاسم",
-      w: "1.2fr",
-      weight: 600,
-      ellipsis: true,
-      render: (r) => r.name || "—",
-    },
-    {
-      label: "رقم الجوال",
-      w: "1.1fr",
-      ltr: true,
-      render: (r) => formatPhone(r.phone),
-    },
-    {
-      label: "البريد الإلكتروني",
-      w: "1.5fr",
-      ltr: true,
-      ellipsis: true,
-      title: true,
-      render: (r) => r.email || "—",
-    },
-    {
-      label: "الباقة",
-      w: "1fr",
-      weight: 600,
-      render: (r) => r.packageName || "—",
-    },
-    {
-      label: "المبلغ",
-      w: "1fr",
-      align: "center",
-      weight: 600,
-      render: (r) => formatSAR(r.amount),
-    },
-    {
-      label: "المدينة",
-      w: "0.9fr",
-      ellipsis: true,
-      render: (r) => r.city || "—",
-    },
   ],
   waitlist: [
     {
@@ -1283,24 +1263,25 @@ const OrdersTab = memo(
         return undefined;
       }
       const controller = new AbortController();
-      const opts = {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        signal: controller.signal,
-      };
+      // userRequest (requestMethods.js -> amanapi) adds the Bearer token itself
+      const opts = { signal: controller.signal };
 
       (async () => {
         setLoading(true);
-        const [quotaRes, extraRes] = await Promise.allSettled([
-          axios.get(`${BASE_URL}/quota`, opts),
-          axios.get(`${BASE_URL}/dashboard/orders`, opts),
+        const [quotaRes, waitlistRes] = await Promise.allSettled([
+          axios.get(QUOTA_URL, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            signal: controller.signal,
+          }),
+          userRequest.get("/waitlist", { ...opts, params: { limit: 500 } }),
         ]);
         if (controller.signal.aborted) return;
 
+        // The login token comes from amanapi (/bus_auth/login):
+        // 401 from amanapi = no/expired session -> show the "login again" modal.
         const quotaStatus = quotaRes.reason?.response?.status;
-        const extraStatus = extraRes.reason?.response?.status;
-        if (quotaStatus === 401 || quotaStatus === 403 || extraStatus === 401) {
-          onAuthError();
-        }
+        const waitlistStatus = waitlistRes.reason?.response?.status;
+        if (waitlistStatus === 401 || quotaStatus === 401) onAuthError();
 
         const next = { quota: [], paid: [], waitlist: [] };
         const errs = {};
@@ -1313,16 +1294,16 @@ const OrdersTab = memo(
           errs.quota = "تعذّر جلب طلبات الحجز";
         }
 
-        if (extraRes.status === "fulfilled") {
-          next.paid = extraRes.value.data?.paid ?? [];
-          next.waitlist = extraRes.value.data?.waitlist ?? [];
+        if (waitlistRes.status === "fulfilled") {
+          const wl = waitlistRes.value.data;
+          next.waitlist = (wl?.entries ?? (Array.isArray(wl) ? wl : [])).map(
+            normalizeWaitlistEntry,
+          );
         } else {
-          const msg =
-            extraStatus === 403
-              ? "لا تملك صلاحية عرض هذه الطلبات"
-              : "تعذّر جلب الطلبات";
-          errs.paid = msg;
-          errs.waitlist = msg;
+          errs.waitlist = amanapiError(
+            waitlistStatus,
+            "تعذّر جلب قائمة الانتظار",
+          );
         }
 
         setData(next);
@@ -1400,11 +1381,7 @@ const OrdersTab = memo(
     const updateWaitlistStatus = async (id, status) => {
       setSavingStatus(true);
       try {
-        await axios.patch(
-          `${BASE_URL}/waitlist/${id}`,
-          { status },
-          { headers: { Authorization: `Bearer ${accessToken}` } },
-        );
+        await userRequest.patch(`/waitlist/${id}`, { status });
         setData((prev) => ({
           ...prev,
           waitlist: prev.waitlist.map((w) =>
@@ -1412,8 +1389,12 @@ const OrdersTab = memo(
           ),
         }));
       } catch (err) {
-        if (err.response?.status === 401) onAuthError();
-        else alert("تعذّر تحديث الحالة. يرجى المحاولة مرة أخرى.");
+        alert(
+          amanapiError(
+            err.response?.status,
+            "تعذّر تحديث الحالة. يرجى المحاولة مرة أخرى.",
+          ),
+        );
       } finally {
         setSavingStatus(false);
       }
@@ -1424,7 +1405,6 @@ const OrdersTab = memo(
       !loading &&
       Object.keys(errors).length === 0 &&
       data.quota.length === 0 &&
-      data.paid.length === 0 &&
       data.waitlist.length === 0;
 
     if (isEmpty) return <EmptyTab {...ORDERS_EMPTY} onNavigate={onNavigate} />;
@@ -1432,11 +1412,9 @@ const OrdersTab = memo(
     const emptyMessage =
       filter !== "الكل"
         ? "لا توجد طلبات بهذه الحالة"
-        : view === "paid"
-          ? "لا توجد طلبات مدفوعة بعد"
-          : view === "waitlist"
-            ? "لا يوجد أحد في قائمة الانتظار بعد"
-            : "لا توجد طلبات حجز بعد";
+        : view === "waitlist"
+          ? "لا يوجد أحد في قائمة الانتظار بعد"
+          : "لا توجد طلبات حجز بعد";
 
     return (
       <S.Page>

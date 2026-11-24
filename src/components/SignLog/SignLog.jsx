@@ -1,4 +1,3 @@
-// SignLog.jsx
 import React, { useState } from "react";
 import {
   SignContainer,
@@ -14,6 +13,7 @@ import {
   LoginSignPara,
   StyledLink,
 } from "./SignLog.elements";
+
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/userRedux";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,24 +22,29 @@ const SignLog = () => {
   const [inputs, setInputs] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Capitalize first letter if it's the username field
     const processedValue =
       name === "username" && value.length > 0
         ? value.charAt(0).toUpperCase() + value.slice(1)
         : value;
 
-    setInputs((prev) => ({ ...prev, [name]: processedValue }));
+    setInputs((prev) => ({
+      ...prev,
+      [name]: processedValue,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage("");
+
     try {
       await dispatch(login(inputs)).unwrap();
       navigate("/control");
@@ -54,23 +59,31 @@ const SignLog = () => {
     <SignContainer>
       <LoginContainer>
         <LoginSignHeader>تسجيل دخول</LoginSignHeader>
+
         {errorMessage && <ErrorCon>{errorMessage}</ErrorCon>}
+
         <form onSubmit={handleSubmit}>
           <LoginSignSubHeader>اسم المستخدم</LoginSignSubHeader>
+
           <LoginSignInput
             name="username"
             placeholder="ادخل اسم المستخدم"
             value={inputs.username || ""}
             onChange={handleChange}
+            autoComplete="username"
+            required
           />
 
           <LoginSignSubHeader>الرقم السري</LoginSignSubHeader>
+
           <LoginSignInput
             type="password"
             name="password"
             placeholder="••••••••"
             value={inputs.password || ""}
             onChange={handleChange}
+            autoComplete="current-password"
+            required
           />
 
           <SignButton type="submit" disabled={isLoading}>
@@ -91,8 +104,9 @@ const SignLog = () => {
         </LoginSignPara>
 
         <StyledLink to="/forgot">نسيت كلمة المرور؟</StyledLink>
+
         <StyledLink to="/signup">
-          <RegistarButton>إنشاء حساب جديد</RegistarButton>
+          <RegistarButton type="button">إنشاء حساب جديد</RegistarButton>
         </StyledLink>
       </LoginContainer>
     </SignContainer>
