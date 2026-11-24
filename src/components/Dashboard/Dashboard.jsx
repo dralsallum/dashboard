@@ -1,434 +1,60 @@
-import { useEffect, useMemo, useState } from "react";
-import { updateBusinessProfile } from "../../redux/userRedux";
-import { useDispatch, useSelector } from "react-redux";
-import { setStoreName } from "../../redux/tabRedux";
-import NavSide from "../NavSide/NavSide";
 import {
-  MaFirst,
-  MaSec,
-  MaAll,
-  ContentSection,
-  MainCon,
-  LogoCon,
-  LogoGrid,
-  LogoDiv,
-  LogoSubDiv,
-  SearchWr,
-  SearchCon,
-  SearchSu,
-  SearchSub,
-  SearchRe,
-  SearchBtn,
-  InputWr,
-  InputCon,
-  InputSp,
-  InputKbd,
-  LogoImg,
-  NavCon,
-  MainSubCon,
-  StartCon,
-  StartDiv,
-  StartSub,
-  StartRe,
-  StartSa,
-  StartWa,
-  StartLa,
-  StartTop,
-  TopUl,
-  TopLi,
-  TopStart,
-  TopRe,
-  TopAt,
-  TopSelect,
-  TopFlex,
-  TopToo,
-  TopSpan,
-  TopSp,
-  TopImg,
-  TopBtn,
-  TopRight,
-  TopMore,
-  MidWr,
-  MidCo,
-  MidUl,
-  MidDiv,
-  MidStart,
-  MidSe,
-  MidThi,
-  MidLa,
-  MidTop,
-  ChWr,
-  ChCo,
-  ChHe,
-  ChBtn,
-  ChSpan,
-  ChImg,
-  MidMid,
-  StoWr,
-  StoTop,
-  StoBot,
-  StoMap,
-  StoBtn,
-  StoSpan,
-  StoreBot,
-  StoreTop,
-  StoreHe,
-  StoreMid,
-  StoreEx,
-  StoreBtn,
-  StoreDiv,
-  StoreSp,
-  StoreImg,
-  SiteWr,
-  SiteMid,
-  SiteDes,
-  SiteBo,
-  SiteWrap,
-  SiteSp,
-  SiteSpa,
-  SiteAt,
-  SiteBtn,
-  SiteDiv,
-  SiteEx,
-  SiteFir,
-  SiteSec,
-  SiteThi,
-  SiteSubThi,
-  SiteSuThi,
-  SiteSThi,
-  SiteSubImg,
-  SiteFou,
-  CircleFi,
-  CircleSe,
-  CircleThi,
-  CircleFou,
-  CircleFiv,
-  CircleSi,
-  OreWr,
-  OreCon,
-  OreSubCon,
-  OreTop,
-  OreSubTop,
-  OreSu,
-  OreDivImg,
-  OreHeDiv,
-  OreHe,
-  OreImg,
-  OreTopRight,
-  OreTopRi,
-  OreTopFi,
-  OreSubFi,
-  OreSubBtn,
-  OreSubImg,
-  OreSpan,
-  OreSpa,
-  OreMid,
-  OreMidSub,
-  OreMidSu,
-  OreFlex,
-  CenterTop,
-  CenterTopImg,
-  CenterBot,
-  CenterBotBtnDiv,
-  CenterBotBtn,
-  CenterBotSp,
-  CenSp,
-  CenDivMain,
-  CenDiv,
-  CenDivSp,
-  OreBot,
-  OreBotSub,
-  OreBotBtn,
-  OreBotPa,
-  OreBotSpa,
-  ProWr,
-  ProCon,
-  ProStart,
-  ProSub,
-  ProDiv,
-  ProTop,
-  ProTopSt,
-  ProTopFl,
-  ProTopLe,
-  ProTopLef,
-  ProTopLeft,
-  ProTopLeftTo,
-  ProTopLeftBtn,
-  ProTopLeftSp,
-  ProTopRightTo,
-  ProTopPlus,
-  ProPlus,
-  ProUpDow,
-  ProFilter,
-  ProTopRi,
-  ProTopRiDiv,
-  ProTopRiBtn,
-  ProBot,
-  ProBo,
-  ProBott,
-  ProBottHe,
-  ProBottPa,
-  ProBottDiv,
-  ProBottSp,
-  ProBottBtn,
-  ProMid,
-  ProMidSub,
-  ProMidStart,
-  ProMidTop,
-  ProMidImg,
-  ProMidHe,
-  ProMidPa,
-  ProBtnWr,
-  ProBtnFl,
-  ProBtnLe,
-  ProBtnSp,
-  ProBtnRi,
-  InputSpan,
-  InputImg,
-  InputSpa,
-  NotifWr,
-  NotifCon,
-  NotifSub,
-  NotifStore,
-  NotifBtn,
-  NotifBtnDiv,
-  NotDiv,
-  NotSpan,
-  NotSp,
-  ButtonRow,
-  StoreInput,
-  ModalHeader,
-  Button,
-  ModalContainer,
-  ModalImg,
-  ModalClose,
-  ModalOverlay,
-  MarketTopBtn,
-  MarketMidImg,
-  SearWr,
-  SearLe,
-  SearLeImg,
-  SearSha,
-  SearLeIn,
-  MarketBot,
-  MarkMid,
-  MarkTable,
-  MarkTabHe,
-  MarkTabBod,
-  MarkTabTr,
-  MarkTh,
-  MarkBtn,
-  MarkBtnWr,
-  MarkBtnCon,
-  MarkBtnSp,
-  MarkTw,
-  MarkTwDiv,
-  BodyWr,
-  BodyTh,
-  BodyBtnWr,
-  BodyBtnCon,
-  BodyBtn,
-  BodyBtnSp,
-  BodyTw,
-  BodyTwDiv,
-  BodyImg,
-  BodyBtSp,
-  BodyBot,
-  BodyRiBtnSp,
-  RepBtn,
-  RepExBtn,
-  RepSubImg,
-  RepBot,
-  RepDate,
-  RepMain,
-  RepTod,
-  RepTodBtn,
-  RepTodSp,
-  RepBotto,
-  RepTop,
-  RepBotPa,
-  RepTopDiv,
-  RepTopSta,
-  RepSec,
-  RepSecFi,
-  RepSecBtn,
-  RepBtnDiv,
-  RepBtnSec,
-  RepBtnFl,
-  RepFl,
-  RepFlex,
-  RepFlTop,
-  ReportWr,
-  ReportLine,
-  ReportLin,
-  ReportLi,
-  ReportLiFi,
-  ReportImg,
-  ReportText,
-  ReportTex,
-  ReportTe,
-  ReportPa,
-  AnalWr,
-  AnalCon,
-  AnalSub,
-  AnalMain,
-  AnalPad,
-  AnalFl,
-  AnalTop,
-  AnalTopBtn,
-  AnalTopPad,
-  AnalTopFl,
-  AnalTopGr,
-  AnalTopGrBtn,
-  AnalTopGrHe,
-  AnalGrSp,
-  BreakWr,
-  BreakCon,
-  BreakSub,
-  BreakRe,
-  BreakUl,
-  BreakLi,
-  BreakLiSp,
-  BreakLiSpan,
-  BreakLiBtn,
-  BreakPrice,
-  GraphWr,
-  GraphTop,
-  GraphBot,
-  GraphTopPa,
-  GraphTopCon,
-  GraphBotWr,
-  GraphBotCon,
-  GraphBotSt,
-  GraWr,
-  GraBtn,
-  GraBtnImgCon,
-  GraBtnImg,
-  GraSp,
-  AllStart,
-  ChartLine,
-  XAxisLabels,
-  XAxisLabel,
-  YAxisLabels,
-  YAxisLabel,
-  AdWr,
-  AdGrid,
-  AdSec,
-  AdPad,
-  AdTop,
-  AdTopSp,
-  AdTopSpan,
-  AdTopBtn,
-  AdMid,
-  AdBot,
-  AdBotCon,
-  AdBotWr,
-  AdBotRe,
-  CampWr,
-  CampCon,
-  CampCol,
-  CampFl,
-  CampFlTop,
-  CampFlHe,
-  CampFlDiv,
-  CampFlPa,
-  CampBtnWr,
-  CampBtnCon,
-  CampBtnBtn,
-  CampBtnSp,
-  AbaMidPa,
-  BillingContainer,
-  BillingHeader,
-  BillingFiltersContainer,
-  BillingFilterButtons,
-  BillingFilterButton,
-  BillingActionButtons,
-  BillingActionButton,
-  BillingTableContainer,
-  BillingTable,
-  BillingTableHead,
-  BillingTableRow,
-  BillingTableHeader,
-  BillingTableCell,
-  BillingTableBody,
-  BillingCheckbox,
-  BillingStatusBadge,
-  BillingPagination,
-  BillingPaginationButton,
-  BillingExtra,
-  BillingLoadingRow,
-  ArrowDir,
-  OverlayRedirect,
-  ModalRedirect,
-  MessageRedirect,
-  SubMessageRedirect,
-  ButtonRedirect,
-  PageWrapper,
-  MainContentArea,
-  TopHeaderSection,
-  HeaderFlexRow,
-  MainTitle,
-  SaveButton,
-  TwoColumnGrid,
-  LeftColumnWrapper,
-  WhiteCard,
-  CardHeading,
-  TwoFieldGrid,
-  InputFieldWrapper,
-  FieldLabel,
-  TextInput,
-  ProfileImageRow,
-  ProfileImagePreview,
-  ImagePlaceholder,
-  ImageUploadArea,
-  UploadLabel,
-  UploadHintText,
-  HiddenFileInput,
-  SmallFieldLabel,
-  SelectDropdown,
-  TimeInput,
-  CheckboxLabel,
-  CheckboxInput,
-  CheckboxText,
-  NumberInput,
-  CheckboxGroup,
-  HolidayInputRow,
-  DateInputWrapper,
-  DateInput,
-  DescriptionInputWrapper,
-  AddButton,
-  HolidayListSection,
-  HolidayListTitle,
-  HolidayItemsWrapper,
-  HolidayItem,
-  HolidayInfo,
-  HolidayName,
-  HolidayDate,
-  DeleteButton,
-  RightColumnSticky,
-  PhonePreviewFrame,
-  PreviewSection,
-  PreviewTitle,
-  DoctorInfoRow,
-  DoctorAvatar,
-  DoctorDetails,
-  DoctorName,
-  DoctorSpecialty,
-  RatingRow,
-  ScheduleHeading,
-  ReasonBox,
-  ReasonText,
-  FeeBox,
-  NoWorkDaysAlert,
-  DateSlotSection,
-  DateTitle,
-  NoSlotsMessage,
-  TimeSlotGrid,
-  TimeSlotButton,
-} from "./Dashboard.elements";
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  ArrowUpDown,
+  BookOpen,
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Filter,
+  Globe,
+  LayoutGrid,
+  Maximize2,
+  Minus,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+  Star,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
+
+import NavSide from "../NavSide/NavSide";
+import { userRequest } from "../../requestMethods";
+import { setStoreName, setActiveTab } from "../../redux/tabRedux";
+import { setSettingTab } from "../../redux/settingRedux";
+import {
+  updateBusinessProfile,
+  updateStoreName,
+  userSelector,
+  clearState,
+  signOut,
+} from "../../redux/userRedux";
+import * as S from "./Dashboard.elements";
+
+// Tab icons
 import ordersIcon from "../../assets/orders.png";
-import draftImage from "../../assets/draft.svg";
 import tagIcon from "../../assets/tag.png";
+import discountsIcon from "../../assets/discount.png";
+import contentIcon from "../../assets/content.png";
+import marketsIcon from "../../assets/markets.png";
+// Illustrations
+import ordersImage from "../../assets/order.png";
+import draftImage from "../../assets/draft.svg";
 import customersImage from "../../assets/customerImage.svg";
 import contentImage from "../../assets/content.svg";
 import abandonImage from "../../assets/abandon.svg";
@@ -440,34 +66,13 @@ import automationImage from "../../assets/automation.svg";
 import campaignImage from "../../assets/campaign.svg";
 import stateImage from "../../assets/state.svg";
 import discountImage from "../../assets/discount.svg";
-import discountsIcon from "../../assets/discount.png";
-import catalogeIcon from "../../assets/catalogue.png";
-import refreshIcon from "../../assets/repost.png";
-import expandIcon from "../../assets/expand.png";
-import domainIcon from "../../assets/domain.png";
-import contentIcon from "../../assets/content.png";
-import filterIcon from "../../assets/filter.png";
-import removeIcon from "../../assets/remove.png";
-import plusGrayIcon from "../../assets/plusGray.png";
-import productsItem from "../../assets/products.svg";
-import copyIcon from "../../assets/copy.png";
-import rightBlockIcon from "../../assets/rightBlock.png";
-import selectIcon from "../../assets/selectIcon.png";
-import inputIcon from "../../assets/input.png";
-import pulseIcon from "../../assets/pulse.png";
-import crossIcon from "../../assets/cross.png";
-import calendarIcon from "../../assets/calendar.png";
-import arrowDown from "../../assets/arrowDown.png";
-import arrowRight from "../../assets/rightArrow.png";
-import arrowLeft from "../../assets/leftArrow.png";
-import penIcon from "../../assets/pen.png";
-import upDownIcon from "../../assets/upDown.png";
-import domesticIcon from "../../assets/domestic.png";
-import internationalIcon from "../../assets/international.png";
+import productsImage from "../../assets/products.svg";
+// Brand / product images
 import paypalIcon from "../../assets/paypal.svg";
-import ordersImage from "../../assets/order.png";
 import visaIcon from "../../assets/visa.svg";
 import madaIcon from "../../assets/mada.jpg";
+import domesticIcon from "../../assets/domestic.png";
+import internationalIcon from "../../assets/international.png";
 import WeddingCake from "../../assets/weddingCake.png";
 import Flower from "../../assets/flowerBrand.png";
 import Board from "../../assets/board.png";
@@ -475,332 +80,1834 @@ import Board2 from "../../assets/board2.png";
 import Board3 from "../../assets/board3.png";
 import Chair from "../../assets/chair.webp";
 import logo from "../../assets/logoWhite.png";
-import marketsIcon from "../../assets/markets.png";
-import { useNavigate } from "react-router-dom";
-import { setSettingTab } from "../../redux/settingRedux";
-import { setActiveTab } from "../../redux/tabRedux";
-import {
-  updateStoreName,
-  userSelector,
-  clearState,
-  signOut,
-} from "../../redux/userRedux";
-import axios from "axios";
 
-import { Star, MapPin, Plus, Trash2, Upload } from "lucide-react";
-import { userRequest } from "../../requestMethods";
+/* ============================================================
+   Constants & helpers
+   ============================================================ */
 
 const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
+const T = S.theme;
 
-const Dashboard = () => {
+const DAY_KEYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+const DAY_LABELS = [
+  "الأحد",
+  "الاثنين",
+  "الثلاثاء",
+  "الأربعاء",
+  "الخميس",
+  "الجمعة",
+  "السبت",
+];
+const MONTH_LABELS = [
+  "يناير",
+  "فبراير",
+  "مارس",
+  "أبريل",
+  "مايو",
+  "يونيو",
+  "يوليو",
+  "أغسطس",
+  "سبتمبر",
+  "أكتوبر",
+  "نوفمبر",
+  "ديسمبر",
+];
+
+const ORDER_FILTERS = [
+  "الكل",
+  "مدفوع",
+  "مفتوح",
+  "فشل",
+  "قيد المراجعة",
+  "تم الاسترداد",
+  "ملغي",
+];
+const DEFAULT_STATUS = "قيد المراجعة";
+const ORDERS_PAGE_SIZE = 10;
+
+const STATUS_TONES = {
+  مدفوع: "success",
+  مكتملة: "success",
+  completed: "success",
+  paid: "success",
+  "قيد المراجعة": "warning",
+  مفتوح: "warning",
+  pending: "warning",
+  فشل: "danger",
+  ملغي: "danger",
+  ملغية: "danger",
+  cancelled: "danger",
+  failed: "danger",
+};
+
+const shortDateFmt = new Intl.DateTimeFormat("ar-SA-u-ca-gregory", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
+const getYesterday = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d;
+};
+
+const formatDayLabel = (date) =>
+  `${DAY_LABELS[date.getDay()]}، ${date.getDate()} ${MONTH_LABELS[date.getMonth()]}`;
+
+// Local yyyy-mm-dd (toISOString shifts the day for UTC+3 near midnight)
+const toDateKey = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const isDayInRange = (day, start, end) =>
+  start <= end ? day >= start && day <= end : day >= start || day <= end;
+
+const generateTimeSlots = (startTime, endTime, interval = 30) => {
+  if (!startTime || !endTime) return [];
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  const slots = [];
+  for (let m = sh * 60 + sm; m < eh * 60 + em; m += interval) {
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    slots.push(
+      `${h % 12 || 12}:${String(min).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`,
+    );
+  }
+  return slots;
+};
+
+const parseWorkingHours = (wh) => {
+  let first = null;
+  let last = null;
+  let start = "09:00";
+  let end = "17:00";
+  DAY_KEYS.forEach((key, i) => {
+    const day = wh[key];
+    if (!day?.isOpen) return;
+    if (first === null) {
+      first = i;
+      const slot = day.slots?.[0];
+      if (slot) {
+        start = slot.startTime || start;
+        end = slot.endTime || end;
+      }
+    }
+    last = i;
+  });
+  return {
+    start,
+    end,
+    startDay: String(first ?? 0),
+    endDay: String(last ?? 4),
+  };
+};
+
+// Generic input binder: bind(setState, "key") -> onChange handler
+const bind = (setter, key) => (e) => {
+  const { type, checked, value } = e.target;
+  setter((prev) => ({ ...prev, [key]: type === "checkbox" ? checked : value }));
+};
+
+/* ============================================================
+   Static content
+   ============================================================ */
+
+const HERO_CARDS = [
+  {
+    title: "اختر تصميم متجرك",
+    text: "تصفّح التصاميم الجاهزة وابدأ بتخصيص واجهة متجرك.",
+    images: [Board, Board2, Board3],
+    primary: "تصفح المواقع",
+    secondary: "اصنع",
+    action: { type: "page", value: "المتجر" },
+  },
+  {
+    title: "أضف منتجك الأول",
+    text: "ابدأ بإضافة منتج وبعض التفاصيل الأساسية.",
+    images: [Flower, WeddingCake, Chair],
+    primary: "اضافة المنتجات",
+    secondary: "استيراد",
+    action: { type: "route", value: "/item" },
+  },
+];
+
+const SETUP_CARDS = [
+  {
+    title: "أضف طرق الدفع",
+    btn: "تفعيل",
+    tab: "المدفوعات",
+    logos: [paypalIcon, visaIcon, madaIcon],
+    max: "5rem",
+  },
+  {
+    title: "راجع أسعار الشحن الخاصة بك",
+    btn: "مراجعة",
+    tab: "الشحن",
+    logos: [domesticIcon, internationalIcon],
+    max: "4.5rem",
+  },
+  {
+    title: "خصص نطاقك",
+    btn: "تخصيص",
+    tab: "الرابط",
+    domain: "f8u1iq-av.myshopify.com",
+  },
+];
+
+// Centered empty-state tabs
+const EMPTY_TABS = {
+  الخصومات: {
+    icon: discountsIcon,
+    image: discountImage,
+    title: "الخصومات",
+    heading: "إدارة الخصومات والعروض الترويجية",
+    text: "أضف رموز خصم وخصومات تلقائية تُطبق عند إتمام الدفع. يمكنك أيضًا استخدام الخصومات مع الأسعار المقارنة.",
+    cta: "انشاء خصومات",
+    topic: "الخصومات",
+  },
+  المحتوى: {
+    icon: contentIcon,
+    image: contentImage,
+    title: "المحتوى",
+    heading: "بسّط عملية إنشاء المحتوى باستخدام الكائنات الوصفية",
+    text: "تتيح لك الكائنات الوصفية تجميع الحقول وربطها بمختلف أجزاء متجرك. استخدمها لإنشاء محتوى مخصص أو هياكل بيانات خاصة بك.",
+    cta: "اضافة تعريف",
+    topic: "المحتوى",
+  },
+  مسودة: {
+    icon: ordersIcon,
+    image: draftImage,
+    title: "مسودة",
+    heading: "إنشاء الطلبات والفواتير يدويًا",
+    text: "استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، واجمع المدفوعات.",
+    cta: "انشاء مسودة طلب",
+    topic: "الطلبات المسودة",
+  },
+  المخزون: {
+    icon: ordersIcon,
+    image: inventoryImage,
+    title: "المخزون",
+    heading: "تتبّع مخزونك في مكان واحد",
+    text: "اعرف الكميات المتوفرة من كل منتج، وعدّلها يدويًا أو استوردها دفعة واحدة.",
+    cta: "إدارة المخزون",
+    topic: "المخزون",
+  },
+  "تاريخ الشراء": {
+    icon: ordersIcon,
+    image: historyImage,
+    title: "تاريخ الشراء",
+    heading: "تابع أوامر الشراء من الموردين",
+    text: "أنشئ أوامر شراء لتتبّع المنتجات التي تطلبها من الموردين، وحدّث مخزونك تلقائيًا عند استلامها.",
+    cta: "إنشاء أمر شراء",
+    topic: "أوامر الشراء",
+  },
+  التحويل: {
+    icon: ordersIcon,
+    image: transferImage,
+    title: "التحويل",
+    heading: "انقل المخزون بين مواقعك",
+    text: "سجّل تحويلات المخزون بين مستودعاتك أو فروعك وتابع حالتها حتى الاستلام.",
+    cta: "إنشاء تحويل",
+    topic: "التحويلات",
+  },
+  الهدايا: {
+    icon: ordersIcon,
+    image: giftImage,
+    title: "الهدايا",
+    heading: "بطاقات الهدايا",
+    text: "أنشئ بطاقات هدايا يمكن لعملائك شراؤها لأحبّائهم أو استخدامها عند الدفع.",
+    cta: "إنشاء بطاقة هدية",
+    topic: "بطاقات الهدايا",
+  },
+};
+
+const ORDERS_EMPTY = {
+  icon: ordersIcon,
+  image: ordersImage,
+  title: "الطلبات",
+  heading: "ستظهر طلباتك هنا",
+  text: "للحصول على الطلبات وقبول المدفوعات من العملاء، تحتاج إلى اختيار خطة. سيتم فرض رسوم الخطة عليك فقط بعد انتهاء الفترة التجريبية المجانية.",
+  cta: "اختار الخطة",
+  to: "/pay",
+  topic: "الطلبات",
+};
+
+// List-style tabs (toolbar + hero + promo)
+const LIST_TABS = {
+  المنتجات: {
+    icon: ordersIcon,
+    image: productsImage,
+    title: "المنتجات",
+    heading: "أضف منتجاتك",
+    text: "ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك.",
+    primary: "اضافة منتج",
+    secondary: "استورد",
+    to: "/item",
+    promo: {
+      heading: "ابحث عن منتجات لبيعها",
+      text: "اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه.",
+      cta: "تصفح تطبيقات توريد المنتجات",
+    },
+  },
+  العملاء: {
+    icon: tagIcon,
+    image: customersImage,
+    title: "العملاء",
+    heading: "كل ما يتعلق بالعملاء في مكان واحد",
+    text: "قم بإدارة تفاصيل العملاء، واطّلع على سجل طلباتهم، وقم بتقسيمهم إلى مجموعات.",
+    primary: "اضافة عميل",
+    secondary: "استيراد العملاء",
+    promo: {
+      heading: "احصل على عملاء من خلال التطبيقات",
+      text: "نمِّ قائمة عملائك من خلال إضافة نموذج لجمع بيانات العملاء إلى متجرك وحملاتك التسويقية.",
+      cta: "اطّلع على التطبيقات الموصى بها",
+    },
+  },
+  الحملات: {
+    icon: ordersIcon,
+    image: campaignImage,
+    title: "الحملات",
+    heading: "أطلق حملتك التسويقية الأولى",
+    text: "خطّط لحملاتك عبر القنوات المختلفة وتابع أثرها على مبيعاتك من مكان واحد.",
+    primary: "إنشاء حملة",
+    promo: {
+      heading: "زِد عدد الزوار باستخدام تطبيقات التسويق",
+      text: "اربط حساباتك على منصات التواصل الاجتماعي والبريد الإلكتروني لإدارة حملاتك بسهولة.",
+      cta: "استكشف تطبيقات التسويق",
+    },
+  },
+  الاتمته: {
+    icon: ordersIcon,
+    image: automationImage,
+    title: "الأتمتة",
+    heading: "وفّر وقتك بالأتمتة",
+    text: "أنشئ مسارات تلقائية لرسائل الترحيب، والسلات المتروكة، ومتابعة العملاء بعد الشراء.",
+    primary: "إنشاء أتمتة",
+  },
+  "السلات المتروكة": {
+    icon: ordersIcon,
+    image: abandonImage,
+    title: "السلات المتروكة",
+    heading: "ستظهر عمليات الدفع المتروكة هنا",
+    text: "اطّلع على الوقت الذي يضيف فيه العملاء منتجًا إلى سلة التسوق دون إتمام عملية الدفع. يمكنك أيضًا إرسال رابط السلة إلى العملاء عبر البريد الإلكتروني.",
+    toolbar: false,
+  },
+};
+
+const MARKET_TABS = {
+  الأسواق: { title: "الأسواق" },
+  جزء: { title: "جزء" },
+  المجموعة: { title: "المجموعة", action: "اصنع مجموعة" },
+};
+
+const MARKETING_METRICS = [
+  "جلسات المتجر الإلكتروني",
+  "معدل التحويل",
+  "متوسط قيمة الطلب",
+  "إجمالي المبيعات",
+  "المبيعات من التسويق",
+  "الطلبات من التسويق",
+];
+
+const CAMPAIGNS = [
+  {
+    image: campaignImage,
+    title: "مركز تتبع حملاتك التسويقية",
+    text: "أنشئ حملات لتقييم مدى تأثير المبادرات التسويقية على أهداف عملك. سجّل نقاط التواصل عبر الإنترنت أو دون اتصال، وأضف أنشطة الحملات من قنوات تسويقية متعددة، وتابع النتائج بسهولة.",
+    cta: "اصنع حملتك",
+  },
+  {
+    image: stateImage,
+    title: "زِد عدد الزوار باستخدام تطبيقات التسويق",
+    text: "نمّ جمهورك على منصات التواصل الاجتماعي، واجذب عملاء جدد من خلال الاشتراك في النشرات البريدية، وزِد من معدلات التحويل باستخدام الدردشة، والمزيد.",
+    cta: "استكشف تسويق التطبيقات",
+  },
+];
+
+const ANALYTICS_KPIS = [
+  { title: "صافي المبيعات", value: "0 ريال" },
+  { title: "معدل عودة العملاء", value: "0%" },
+  { title: "طلبات نفذت", value: "0" },
+  { title: "الطلبات", value: "0" },
+];
+
+const ANALYTICS_BREAKDOWN = [
+  { title: "كامل المبيعات", value: 0 },
+  { title: "الخصومات", value: 0 },
+  { title: "الترجيع", value: 0 },
+  { title: "صافي المبيعات", value: 0, total: true },
+  { title: "تكاليف الشحن", value: 0 },
+  { title: "الضريبة", value: 0 },
+  { title: "جميع المبيعات", value: 0, total: true },
+];
+
+const Y_LABELS = ["10 ريال", "5 ريال", "0 ريال"];
+const X_LABELS = [
+  "12 AM",
+  "3 AM",
+  "6 AM",
+  "9 AM",
+  "12 PM",
+  "3 PM",
+  "6 PM",
+  "9 PM",
+];
+
+const DEFAULT_HOURS = {
+  start: "09:00",
+  end: "17:00",
+  startDay: "0",
+  endDay: "4",
+};
+const DEFAULT_PAYMENT = {
+  enabled: true,
+  appointmentFee: 1,
+  allowPayOnArrival: true,
+  allowOnlinePayment: true,
+  requireUpfrontPayment: false,
+};
+const DEFAULT_REVIEWS = { enabled: true, rating: 4, review: 3 };
+const FALLBACK_AVATAR =
+  "https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=128&auto=format&fit=crop";
+
+/* ============================================================
+   Shared pieces
+   ============================================================ */
+
+const PageHeader = memo(({ icon, title, children }) => (
+  <S.Row $between $wrap $gap="1rem">
+    <S.Row>
+      {icon && <S.TitleIcon src={icon} alt="" />}
+      <S.PageTitle>{title}</S.PageTitle>
+    </S.Row>
+    {children && <S.Row>{children}</S.Row>}
+  </S.Row>
+));
+
+const ReportActions = memo(() => (
+  <>
+    <S.Button type="button" $icon aria-label="تحديث">
+      <RefreshCw size={15} />
+    </S.Button>
+    <S.Button type="button" $icon aria-label="توسيع">
+      <Maximize2 size={15} />
+    </S.Button>
+    <S.Button type="button" $variant="primary">
+      تخصيص
+    </S.Button>
+  </>
+));
+
+const DateFilters = memo(({ compare }) => (
+  <S.Row $wrap>
+    <S.Button type="button">
+      <Calendar size={15} />
+      اليوم
+    </S.Button>
+    <S.Button type="button">مقارنة مع: {compare}</S.Button>
+  </S.Row>
+));
+
+const LearnMore = memo(({ topic }) => (
+  <S.Text $muted $center $size="0.8125rem">
+    اعرف المزيد عن <S.LinkButton type="button">{topic}</S.LinkButton>
+  </S.Text>
+));
+
+const TrendIcon = memo(() => (
+  <S.Trend>
+    <Minus size={12} />
+  </S.Trend>
+));
+
+const MetricCard = memo(({ title, value }) => (
+  <S.Card>
+    <S.CardLabel>{title}</S.CardLabel>
+    <S.Row $between>
+      <S.MetricValue>{value}</S.MetricValue>
+      <TrendIcon />
+    </S.Row>
+    <S.Sparkline
+      viewBox="0 0 100 32"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <line
+        x1="0"
+        y1="30"
+        x2="100"
+        y2="30"
+        stroke={T.primary}
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+      />
+    </S.Sparkline>
+  </S.Card>
+));
+
+const Rating = memo(({ value, reviews }) => (
+  <S.Row $gap="0.375rem" style={{ fontWeight: 700, fontSize: "0.875rem" }}>
+    <Star size={16} fill="#f59e0b" color="#f59e0b" />
+    {Number(value).toFixed(2)} · {Number(reviews).toLocaleString("ar-SA")} تقييم
+  </S.Row>
+));
+
+/* ============================================================
+   Modals
+   ============================================================ */
+
+const TimeoutModal = memo(({ open, onLogin }) =>
+  open ? (
+    <S.Overlay>
+      <S.ModalBox $center role="alertdialog" aria-modal="true">
+        <S.Heading $size="1.125rem">انتهت الجلسة</S.Heading>
+        <S.Text $muted>يجب تسجيل الدخول من جديد للمتابعة.</S.Text>
+        <S.Button type="button" $variant="primary" $size="lg" onClick={onLogin}>
+          سجل الآن
+        </S.Button>
+      </S.ModalBox>
+    </S.Overlay>
+  ) : null,
+);
+
+const StoreNameModal = memo(({ value, onChange, onClose, onSave, saving }) => (
+  <S.Overlay onClick={onClose}>
+    <S.ModalBox
+      role="dialog"
+      aria-modal="true"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <S.Row $between>
+        <S.Heading $size="1.125rem">اختار اسم لمتجرك</S.Heading>
+        <S.PlainIconButton type="button" aria-label="إغلاق" onClick={onClose}>
+          <X size={18} />
+        </S.PlainIconButton>
+      </S.Row>
+      <S.Input
+        autoFocus
+        placeholder="اختار اسم المتجر"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && onSave()}
+      />
+      <S.Row $gap="0.5rem" style={{ justifyContent: "flex-end" }}>
+        <S.Button type="button" onClick={onClose}>
+          إلغاء
+        </S.Button>
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={onSave}
+          disabled={saving || !value.trim()}
+        >
+          {saving ? "جاري المعالجة ..." : "احفظ"}
+        </S.Button>
+      </S.Row>
+    </S.ModalBox>
+  </S.Overlay>
+));
+
+/* ============================================================
+   Tab: الرئيسية
+   ============================================================ */
+
+const HeroCard = memo(
+  ({ title, text, images, primary, secondary, onPrimary }) => (
+    <S.HeroCard>
+      <S.HeroStage>
+        {images.map((src, i) => (
+          <S.HeroImage key={src} src={src} alt="" $delay={i * 4} />
+        ))}
+      </S.HeroStage>
+      <S.HeroBody>
+        <S.Stack $gap="0.25rem">
+          <S.Heading>{title}</S.Heading>
+          <S.Text $muted $size="0.8125rem">
+            {text}
+          </S.Text>
+        </S.Stack>
+        <S.ButtonRow>
+          <S.Button type="button" $variant="primary" onClick={onPrimary}>
+            {primary}
+          </S.Button>
+          <S.Button type="button">{secondary}</S.Button>
+        </S.ButtonRow>
+      </S.HeroBody>
+    </S.HeroCard>
+  ),
+);
+
+const SetupCard = memo(({ title, btn, logos, max, domain, onClick }) => (
+  <S.Card $gap="1rem">
+    <S.Heading $size="0.875rem">{title}</S.Heading>
+    <S.LogoRow>
+      {logos?.map((src) => (
+        <S.BrandLogo key={src} src={src} alt="" $max={max} />
+      ))}
+      {domain && (
+        <S.DomainPill>
+          {domain}
+          <Copy size={13} />
+        </S.DomainPill>
+      )}
+    </S.LogoRow>
+    <div>
+      <S.Button type="button" $size="sm" onClick={onClick}>
+        {btn}
+      </S.Button>
+    </div>
+  </S.Card>
+));
+
+const HomeTab = memo(
+  ({
+    storeName,
+    showBanner,
+    onCloseBanner,
+    onChoosePlan,
+    onEditName,
+    onHero,
+    onSetup,
+  }) => (
+    <S.Page $max="56rem">
+      {showBanner && (
+        <S.Banner>
+          <span>اختر خطة واحصل على 3 أشهر مقابل 1 ريال شهريًا</span>
+          <S.Row>
+            <S.Button
+              type="button"
+              $variant="inverse"
+              $size="sm"
+              onClick={onChoosePlan}
+            >
+              اختار الخطة
+            </S.Button>
+            <S.PlainIconButton
+              type="button"
+              aria-label="إغلاق"
+              onClick={onCloseBanner}
+            >
+              <X size={18} />
+            </S.PlainIconButton>
+          </S.Row>
+        </S.Banner>
+      )}
+
+      <S.Card $gap="1rem">
+        <S.Row>
+          <S.Heading>{storeName || "متجري"}</S.Heading>
+          <S.Button
+            type="button"
+            $variant="ghost"
+            $size="sm"
+            $icon
+            aria-label="تعديل اسم المتجر"
+            onClick={onEditName}
+          >
+            <Pencil size={14} />
+          </S.Button>
+        </S.Row>
+
+        <S.Grid $cols={2}>
+          {HERO_CARDS.map((card) => (
+            <HeroCard
+              key={card.title}
+              {...card}
+              onPrimary={() => onHero(card.action)}
+            />
+          ))}
+        </S.Grid>
+
+        <S.Grid $cols={3}>
+          {SETUP_CARDS.map((card) => (
+            <SetupCard
+              key={card.title}
+              {...card}
+              onClick={() => onSetup(card.tab)}
+            />
+          ))}
+        </S.Grid>
+      </S.Card>
+    </S.Page>
+  ),
+);
+
+/* ============================================================
+   Tab: generic empty state / list pages
+   ============================================================ */
+
+const EmptyTab = memo(
+  ({
+    icon,
+    image,
+    title,
+    heading,
+    text,
+    cta,
+    to,
+    topic,
+    onNavigate,
+    headerAction,
+  }) => (
+    <S.Page>
+      <PageHeader icon={icon} title={title}>
+        {headerAction ?? (
+          <S.Button type="button" $size="sm">
+            خيارات اكثر
+            <ChevronDown size={14} />
+          </S.Button>
+        )}
+      </PageHeader>
+      <S.EmptyState>
+        <S.Illustration src={image} alt="" $w="200px" />
+        <S.Heading $size="1.125rem">{heading}</S.Heading>
+        <S.Text $muted>{text}</S.Text>
+        {cta && (
+          <S.Button
+            type="button"
+            $variant="primary"
+            onClick={to ? () => onNavigate(to) : undefined}
+          >
+            {cta}
+          </S.Button>
+        )}
+      </S.EmptyState>
+      {topic && <LearnMore topic={topic} />}
+    </S.Page>
+  ),
+);
+
+const ListTab = memo(
+  ({
+    icon,
+    image,
+    title,
+    heading,
+    text,
+    primary,
+    secondary,
+    to,
+    promo,
+    toolbar = true,
+    onNavigate,
+  }) => (
+    <S.Page>
+      <PageHeader icon={icon} title={title} />
+      <S.Card $flush>
+        {toolbar && (
+          <S.TableToolbar>
+            <S.Row $gap="0.25rem">
+              <S.TabChip>الكل</S.TabChip>
+              <S.Button
+                type="button"
+                $variant="ghost"
+                $size="sm"
+                $icon
+                aria-label="إضافة عرض"
+              >
+                <Plus size={15} />
+              </S.Button>
+            </S.Row>
+            <S.Row $gap="0.375rem">
+              <S.Button type="button" $size="sm" $icon aria-label="تصفية">
+                <Filter size={14} />
+              </S.Button>
+              <S.Button type="button" $size="sm" $icon aria-label="ترتيب">
+                <ArrowUpDown size={14} />
+              </S.Button>
+            </S.Row>
+          </S.TableToolbar>
+        )}
+
+        <S.ListHero>
+          <S.Split>
+            <S.Stack $gap="0.75rem">
+              <S.Heading $size="1.375rem">{heading}</S.Heading>
+              <S.Text $muted $size="0.9375rem">
+                {text}
+              </S.Text>
+              {(primary || secondary) && (
+                <S.Row $wrap style={{ marginTop: "0.5rem" }}>
+                  {primary && (
+                    <S.Button
+                      type="button"
+                      $variant="primary"
+                      onClick={to ? () => onNavigate(to) : undefined}
+                    >
+                      {primary}
+                    </S.Button>
+                  )}
+                  {secondary && <S.Button type="button">{secondary}</S.Button>}
+                </S.Row>
+              )}
+            </S.Stack>
+            <S.Illustration src={image} alt="" $w="240px" />
+          </S.Split>
+        </S.ListHero>
+
+        {promo && (
+          <S.ListPromo>
+            <S.Stack $gap="0.25rem" style={{ maxWidth: "36rem" }}>
+              <S.Heading $size="0.9375rem">{promo.heading}</S.Heading>
+              <S.Text $muted $size="0.8125rem">
+                {promo.text}
+              </S.Text>
+            </S.Stack>
+            <S.Button type="button">{promo.cta}</S.Button>
+          </S.ListPromo>
+        )}
+      </S.Card>
+    </S.Page>
+  ),
+);
+
+/* ============================================================
+   Tab: الأسواق / جزء / المجموعة
+   ============================================================ */
+
+const MarketsTab = memo(({ title, action }) => (
+  <S.Page>
+    <PageHeader icon={marketsIcon} title={title}>
+      {action && (
+        <S.Button type="button" $variant="primary">
+          {action}
+        </S.Button>
+      )}
+    </PageHeader>
+    <S.Card $flush>
+      <S.TableToolbar>
+        <S.Button type="button" $size="sm" $icon aria-label="خيارات العرض">
+          <SlidersHorizontal size={14} />
+        </S.Button>
+        <S.SearchField>
+          <Search size={15} />
+          <input type="text" placeholder="ابحث بكل الأسواق" />
+        </S.SearchField>
+        <S.Button type="button" $size="sm" $icon aria-label="الأعمدة">
+          <LayoutGrid size={14} />
+        </S.Button>
+      </S.TableToolbar>
+
+      <S.TableScroll>
+        <S.DataTable>
+          <thead>
+            <tr>
+              <th>السوق</th>
+              <th>الحالة</th>
+              <th style={{ width: "1%" }}>تخصيص</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ fontWeight: 600 }}>المملكة العربية السعودية</td>
+              <td>
+                <S.StatusBadge $tone="success">نشط</S.StatusBadge>
+              </td>
+              <td>
+                <S.Row $gap="0.25rem">
+                  <S.Button
+                    type="button"
+                    $variant="ghost"
+                    $size="sm"
+                    $icon
+                    aria-label="النطاق"
+                  >
+                    <Globe size={15} />
+                  </S.Button>
+                  <S.Button
+                    type="button"
+                    $variant="ghost"
+                    $size="sm"
+                    $icon
+                    aria-label="الكتالوج"
+                  >
+                    <BookOpen size={15} />
+                  </S.Button>
+                </S.Row>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={2}>
+                <S.LinkButton type="button">اصنع سوق عالمي</S.LinkButton>
+              </td>
+              <td>
+                <S.LinkButton type="button" style={{ color: T.danger }}>
+                  ازالة
+                </S.LinkButton>
+              </td>
+            </tr>
+          </tbody>
+        </S.DataTable>
+      </S.TableScroll>
+    </S.Card>
+  </S.Page>
+));
+
+/* ============================================================
+   Tab: الطلبات  (booking requests + paid orders + waitlist)
+   ============================================================ */
+
+const ORDER_VIEWS = [
+  { id: "quota", label: "طلبات الحجز" },
+  { id: "paid", label: "الطلبات المدفوعة" },
+  { id: "waitlist", label: "قائمة الانتظار" },
+];
+
+// Keys must match the `status` values stored on your Waitlist model
+const WAITLIST_STATUS = {
+  pending: { label: "قيد الانتظار", tone: "warning" },
+  contacted: { label: "تم التواصل", tone: "neutral" },
+  converted: { label: "تم التحويل", tone: "success" },
+  cancelled: { label: "ملغي", tone: "danger" },
+};
+
+const VIEW_FILTERS = {
+  quota: ORDER_FILTERS,
+  paid: ["الكل"],
+  waitlist: ["الكل", ...Object.values(WAITLIST_STATUS).map((s) => s.label)],
+};
+
+// Quiz question ids -> short labels (shown in the order details)
+const ANSWER_LABELS = {
+  sex: "الجنس",
+  pastVitamins: "مستوى النشاط",
+  currentSupplements: "الدافعية للتغيير",
+  familiarity: "المعرفة بالمكملات",
+  powders: "المساحيق التكميلية",
+  healthGoals: "مجالات الدعم",
+  exerciseTypes: "أنواع التمارين",
+  stressLevel: "مستوى التوتر",
+  sleepHours: "ساعات النوم",
+  energyLevels: "مستوى الطاقة",
+  digestiveDiscomfort: "الانزعاج الهضمي",
+  getSick: "تكرار المرض",
+  focusMemory: "التركيز والذاكرة",
+  fruitVeggies: "الفواكه والخضروات",
+  fiber: "الألياف",
+  allergies: "الحساسية",
+  smoke: "التدخين",
+};
+
+const formatDate = (d) => (d ? new Date(d).toLocaleDateString("ar-SA") : "—");
+
+const formatSAR = (n) =>
+  n === null || n === undefined || n === ""
+    ? "—"
+    : `${Number(n).toLocaleString("ar-SA", { maximumFractionDigits: 2 })} ر.س`;
+
+const formatPhone = (p) => {
+  if (!p) return "—";
+  return /^(\+|00)/.test(p) ? p : `+966 ${String(p).replace(/^0/, "")}`;
+};
+
+const quotaName = (q) =>
+  `${q.firstName || ""} ${q.lastName || ""}`.trim() || "—";
+
+const getStatus = (view, row) => {
+  if (view === "quota") {
+    const s = row.status || DEFAULT_STATUS;
+    return { label: s, tone: STATUS_TONES[s] || "neutral" };
+  }
+  if (view === "paid") return { label: "مدفوع", tone: "success" };
+  return (
+    WAITLIST_STATUS[row.status] || {
+      label: row.status || "قيد الانتظار",
+      tone: "warning",
+    }
+  );
+};
+
+// Column config per view. `w` = grid width, `ltr` = numbers/emails
+const VIEW_COLUMNS = {
+  quota: [
+    { label: "تاريخ الطلب", w: "1fr", render: (r) => formatDate(r.createdAt) },
+    {
+      label: "الاسم",
+      w: "1.2fr",
+      weight: 600,
+      ellipsis: true,
+      render: quotaName,
+    },
+    {
+      label: "رقم الجوال",
+      w: "1fr",
+      ltr: true,
+      render: (r) => r.phoneNumber || "—",
+    },
+    {
+      label: "تفاصيل الطلب",
+      w: "1.6fr",
+      ellipsis: true,
+      title: true,
+      render: (r) => r.weddingDetails || "لا توجد تفاصيل",
+    },
+    {
+      label: "المورد",
+      w: "1fr",
+      ellipsis: true,
+      render: (r) => r.vendor?.name || "غير محدد",
+    },
+    {
+      label: "عدد الضيوف",
+      w: "0.8fr",
+      align: "center",
+      weight: 600,
+      render: (r) => r.guestCount ?? "—",
+    },
+    { label: "تاريخ الزواج", w: "1fr", render: (r) => r.weddingDate || "—" },
+  ],
+  paid: [
+    { label: "تاريخ الدفع", w: "1fr", render: (r) => formatDate(r.createdAt) },
+    {
+      label: "الاسم",
+      w: "1.2fr",
+      weight: 600,
+      ellipsis: true,
+      render: (r) => r.name || "—",
+    },
+    {
+      label: "رقم الجوال",
+      w: "1.1fr",
+      ltr: true,
+      render: (r) => formatPhone(r.phone),
+    },
+    {
+      label: "البريد الإلكتروني",
+      w: "1.5fr",
+      ltr: true,
+      ellipsis: true,
+      title: true,
+      render: (r) => r.email || "—",
+    },
+    {
+      label: "الباقة",
+      w: "1fr",
+      weight: 600,
+      render: (r) => r.packageName || "—",
+    },
+    {
+      label: "المبلغ",
+      w: "1fr",
+      align: "center",
+      weight: 600,
+      render: (r) => formatSAR(r.amount),
+    },
+    {
+      label: "المدينة",
+      w: "0.9fr",
+      ellipsis: true,
+      render: (r) => r.city || "—",
+    },
+  ],
+  waitlist: [
+    {
+      label: "تاريخ التسجيل",
+      w: "1fr",
+      render: (r) => formatDate(r.createdAt),
+    },
+    {
+      label: "الاسم",
+      w: "1.2fr",
+      weight: 600,
+      ellipsis: true,
+      render: (r) => r.name || "—",
+    },
+    {
+      label: "رقم الجوال",
+      w: "1.1fr",
+      ltr: true,
+      render: (r) => formatPhone(r.phone),
+    },
+    {
+      label: "البريد الإلكتروني",
+      w: "1.5fr",
+      ltr: true,
+      ellipsis: true,
+      title: true,
+      render: (r) => r.email || "—",
+    },
+    {
+      label: "الباقة المهتم بها",
+      w: "1fr",
+      weight: 600,
+      render: (r) => r.packageName || "—",
+    },
+    {
+      label: "السعر المتوقع",
+      w: "1fr",
+      align: "center",
+      render: (r) => formatSAR(r.amount),
+    },
+    {
+      label: "المدينة",
+      w: "0.9fr",
+      ellipsis: true,
+      render: (r) => r.city || "—",
+    },
+  ],
+};
+
+const OrderDetailModal = memo(
+  ({ row, view, onClose, onStatusChange, savingStatus }) => {
+    const status = getStatus(view, row);
+    const answers = Object.entries(row.answers || {});
+    const details = [
+      ["رقم الجوال", formatPhone(row.phone), true],
+      ["البريد الإلكتروني", row.email || "—", true],
+      ["المدينة", row.city || "—"],
+      ["رقم الهوية / الإقامة", row.idNumber || "—", true],
+      ["تاريخ الميلاد", row.dob || "—", true],
+      [
+        view === "paid" ? "الباقة" : "الباقة المهتم بها",
+        row.packageName || "—",
+      ],
+      [
+        view === "paid" ? "المبلغ المدفوع" : "السعر المتوقع",
+        formatSAR(row.amount),
+      ],
+      ...(row.analysisCount
+        ? [["عدد التحاليل", `${row.analysisCount} تحليلاً`]]
+        : []),
+      ...(row.chargeId ? [["رقم العملية", row.chargeId, true]] : []),
+    ];
+
+    return (
+      <S.Overlay onClick={onClose}>
+        <S.ModalBox
+          $max="560px"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <S.Row $between $align="flex-start">
+            <S.Stack $gap="0.375rem">
+              <S.Heading $size="1.125rem">{row.name || "—"}</S.Heading>
+              <S.Row $wrap>
+                <S.StatusBadge $tone={status.tone}>
+                  {status.label}
+                </S.StatusBadge>
+                <S.Text $muted $size="0.8125rem">
+                  {view === "paid" ? "طلب مدفوع" : "قائمة الانتظار"} ·{" "}
+                  {formatDate(row.createdAt)}
+                </S.Text>
+              </S.Row>
+            </S.Stack>
+            <S.PlainIconButton
+              type="button"
+              aria-label="إغلاق"
+              onClick={onClose}
+            >
+              <X size={18} />
+            </S.PlainIconButton>
+          </S.Row>
+
+          <S.DetailList>
+            {details.map(([label, value, ltr]) => (
+              <Fragment key={label}>
+                <dt>{label}</dt>
+                <dd
+                  style={
+                    ltr ? { direction: "ltr", textAlign: "right" } : undefined
+                  }
+                >
+                  {value}
+                </dd>
+              </Fragment>
+            ))}
+          </S.DetailList>
+
+          {view === "waitlist" && (
+            <S.Field>
+              <S.FieldLabel>حالة التسجيل</S.FieldLabel>
+              <S.Select
+                value={row.status || "pending"}
+                disabled={savingStatus}
+                onChange={(e) => onStatusChange(row._id, e.target.value)}
+              >
+                {Object.entries(WAITLIST_STATUS).map(([key, s]) => (
+                  <option key={key} value={key}>
+                    {s.label}
+                  </option>
+                ))}
+              </S.Select>
+            </S.Field>
+          )}
+
+          {answers.length > 0 && (
+            <S.Stack $gap="0.5rem">
+              <S.Heading $size="0.9375rem">إجابات الاستبيان</S.Heading>
+              <S.DetailList>
+                {answers.map(([key, value]) => (
+                  <Fragment key={key}>
+                    <dt>{ANSWER_LABELS[key] || key}</dt>
+                    <dd>
+                      {Array.isArray(value) ? value.join("، ") : String(value)}
+                    </dd>
+                  </Fragment>
+                ))}
+              </S.DetailList>
+            </S.Stack>
+          )}
+        </S.ModalBox>
+      </S.Overlay>
+    );
+  },
+);
+
+const OrdersTab = memo(
+  ({ accessToken, onAuthError, onNavigate, onOpenOrder }) => {
+    const [data, setData] = useState({ quota: [], paid: [], waitlist: [] });
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [reloadKey, setReloadKey] = useState(0);
+    const [view, setView] = useState("quota");
+    const [filter, setFilter] = useState("الكل");
+    const [page, setPage] = useState(1);
+    const [selected, setSelected] = useState(() => new Set());
+    const [detailId, setDetailId] = useState(null);
+    const [savingStatus, setSavingStatus] = useState(false);
+
+    /* ---------- Fetch all three sources in parallel ---------- */
+    useEffect(() => {
+      if (!accessToken) {
+        setLoading(false);
+        return undefined;
+      }
+      const controller = new AbortController();
+      const opts = {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: controller.signal,
+      };
+
+      (async () => {
+        setLoading(true);
+        const [quotaRes, extraRes] = await Promise.allSettled([
+          axios.get(`${BASE_URL}/quota`, opts),
+          axios.get(`${BASE_URL}/dashboard/orders`, opts),
+        ]);
+        if (controller.signal.aborted) return;
+
+        const quotaStatus = quotaRes.reason?.response?.status;
+        const extraStatus = extraRes.reason?.response?.status;
+        if (quotaStatus === 401 || quotaStatus === 403 || extraStatus === 401) {
+          onAuthError();
+        }
+
+        const next = { quota: [], paid: [], waitlist: [] };
+        const errs = {};
+
+        if (quotaRes.status === "fulfilled") {
+          next.quota = Array.isArray(quotaRes.value.data)
+            ? quotaRes.value.data
+            : [];
+        } else {
+          errs.quota = "تعذّر جلب طلبات الحجز";
+        }
+
+        if (extraRes.status === "fulfilled") {
+          next.paid = extraRes.value.data?.paid ?? [];
+          next.waitlist = extraRes.value.data?.waitlist ?? [];
+        } else {
+          const msg =
+            extraStatus === 403
+              ? "لا تملك صلاحية عرض هذه الطلبات"
+              : "تعذّر جلب الطلبات";
+          errs.paid = msg;
+          errs.waitlist = msg;
+        }
+
+        setData(next);
+        setErrors(errs);
+        setLoading(false);
+      })();
+
+      return () => controller.abort();
+    }, [accessToken, onAuthError, reloadKey]);
+
+    /* ---------- Derived rows ---------- */
+    const columns = VIEW_COLUMNS[view];
+    const gridColumns = `48px ${columns.map((c) => c.w).join(" ")} 1fr`;
+    const filters = VIEW_FILTERS[view];
+
+    const filtered = useMemo(() => {
+      const rows = data[view];
+      return filter === "الكل"
+        ? rows
+        : rows.filter((r) => getStatus(view, r).label === filter);
+    }, [data, view, filter]);
+
+    const pageCount = Math.max(
+      1,
+      Math.ceil(filtered.length / ORDERS_PAGE_SIZE),
+    );
+    const currentPage = Math.min(page, pageCount);
+    const rows = useMemo(
+      () =>
+        filtered.slice(
+          (currentPage - 1) * ORDERS_PAGE_SIZE,
+          currentPage * ORDERS_PAGE_SIZE,
+        ),
+      [filtered, currentPage],
+    );
+
+    const detailRow = detailId
+      ? data[view].find((r) => r._id === detailId)
+      : null;
+    const allSelected =
+      rows.length > 0 && rows.every((r) => selected.has(r._id));
+
+    /* ---------- Handlers ---------- */
+    const changeView = (id) => {
+      setView(id);
+      setFilter("الكل");
+      setPage(1);
+      setSelected(new Set());
+    };
+
+    const changeFilter = (f) => {
+      setFilter(f);
+      setPage(1);
+    };
+
+    const toggleAll = () =>
+      setSelected((prev) => {
+        const next = new Set(prev);
+        rows.forEach((r) =>
+          allSelected ? next.delete(r._id) : next.add(r._id),
+        );
+        return next;
+      });
+
+    const toggleOne = (id) =>
+      setSelected((prev) => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+      });
+
+    const openRow = (row) =>
+      view === "quota" ? onOpenOrder(row._id) : setDetailId(row._id);
+
+    const updateWaitlistStatus = async (id, status) => {
+      setSavingStatus(true);
+      try {
+        await axios.patch(
+          `${BASE_URL}/waitlist/${id}`,
+          { status },
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+        setData((prev) => ({
+          ...prev,
+          waitlist: prev.waitlist.map((w) =>
+            w._id === id ? { ...w, status } : w,
+          ),
+        }));
+      } catch (err) {
+        if (err.response?.status === 401) onAuthError();
+        else alert("تعذّر تحديث الحالة. يرجى المحاولة مرة أخرى.");
+      } finally {
+        setSavingStatus(false);
+      }
+    };
+
+    /* ---------- Nothing anywhere yet ---------- */
+    const isEmpty =
+      !loading &&
+      Object.keys(errors).length === 0 &&
+      data.quota.length === 0 &&
+      data.paid.length === 0 &&
+      data.waitlist.length === 0;
+
+    if (isEmpty) return <EmptyTab {...ORDERS_EMPTY} onNavigate={onNavigate} />;
+
+    const emptyMessage =
+      filter !== "الكل"
+        ? "لا توجد طلبات بهذه الحالة"
+        : view === "paid"
+          ? "لا توجد طلبات مدفوعة بعد"
+          : view === "waitlist"
+            ? "لا يوجد أحد في قائمة الانتظار بعد"
+            : "لا توجد طلبات حجز بعد";
+
+    return (
+      <S.Page>
+        <PageHeader icon={ordersIcon} title="الطلبات">
+          <S.Button
+            type="button"
+            $icon
+            aria-label="تحديث"
+            disabled={loading}
+            onClick={() => setReloadKey((k) => k + 1)}
+          >
+            <RefreshCw size={15} />
+          </S.Button>
+        </PageHeader>
+
+        <S.Segmented role="tablist">
+          {ORDER_VIEWS.map((v) => (
+            <S.SegmentButton
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={view === v.id}
+              $active={view === v.id}
+              onClick={() => changeView(v.id)}
+            >
+              {v.label}
+              <S.CountPill $active={view === v.id}>
+                {loading ? "…" : data[v.id].length}
+              </S.CountPill>
+            </S.SegmentButton>
+          ))}
+        </S.Segmented>
+
+        <S.Card $flush>
+          <S.TableToolbar>
+            <S.Row $wrap>
+              {filters.length > 1 &&
+                filters.map((f) => (
+                  <S.FilterChip
+                    key={f}
+                    type="button"
+                    $active={filter === f}
+                    onClick={() => changeFilter(f)}
+                  >
+                    {f}
+                  </S.FilterChip>
+                ))}
+            </S.Row>
+            <S.Row $gap="0.375rem">
+              <S.Button type="button" $size="sm" $icon aria-label="تصفية">
+                <Filter size={14} />
+              </S.Button>
+              <S.Button type="button" $size="sm" $icon aria-label="ترتيب">
+                <ArrowUpDown size={14} />
+              </S.Button>
+            </S.Row>
+          </S.TableToolbar>
+
+          <S.TableScroll $minH="400px">
+            <S.GridTable $columns={gridColumns}>
+              <S.Th $align="center">
+                <S.Checkbox
+                  checked={allSelected}
+                  onChange={toggleAll}
+                  aria-label="تحديد الكل"
+                />
+              </S.Th>
+              {columns.map((c) => (
+                <S.Th key={c.label} $align={c.align}>
+                  {c.label}
+                </S.Th>
+              ))}
+              <S.Th $align="center">الحالة</S.Th>
+
+              {loading ? (
+                <S.TableMessage>جاري التحميل...</S.TableMessage>
+              ) : errors[view] ? (
+                <S.TableMessage $error>{errors[view]}</S.TableMessage>
+              ) : rows.length === 0 ? (
+                <S.TableMessage>{emptyMessage}</S.TableMessage>
+              ) : (
+                rows.map((row, i) => {
+                  const status = getStatus(view, row);
+                  return (
+                    <S.Tr key={row._id || i} onClick={() => openRow(row)}>
+                      <S.Td
+                        $align="center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <S.Checkbox
+                          checked={selected.has(row._id)}
+                          onChange={() => toggleOne(row._id)}
+                          aria-label="تحديد"
+                        />
+                      </S.Td>
+                      {columns.map((c) => {
+                        const value = c.render(row);
+                        return (
+                          <S.Td
+                            key={c.label}
+                            $align={c.align}
+                            $weight={c.weight}
+                            title={c.title ? String(value) : undefined}
+                            style={
+                              c.ltr
+                                ? {
+                                    direction: "ltr",
+                                    justifyContent: "flex-end",
+                                  }
+                                : undefined
+                            }
+                          >
+                            {c.ellipsis ? (
+                              <S.Ellipsis>{value}</S.Ellipsis>
+                            ) : (
+                              value
+                            )}
+                          </S.Td>
+                        );
+                      })}
+                      <S.Td $align="center">
+                        <S.StatusBadge $tone={status.tone}>
+                          {status.label}
+                        </S.StatusBadge>
+                      </S.Td>
+                    </S.Tr>
+                  );
+                })
+              )}
+            </S.GridTable>
+          </S.TableScroll>
+
+          <S.TableFooter>
+            <span>
+              {filtered.length} طلب · صفحة {currentPage} من {pageCount}
+            </span>
+            <S.Row $gap="0.375rem">
+              <S.Button
+                type="button"
+                $size="sm"
+                $icon
+                aria-label="السابق"
+                disabled={currentPage <= 1}
+                onClick={() => setPage(currentPage - 1)}
+              >
+                <ChevronRight size={16} />
+              </S.Button>
+              <S.Button
+                type="button"
+                $size="sm"
+                $icon
+                aria-label="التالي"
+                disabled={currentPage >= pageCount}
+                onClick={() => setPage(currentPage + 1)}
+              >
+                <ChevronLeft size={16} />
+              </S.Button>
+            </S.Row>
+          </S.TableFooter>
+        </S.Card>
+
+        {detailRow && (
+          <OrderDetailModal
+            row={detailRow}
+            view={view}
+            onClose={() => setDetailId(null)}
+            onStatusChange={updateWaitlistStatus}
+            savingStatus={savingStatus}
+          />
+        )}
+      </S.Page>
+    );
+  },
+);
+
+/* ============================================================
+   Tab: التسويق
+   ============================================================ */
+
+const MarketingTab = memo(() => {
+  const compare = useMemo(() => shortDateFmt.format(getYesterday()), []);
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="التسويق">
+        <ReportActions />
+      </PageHeader>
+      <DateFilters compare={compare} />
+
+      <S.Grid $cols={3}>
+        {MARKETING_METRICS.map((title) => (
+          <MetricCard key={title} title={title} value="—" />
+        ))}
+      </S.Grid>
+
+      {CAMPAIGNS.map((c) => (
+        <S.Card key={c.title} $padding="2rem">
+          <S.Split>
+            <S.Stack $gap="0.75rem">
+              <S.Heading $size="1.25rem">{c.title}</S.Heading>
+              <S.Text $muted>{c.text}</S.Text>
+              <div>
+                <S.Button type="button" $variant="primary">
+                  {c.cta}
+                </S.Button>
+              </div>
+            </S.Stack>
+            <S.Illustration src={c.image} alt="" $w="200px" />
+          </S.Split>
+        </S.Card>
+      ))}
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Tab: التحليلات
+   ============================================================ */
+
+const FlatLine = memo(({ color, dashed }) => (
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <line
+      x1="0"
+      y1="100"
+      x2="100"
+      y2="100"
+      stroke={color}
+      strokeWidth="2"
+      strokeDasharray={dashed ? "4 4" : undefined}
+      vectorEffect="non-scaling-stroke"
+    />
+  </svg>
+));
+
+const AnalyticsTab = memo(
+  ({ kpis = ANALYTICS_KPIS, breakdown = ANALYTICS_BREAKDOWN }) => {
+    const dates = useMemo(
+      () => ({
+        today: shortDateFmt.format(new Date()),
+        compare: shortDateFmt.format(getYesterday()),
+      }),
+      [],
+    );
+
+    return (
+      <S.Page>
+        <PageHeader icon={contentIcon} title="التحليلات">
+          <ReportActions />
+        </PageHeader>
+        <DateFilters compare={dates.compare} />
+
+        <S.Grid $cols={4}>
+          {kpis.map((k) => (
+            <MetricCard key={k.title} title={k.title} value={k.value} />
+          ))}
+        </S.Grid>
+
+        <S.MainGrid>
+          <S.Card>
+            <S.CardLabel>المبيعات حسب الوقت</S.CardLabel>
+            <S.Row $between>
+              <S.MetricValue $big>0 ريال</S.MetricValue>
+              <TrendIcon />
+            </S.Row>
+
+            <S.ChartArea>
+              <S.YLabels>
+                {Y_LABELS.map((l) => (
+                  <span key={l}>{l}</span>
+                ))}
+              </S.YLabels>
+              <S.Plot>
+                <FlatLine color={T.primarySoft} dashed />
+                <FlatLine color={T.primary} />
+              </S.Plot>
+              <S.XLabels>
+                {X_LABELS.map((l) => (
+                  <span key={l}>{l}</span>
+                ))}
+              </S.XLabels>
+            </S.ChartArea>
+
+            <S.Legend>
+              <S.LegendItem $color={T.primary}>{dates.today}</S.LegendItem>
+              <S.LegendItem $color={T.primarySoft} $dashed>
+                {dates.compare}
+              </S.LegendItem>
+            </S.Legend>
+          </S.Card>
+
+          <S.Card>
+            <S.CardLabel>تفصيل إجمالي المبيعات</S.CardLabel>
+            <S.BreakList>
+              {breakdown.map(({ title, value, total }) => (
+                <S.BreakItem key={title} $total={total}>
+                  <span>{title}</span>
+                  <S.Amount>
+                    {Number(value || 0).toFixed(2)} ريال
+                    <TrendIcon />
+                  </S.Amount>
+                </S.BreakItem>
+              ))}
+            </S.BreakList>
+          </S.Card>
+        </S.MainGrid>
+
+        <LearnMore topic="التحليلات" />
+      </S.Page>
+    );
+  },
+);
+
+/* ============================================================
+   Tab: المتجر (appointment settings)
+   ============================================================ */
+
+const uploadProfileImage = async (file) => {
+  const formData = new FormData();
+  formData.append("image", file);
+  const { data } = await userRequest.post(
+    "/business/upload/profile-image",
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+  return data.imageUrl;
+};
+
+const DaySelect = ({ value, onChange }) => (
+  <S.Select value={value} onChange={onChange}>
+    {DAY_LABELS.map((label, i) => (
+      <option key={label} value={String(i)}>
+        {label}
+      </option>
+    ))}
+  </S.Select>
+);
+
+const AppointmentSettings = memo(() => {
   const dispatch = useDispatch();
-  const activeTab = useSelector((state) => state.tab.activeTab);
-  const storeName = useSelector((state) => state.tab.storeName);
-  const [localName, setLocalName] = useState("");
-  const [inputModule, setInputModule] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("الكل");
-  const [showTimeOutModal, setShowtimeOutModel] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [toggleSubscribe, setToggleSubscribe] = useState(true);
-  const [ordersData, setOrdersData] = useState([]);
-  const [preOrdered, setPreOrdered] = useState(true);
-  const [error, setError] = useState("");
-  const [reason, setReason] = useState("زيارة جديدة");
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [docFirstName, setDocFirstName] = useState("");
-  const [docLastName, setDocLastName] = useState("");
-  const [major, setMajor] = useState("");
-  const [profileImg, setProfileImg] = useState("");
-  const [profileImgFile, setProfileImgFile] = useState(null);
-  const [country, setCountry] = useState("");
-  const [paymentSettings, setPaymentSettings] = useState({
-    enabled: true,
-    appointmentFee: 1,
-    allowPayOnArrival: true,
-    allowOnlinePayment: true,
-    requireUpfrontPayment: false,
-  });
-  const [reviewSettings, setReviewSettings] = useState({
-    enabled: true,
-    rating: 4,
-    review: 3,
-  });
-  const [holidays, setHolidays] = useState([]);
-  const [newHoliday, setNewHoliday] = useState({
-    date: "",
-    description: "",
-  });
-
-  const navigate = useNavigate();
   const { currentUser } = useSelector(userSelector);
 
-  // Admin configuration state
-  const [workingDays, setWorkingDays] = useState({
-    0: false, // Sunday
-    1: true, // Monday
-    2: true, // Tuesday
-    3: true, // Wednesday
-    4: true, // Thursday
-    5: false, // Friday
-    6: false, // Saturday
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState({
+    docFirstName: "",
+    docLastName: "",
+    major: "",
+    country: "",
   });
+  const [profileImg, setProfileImg] = useState("");
+  const [profileImgFile, setProfileImgFile] = useState(null);
+  const [hours, setHours] = useState(DEFAULT_HOURS);
+  const [payment, setPayment] = useState(DEFAULT_PAYMENT);
+  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [holidays, setHolidays] = useState([]);
+  const [newHoliday, setNewHoliday] = useState({ date: "", description: "" });
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
-  const [workingHours, setWorkingHours] = useState({
-    start: "09:00",
-    end: "17:00",
-  });
-
-  // Generate available dates (next 14 days)
-
-  const availableDates = useMemo(() => {
-    const dates = [];
-    const today = new Date();
-
-    const startDay = parseInt(workingHours.startDay ?? 0);
-    const endDay = parseInt(workingHours.endDay ?? 6);
-
-    for (let i = 0; i < 14; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-
-      const day = date.getDay();
-
-      // Include only days between startDay and endDay
-      if (
-        (startDay <= endDay && day >= startDay && day <= endDay) ||
-        (startDay > endDay && (day >= startDay || day <= endDay))
-      ) {
-        dates.push(date);
-      }
-    }
-
-    return dates.slice(0, 5); // Show first 5 available days
-  }, [workingHours.startDay, workingHours.endDay]);
-
+  // Load saved settings
   useEffect(() => {
-    if (currentUser) {
-      setDocFirstName(currentUser.docFirstName || "");
-      setDocLastName(currentUser.docLastName || "");
-      setMajor(currentUser.major || "");
-      setProfileImg(currentUser.profileImg || "");
-      setCountry(currentUser.country || "");
-
-      // Initialize payment settings
-      if (currentUser.appointmentSettings?.paymentSettings) {
-        setPaymentSettings(currentUser.appointmentSettings.paymentSettings);
-      }
-
-      // Initialize review settings
-      if (currentUser.appointmentSettings?.reviewSettings) {
-        setReviewSettings(currentUser.appointmentSettings.reviewSettings);
-      }
-
-      // Initialize holidays
-      if (currentUser.appointmentSettings?.holidays) {
-        setHolidays(currentUser.appointmentSettings.holidays);
-      }
-
-      // Initialize working hours if available
-      if (currentUser.appointmentSettings?.workingHours) {
-        // Find the first and last open days
-        const days = [
-          "sunday",
-          "monday",
-          "tuesday",
-          "wednesday",
-          "thursday",
-          "friday",
-          "saturday",
-        ];
-        const workingDaysSettings =
-          currentUser.appointmentSettings.workingHours;
-
-        let firstOpenDay = null;
-        let lastOpenDay = null;
-        let startTime = "09:00";
-        let endTime = "17:00";
-
-        days.forEach((day, index) => {
-          if (workingDaysSettings[day]?.isOpen) {
-            if (firstOpenDay === null) {
-              firstOpenDay = index;
-              // Get time from first open day
-              if (workingDaysSettings[day].slots?.[0]) {
-                startTime =
-                  workingDaysSettings[day].slots[0].startTime || "09:00";
-                endTime = workingDaysSettings[day].slots[0].endTime || "17:00";
-              }
-            }
-            lastOpenDay = index;
-          }
-        });
-
-        setWorkingHours({
-          start: startTime,
-          end: endTime,
-          startDay: firstOpenDay !== null ? String(firstOpenDay) : "0",
-          endDay: lastOpenDay !== null ? String(lastOpenDay) : "4",
-        });
-      }
-    }
+    if (!currentUser) return;
+    setProfile({
+      docFirstName: currentUser.docFirstName || "",
+      docLastName: currentUser.docLastName || "",
+      major: currentUser.major || "",
+      country: currentUser.country || "",
+    });
+    setProfileImg(currentUser.profileImg || "");
+    const s = currentUser.appointmentSettings || {};
+    if (s.paymentSettings) setPayment(s.paymentSettings);
+    if (s.reviewSettings) setReviews(s.reviewSettings);
+    if (s.holidays) setHolidays(s.holidays);
+    if (s.workingHours) setHours(parseWorkingHours(s.workingHours));
   }, [currentUser]);
 
-  const handleProfileImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfileImgFile(file);
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImg(reader.result);
-      };
-      reader.readAsDataURL(file);
+  // Preview: next 2 working days + first 4 slots
+  const previewDates = useMemo(() => {
+    const start = Number(hours.startDay);
+    const end = Number(hours.endDay);
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < 14 && dates.length < 2; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      if (isDayInRange(d.getDay(), start, end)) dates.push(d);
     }
-  };
+    return dates;
+  }, [hours.startDay, hours.endDay]);
 
-  const uploadProfileImage = async (file) => {
-    const formData = new FormData();
-    formData.append("image", file);
+  const previewSlots = useMemo(
+    () => generateTimeSlots(hours.start, hours.end).slice(0, 4),
+    [hours.start, hours.end],
+  );
 
-    try {
-      const response = await userRequest.post(
-        `/business/upload/profile-image`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      return response.data.imageUrl;
-    } catch (error) {
-      console.error("Failed to upload image:", error);
-      throw error;
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("حجم الصورة يتجاوز 5 ميجابايت");
+      return;
     }
+    setProfileImgFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setProfileImg(reader.result);
+    reader.readAsDataURL(file);
   };
 
-  // Handle Adding Holiday
-  const handleAddHoliday = () => {
-    if (newHoliday.date && newHoliday.description) {
-      setHolidays([...holidays, { ...newHoliday }]);
-      setNewHoliday({ date: "", description: "" });
-    }
+  const addHoliday = () => {
+    if (!newHoliday.date || !newHoliday.description.trim()) return;
+    setHolidays((prev) => [
+      ...prev,
+      { ...newHoliday, description: newHoliday.description.trim() },
+    ]);
+    setNewHoliday({ date: "", description: "" });
   };
 
-  // Handle Removing Holiday
-  const handleRemoveHoliday = (index) => {
-    setHolidays(holidays.filter((_, i) => i !== index));
-  };
+  const removeHoliday = (index) =>
+    setHolidays((prev) => prev.filter((_, i) => i !== index));
 
-  const handleSaveAllSettings = async () => {
+  const handleSave = async () => {
     if (!currentUser?._id) {
-      console.error("User ID not found");
       alert("معرف المستخدم غير موجود");
       return;
     }
 
+    setSaving(true);
     try {
-      setIsLoading(true);
-
-      let uploadedImageUrl = profileImg;
-
-      // Upload new image if file was selected
+      let imageUrl = profileImg;
       if (profileImgFile) {
         try {
-          uploadedImageUrl = await uploadProfileImage(profileImgFile);
-          console.log("Image uploaded successfully:", uploadedImageUrl);
+          imageUrl = await uploadProfileImage(profileImgFile);
         } catch (uploadError) {
           console.error("Image upload failed:", uploadError);
           alert("فشل رفع الصورة. سيتم حفظ التغييرات الأخرى.");
-          uploadedImageUrl = profileImg;
+          imageUrl = currentUser.profileImg || ""; // never save the base64 preview
         }
       }
 
-      // Helper function to check if a day is within working range
-      const isDayInWorkingRange = (dayIndex) => {
-        const startDay = parseInt(workingHours.startDay ?? 0);
-        const endDay = parseInt(workingHours.endDay ?? 6);
-
-        if (startDay <= endDay) {
-          // Normal range (e.g., Monday to Friday)
-          return dayIndex >= startDay && dayIndex <= endDay;
-        } else {
-          // Wrapped range (e.g., Friday to Tuesday)
-          return dayIndex >= startDay || dayIndex <= endDay;
-        }
-      };
-
-      // Prepare the complete update data
-      const updateData = {
-        // Doctor Information
-        docFirstName: docFirstName.trim(),
-        docLastName: docLastName.trim(),
-        major: major.trim(),
-
-        // Profile Settings
-        profileImg: uploadedImageUrl,
-        country: country.trim(),
-
-        // Appointment Settings
-        appointmentSettings: {
-          workingHours: {
-            sunday: {
-              isOpen: isDayInWorkingRange(0),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            monday: {
-              isOpen: isDayInWorkingRange(1),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            tuesday: {
-              isOpen: isDayInWorkingRange(2),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            wednesday: {
-              isOpen: isDayInWorkingRange(3),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            thursday: {
-              isOpen: isDayInWorkingRange(4),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            friday: {
-              isOpen: isDayInWorkingRange(5),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
-            saturday: {
-              isOpen: isDayInWorkingRange(6),
-              slots: [
-                { startTime: workingHours.start, endTime: workingHours.end },
-              ],
-            },
+      const startDay = Number(hours.startDay);
+      const endDay = Number(hours.endDay);
+      const workingHours = Object.fromEntries(
+        DAY_KEYS.map((key, i) => [
+          key,
+          {
+            isOpen: isDayInRange(i, startDay, endDay),
+            slots: [{ startTime: hours.start, endTime: hours.end }],
           },
+        ]),
+      );
 
+      const updateData = {
+        docFirstName: profile.docFirstName.trim(),
+        docLastName: profile.docLastName.trim(),
+        major: profile.major.trim(),
+        country: profile.country.trim(),
+        profileImg: imageUrl,
+        appointmentSettings: {
+          workingHours,
           paymentSettings: {
-            enabled: paymentSettings.enabled,
-            appointmentFee: parseFloat(paymentSettings.appointmentFee) || 0,
-            allowPayOnArrival: paymentSettings.allowPayOnArrival,
-            allowOnlinePayment: paymentSettings.allowOnlinePayment,
-            requireUpfrontPayment: paymentSettings.requireUpfrontPayment,
+            enabled: payment.enabled,
+            appointmentFee: parseFloat(payment.appointmentFee) || 0,
+            allowPayOnArrival: payment.allowPayOnArrival,
+            allowOnlinePayment: payment.allowOnlinePayment,
+            requireUpfrontPayment: payment.requireUpfrontPayment,
           },
           reviewSettings: {
-            enabled: reviewSettings.enabled,
-            review: reviewSettings.review || 0,
-            rating: reviewSettings.rating || 0,
+            enabled: reviews.enabled,
+            review: reviews.review || 0,
+            rating: reviews.rating || 0,
           },
-
           holidays: holidays.map((h) => ({
             date: new Date(h.date),
             description: h.description,
@@ -809,2264 +1916,530 @@ const Dashboard = () => {
       };
 
       await dispatch(
-        updateBusinessProfile({
-          id: currentUser._id,
-          updateData,
-        })
+        updateBusinessProfile({ id: currentUser._id, updateData }),
       ).unwrap();
-
-      console.log("All settings updated successfully");
+      setProfileImgFile(null);
       alert("تم حفظ جميع التغييرات بنجاح");
     } catch (error) {
       console.error("Failed to update settings:", error);
       alert("فشل حفظ التغييرات. يرجى المحاولة مرة أخرى.");
     } finally {
-      setIsLoading(false);
-      setProfileImgFile(null);
+      setSaving(false);
     }
   };
 
-  const generateTimeSlots = (startTime, endTime, interval = 30) => {
-    const slots = [];
-    const [startHour, startMin] = startTime.split(":").map(Number);
-    const [endHour, endMin] = endTime.split(":").map(Number);
+  const doctorName = [profile.docFirstName, profile.docLastName]
+    .filter(Boolean)
+    .join(" ");
 
-    let currentHour = startHour;
-    let currentMin = startMin;
+  return (
+    <S.Page $max="1400px">
+      <S.Card $padding="1rem 1.25rem">
+        <S.Row $between $wrap $gap="1rem">
+          <S.PageTitle>إعدادات حجز المواعيد</S.PageTitle>
+          <S.Button
+            type="button"
+            $variant="primary"
+            $size="lg"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "جاري الحفظ..." : "حفظ جميع التغييرات"}
+          </S.Button>
+        </S.Row>
+      </S.Card>
 
-    while (
-      currentHour < endHour ||
-      (currentHour === endHour && currentMin < endMin)
-    ) {
-      const hour12 = currentHour % 12 || 12;
-      const period = currentHour >= 12 ? "PM" : "AM";
-      const timeStr = `${hour12}:${currentMin
-        .toString()
-        .padStart(2, "0")} ${period}`;
-      slots.push(timeStr);
+      <S.SettingsGrid>
+        {/* ---------- Settings column ---------- */}
+        <S.Stack $gap="1.25rem">
+          <S.Card $padding="1.5rem" $gap="1rem">
+            <S.Heading $size="1.0625rem">معلومات الطبيب</S.Heading>
+            <S.FormGrid>
+              <S.Field>
+                <S.FieldLabel>الاسم الأول</S.FieldLabel>
+                <S.Input
+                  value={profile.docFirstName}
+                  onChange={bind(setProfile, "docFirstName")}
+                  placeholder="أدخل الاسم الأول"
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel>الاسم الأخير</S.FieldLabel>
+                <S.Input
+                  value={profile.docLastName}
+                  onChange={bind(setProfile, "docLastName")}
+                  placeholder="أدخل الاسم الأخير"
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel>التخصص</S.FieldLabel>
+                <S.Input
+                  value={profile.major}
+                  onChange={bind(setProfile, "major")}
+                  placeholder="مثال: طبيب رعاية أولية"
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel>البلد</S.FieldLabel>
+                <S.Input
+                  value={profile.country}
+                  onChange={bind(setProfile, "country")}
+                  placeholder="أدخل البلد"
+                />
+              </S.Field>
+            </S.FormGrid>
+          </S.Card>
 
-      currentMin += interval;
-      if (currentMin >= 60) {
-        currentMin -= 60;
-        currentHour++;
-      }
-    }
+          <S.Card $padding="1.5rem" $gap="1rem">
+            <S.Heading $size="1.0625rem">صورة الملف الشخصي</S.Heading>
+            <S.ProfileRow>
+              {profileImg ? (
+                <S.ProfilePreview src={profileImg} alt="" />
+              ) : (
+                <S.ProfilePlaceholder>
+                  <Upload size={28} />
+                </S.ProfilePlaceholder>
+              )}
+              <S.Stack $gap="0.5rem">
+                <S.UploadLabel>
+                  <Upload size={16} />
+                  اختر صورة جديدة
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </S.UploadLabel>
+                <S.Text $muted $size="0.8125rem">
+                  JPG, PNG أو GIF (الحد الأقصى 5 ميجابايت)
+                </S.Text>
+              </S.Stack>
+            </S.ProfileRow>
+          </S.Card>
 
-    return slots;
-  };
-  // Generate time slots for available dates
-  const dateSlots = useMemo(() => {
-    const slots = {};
-    availableDates.forEach((date) => {
-      const dateKey = date.toISOString().split("T")[0];
-      slots[dateKey] = generateTimeSlots(workingHours.start, workingHours.end);
-    });
-    return slots;
-  }, [availableDates, workingHours]);
+          <S.Card $padding="1.5rem" $gap="1rem">
+            <S.Heading $size="1.0625rem">أوقات العمل</S.Heading>
+            <S.FormGrid>
+              <S.Field>
+                <S.FieldLabel $small>من يوم</S.FieldLabel>
+                <DaySelect
+                  value={hours.startDay}
+                  onChange={bind(setHours, "startDay")}
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>إلى يوم</S.FieldLabel>
+                <DaySelect
+                  value={hours.endDay}
+                  onChange={bind(setHours, "endDay")}
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>من الساعة</S.FieldLabel>
+                <S.Input
+                  type="time"
+                  value={hours.start}
+                  onChange={bind(setHours, "start")}
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>إلى الساعة</S.FieldLabel>
+                <S.Input
+                  type="time"
+                  value={hours.end}
+                  onChange={bind(setHours, "end")}
+                />
+              </S.Field>
+            </S.FormGrid>
+          </S.Card>
 
-  const Rating = ({ value, reviews }) => (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        fontWeight: 800,
-      }}
-    >
-      <Star size={18} style={{ color: "#f59e0b" }} />
-      {value.toFixed(2)} · {reviews.toLocaleString()} reviews
-    </span>
+          <S.Card $padding="1.5rem" $gap="1rem">
+            <S.Heading $size="1.0625rem">إعدادات الدفع</S.Heading>
+            <S.Check $bold>
+              <input
+                type="checkbox"
+                checked={payment.enabled}
+                onChange={bind(setPayment, "enabled")}
+              />
+              تفعيل نظام الدفع
+            </S.Check>
+            <S.Field style={{ maxWidth: "16rem" }}>
+              <S.FieldLabel>رسوم الموعد (ريال)</S.FieldLabel>
+              <S.Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={payment.appointmentFee}
+                onChange={bind(setPayment, "appointmentFee")}
+                disabled={!payment.enabled}
+              />
+            </S.Field>
+            <S.Stack $gap="0.75rem">
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={payment.allowPayOnArrival}
+                  onChange={bind(setPayment, "allowPayOnArrival")}
+                />
+                السماح بالدفع عند الوصول
+              </S.Check>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={payment.allowOnlinePayment}
+                  onChange={bind(setPayment, "allowOnlinePayment")}
+                />
+                السماح بالدفع الإلكتروني
+              </S.Check>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={payment.requireUpfrontPayment}
+                  onChange={bind(setPayment, "requireUpfrontPayment")}
+                />
+                يتطلب الدفع المسبق
+              </S.Check>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={reviews.enabled}
+                  onChange={bind(setReviews, "enabled")}
+                />
+                إظهار التقييمات
+              </S.Check>
+            </S.Stack>
+          </S.Card>
+
+          <S.Card $padding="1.5rem" $gap="1rem">
+            <S.Heading $size="1.0625rem">العطلات الرسمية</S.Heading>
+            <S.HolidayRow>
+              <S.Field>
+                <S.FieldLabel $small>التاريخ</S.FieldLabel>
+                <S.Input
+                  type="date"
+                  value={newHoliday.date}
+                  onChange={bind(setNewHoliday, "date")}
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>الوصف</S.FieldLabel>
+                <S.Input
+                  value={newHoliday.description}
+                  onChange={bind(setNewHoliday, "description")}
+                  onKeyDown={(e) => e.key === "Enter" && addHoliday()}
+                  placeholder="مثال: عيد الفطر"
+                />
+              </S.Field>
+              <S.Button
+                type="button"
+                $variant="primary"
+                style={{ height: "2.5rem" }}
+                onClick={addHoliday}
+                disabled={!newHoliday.date || !newHoliday.description.trim()}
+              >
+                <Plus size={16} />
+                إضافة
+              </S.Button>
+            </S.HolidayRow>
+
+            {holidays.length > 0 && (
+              <S.Stack $gap="0.5rem">
+                <S.FieldLabel>العطلات المضافة</S.FieldLabel>
+                {holidays.map((h, i) => (
+                  <S.HolidayItem key={`${h.date}-${i}`}>
+                    <S.Row $gap="0.75rem">
+                      <strong>{h.description}</strong>
+                      <S.Text $muted $size="0.8125rem">
+                        {new Date(h.date).toLocaleDateString("ar-SA")}
+                      </S.Text>
+                    </S.Row>
+                    <S.Button
+                      type="button"
+                      $variant="danger"
+                      $size="sm"
+                      $icon
+                      aria-label="حذف"
+                      onClick={() => removeHoliday(i)}
+                    >
+                      <Trash2 size={14} />
+                    </S.Button>
+                  </S.HolidayItem>
+                ))}
+              </S.Stack>
+            )}
+          </S.Card>
+        </S.Stack>
+
+        {/* ---------- Phone preview ---------- */}
+        <S.PreviewSticky>
+          <S.Card $padding="1.25rem" $gap="1rem">
+            <S.CardLabel>معاينة صفحة الحجز</S.CardLabel>
+            <S.PhoneFrame>
+              <S.Heading $size="1.375rem">حجز موعد</S.Heading>
+
+              <S.Row $align="flex-start" $gap="0.75rem">
+                <S.DoctorAvatar src={profileImg || FALLBACK_AVATAR} alt="" />
+                <S.Stack $gap="0.125rem">
+                  <S.Heading $size="1rem">
+                    {doctorName ? `د. ${doctorName}` : "د. هارولد واتسون، MD"}
+                  </S.Heading>
+                  <S.Text $muted $size="0.8125rem">
+                    {profile.major || "طبيب رعاية أولية"}
+                  </S.Text>
+                  {reviews.enabled && (
+                    <Rating
+                      value={currentUser?.rating || 4.9}
+                      reviews={currentUser?.reviews || 860}
+                    />
+                  )}
+                </S.Stack>
+              </S.Row>
+
+              <S.Stack $gap="0.5rem">
+                <S.Heading $size="0.9375rem">تفاصيل الجدولة</S.Heading>
+                <S.InfoBox>زيارة جديدة</S.InfoBox>
+                {payment.enabled && (
+                  <S.InfoBox $accent>
+                    رسوم الموعد: {payment.appointmentFee} ريال
+                  </S.InfoBox>
+                )}
+              </S.Stack>
+
+              <S.Stack $gap="0.75rem">
+                <S.Heading $size="0.9375rem">المواعيد المتاحة</S.Heading>
+                {previewDates.length === 0 ? (
+                  <S.Alert>لا توجد أيام عمل محددة</S.Alert>
+                ) : (
+                  previewDates.map((date, idx) => {
+                    const dateKey = toDateKey(date);
+                    return (
+                      <S.Stack key={dateKey} $gap="0.5rem">
+                        <S.Text $size="0.875rem" style={{ fontWeight: 700 }}>
+                          {idx === 0 && toDateKey(new Date()) === dateKey
+                            ? "اليوم، "
+                            : ""}
+                          {formatDayLabel(date)}
+                        </S.Text>
+                        {previewSlots.length === 0 ? (
+                          <S.InfoBox>لا توجد أوقات متاحة لهذا اليوم.</S.InfoBox>
+                        ) : (
+                          <S.SlotGrid>
+                            {previewSlots.map((time) => {
+                              const key = `${dateKey}-${time}`;
+                              return (
+                                <S.Slot
+                                  key={key}
+                                  type="button"
+                                  $selected={selectedSlot === key}
+                                  onClick={() => setSelectedSlot(key)}
+                                >
+                                  {time}
+                                </S.Slot>
+                              );
+                            })}
+                          </S.SlotGrid>
+                        )}
+                      </S.Stack>
+                    );
+                  })
+                )}
+              </S.Stack>
+            </S.PhoneFrame>
+          </S.Card>
+        </S.PreviewSticky>
+      </S.SettingsGrid>
+    </S.Page>
   );
+});
 
-  const handleTab = (item) => {
-    dispatch(setSettingTab(item));
-    navigate(`/preference?tab=${encodeURIComponent(item)}`);
-  };
+/* ============================================================
+   Tab: التطبيقات
+   ============================================================ */
 
-  const handlePage = (item) => {
-    dispatch(setActiveTab(item));
-    navigate(`/control?tab=${encodeURIComponent(item)}`);
-  };
+const AppsTab = memo(() => (
+  <S.Page>
+    <PageHeader icon={contentIcon} title="التطبيقات" />
+    <S.EmptyState>
+      <S.Heading $size="1.125rem">لا توجد تطبيقات مثبتة بعد</S.Heading>
+      <S.Text $muted>
+        ستظهر هنا التطبيقات التي تضيفها لتوسيع إمكانيات متجرك.
+      </S.Text>
+      <S.Button type="button" $variant="primary">
+        تصفح التطبيقات
+      </S.Button>
+    </S.EmptyState>
+  </S.Page>
+));
 
-  const businessId = currentUser?._id;
+/* ============================================================
+   Dashboard
+   ============================================================ */
+
+const Dashboard = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const activeTab = useSelector((state) => state.tab.activeTab);
+  const storeName = useSelector((state) => state.tab.storeName);
+  const { currentUser } = useSelector(userSelector);
   const accessToken = currentUser?.accessToken;
 
-  const onOrderClick = (quotaId) => {
-    if (quotaId) {
-      navigate(`/quota/${quotaId}`);
-    }
-  };
+  const [nameModalOpen, setNameModalOpen] = useState(false);
+  const [localName, setLocalName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
+  const [showTimeout, setShowTimeout] = useState(false);
 
-  const handleTokenExpiration = () => {
-    setShowtimeOutModel(true);
-  };
+  /* ---------- Navigation ---------- */
 
-  const handleLoginRedirect = () => {
+  const goTo = useCallback((path) => navigate(path), [navigate]);
+
+  const goToSetting = useCallback(
+    (tab) => {
+      dispatch(setSettingTab(tab));
+      navigate(`/preference?tab=${encodeURIComponent(tab)}`);
+    },
+    [dispatch, navigate],
+  );
+
+  const goToTab = useCallback(
+    (tab) => {
+      dispatch(setActiveTab(tab));
+      navigate(`/control?tab=${encodeURIComponent(tab)}`);
+    },
+    [dispatch, navigate],
+  );
+
+  const handleHeroAction = useCallback(
+    ({ type, value }) => (type === "page" ? goToTab(value) : goTo(value)),
+    [goTo, goToTab],
+  );
+
+  const openOrder = useCallback(
+    (id) => id && navigate(`/quota/${id}`),
+    [navigate],
+  );
+  const choosePlan = useCallback(() => navigate("/pay"), [navigate]);
+  const closeBanner = useCallback(() => setShowBanner(false), []);
+
+  /* ---------- Auth ---------- */
+
+  const handleAuthError = useCallback(() => setShowTimeout(true), []);
+
+  const handleLogin = useCallback(() => {
     dispatch(signOut());
     dispatch(clearState());
-  };
+  }, [dispatch]);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!accessToken || !businessId) {
-        console.log("Missing:", { accessToken, businessId });
-        return;
-      }
+  /* ---------- Store name ---------- */
 
-      setIsLoading(true);
-      setError("");
-      console.log(businessId);
+  const openNameModal = useCallback(() => {
+    setLocalName(storeName || "");
+    setNameModalOpen(true);
+  }, [storeName]);
 
-      try {
-        const response = await axios.get(`${BASE_URL}/quota`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+  const closeNameModal = useCallback(() => setNameModalOpen(false), []);
 
-        setOrdersData(response.data);
-        setPreOrdered(response.data.length > 0);
-      } catch (err) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          handleTokenExpiration();
-        } else {
-          setError("تعذّر جلب بيانات الطلبات");
-        }
-        setPreOrdered(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const saveStoreName = useCallback(async () => {
+    const name = localName.trim();
+    if (!currentUser?._id || !name) return;
 
-    fetchOrders();
-  }, [accessToken, businessId]);
-
-  const filters = [
-    "الكل",
-    "مدفوع",
-    "مفتوح",
-    "فشل",
-    "قيد المراجعة",
-    "تم الاسترداد",
-    "ملغي",
-  ];
-
-  const handleDestination = (des) => {
-    navigate(des);
-  };
-
-  const handleToggle = (toggle) => {
-    toggle((pre) => !pre);
-  };
-
-  const handleStoreName = async () => {
-    if (!currentUser?._id) {
-      console.error("User ID not found");
-      return;
-    }
-
-    const trimmedName = localName.trim();
-    if (!trimmedName) {
-      console.error("Store name cannot be empty");
-      return;
-    }
-
-    dispatch(setStoreName(trimmedName));
-
+    dispatch(setStoreName(name));
+    setSavingName(true);
     try {
-      setIsLoading(true);
       await dispatch(
-        updateStoreName({
-          id: currentUser._id,
-          storeName: trimmedName,
-        })
+        updateStoreName({ id: currentUser._id, storeName: name }),
       ).unwrap();
     } catch (error) {
       console.error("Failed to update store name:", error);
     } finally {
-      setIsLoading(false);
-      setInputModule(false);
+      setSavingName(false);
+      setNameModalOpen(false);
     }
-  };
+  }, [currentUser?._id, dispatch, localName]);
 
-  const formatDate = (date) => {
-    const days = [
-      "الأحد",
-      "الاثنين",
-      "الثلاثاء",
-      "الأربعاء",
-      "الخميس",
-      "الجمعة",
-      "السبت",
-    ];
-    const months = [
-      "يناير",
-      "فبراير",
-      "مارس",
-      "أبريل",
-      "مايو",
-      "يونيو",
-      "يوليو",
-      "أغسطس",
-      "سبتمبر",
-      "أكتوبر",
-      "نوفمبر",
-      "ديسمبر",
-    ];
-    return `${days[date.getDay()]}، ${date.getDate()} ${
-      months[date.getMonth()]
-    }`;
-  };
-
-  const ImgArray1 = [
-    { text: "", icon: paypalIcon },
-    { text: "", icon: visaIcon },
-    { text: "", icon: madaIcon },
-  ];
-  const ImgArray2 = [
-    { text: "", icon: domesticIcon },
-    { text: "", icon: internationalIcon },
-  ];
-  const ImgArray3 = [{ text: "f8u1iq-av.myshopify.com", icon: copyIcon }];
-
-  const BtnArray = [
-    { icon: refreshIcon, btn: handleStoreName },
-    { icon: expandIcon, btn: handleStoreName },
-  ];
-
-  const AdArray = [
-    { title: "Online store sessions" },
-    { title: "Online store rate" },
-    { title: "Average order value" },
-    { title: "Total sales" },
-    { title: "Sales attributed to marketing" },
-    { title: "Orders attributed to marketing" },
-  ];
-
-  const BreakArray = [
-    { title: "كامل المبيعات", price: "0.00" },
-    { title: "الخصومات", price: "0.00" },
-    { title: "الترجيع", price: "0.00" },
-    { title: "صافي المبيعات", price: "0.00" },
-    { title: "تكاليف الشحن", price: "0.00" },
-    { title: "الضريبة", price: "0.00" },
-    { title: "جميع المبيعات", price: "0.00" },
-  ];
-
-  const TimeOutModel = () => {
-    if (!showTimeOutModal) return null;
-    return (
-      <OverlayRedirect>
-        <ModalRedirect>
-          <MessageRedirect>الجلسة انتهت سجل مره ثانية</MessageRedirect>
-          <SubMessageRedirect>يجب تسجيل الدخول من جديد</SubMessageRedirect>
-          <ButtonRedirect onClick={handleLoginRedirect}>
-            سجل الآن
-          </ButtonRedirect>
-        </ModalRedirect>
-      </OverlayRedirect>
-    );
-  };
+  /* ---------- Content ---------- */
 
   const renderContent = () => {
-    const StoreMapped = ({
-      title,
-      btnText,
-      arrayText,
-      widthText,
-      boxText,
-      handlePro,
-    }) => {
-      return (
-        <StoMap>
-          <StoreTop>
-            <StoreHe>{title}</StoreHe>
-          </StoreTop>
-          <StoreMid>
-            <StoreEx>
-              {arrayText.map((item, index) => {
-                return (
-                  <StoreBtn key={index}>
-                    <StoreDiv>
-                      <StoreSp>{item.text}</StoreSp>
-                      <StoreImg
-                        widthMax={widthText}
-                        boxShadow={boxText}
-                        src={item.icon}
-                        alt=""
-                      />
-                    </StoreDiv>
-                  </StoreBtn>
-                );
-              })}
-            </StoreEx>
-          </StoreMid>
-          <StoreBot>
-            <StoBtn onClick={handlePro}>
-              <StoSpan>{btnText}</StoSpan>
-            </StoBtn>
-          </StoreBot>
-        </StoMap>
-      );
-    };
-
-    const SiteMapped = ({
-      imgFirst,
-      imgSec,
-      imgThi,
-      priBtn,
-      secBtn,
-      handlePri,
-      handleDes,
-    }) => {
-      return (
-        <SiteWr>
-          <SiteFir></SiteFir>
-          <SiteSec></SiteSec>
-          <SiteThi>
-            <SiteSuThi>
-              <SiteSubImg src={imgFirst} alt="WeddingCake" />
-            </SiteSuThi>
-            <SiteSubThi>
-              <SiteSubImg src={imgSec} alt="flowers" />
-            </SiteSubThi>
-            <SiteSThi>
-              <SiteSubImg src={imgThi} alt="Chair" />
-            </SiteSThi>
-          </SiteThi>
-          <SiteFou>
-            <CircleFi>
-              <CircleSe>
-                <CircleThi>
-                  <CircleFou>
-                    <CircleFiv>
-                      <CircleSi></CircleSi>
-                    </CircleFiv>
-                  </CircleFou>
-                </CircleThi>
-              </CircleSe>
-            </CircleFi>
-          </SiteFou>
-          <SiteMid>
-            <SiteEx></SiteEx>
-            <SiteDes>
-              <SiteSp>أضف منتجك الأول</SiteSp>
-              <SiteWrap>
-                <SiteSpa>ابدأ بإضافة منتج وبعض التفاصيل الأساسية.</SiteSpa>
-                <SiteSpa>
-                  <SiteAt>ابدأ بمنتج نموذجي</SiteAt>
-                </SiteSpa>
-              </SiteWrap>
-            </SiteDes>
-          </SiteMid>
-          <SiteBo>
-            <SiteDiv>
-              <SiteBtn onClick={handlePri}>
-                <SiteSp>{priBtn}</SiteSp>
-              </SiteBtn>
-            </SiteDiv>
-            <SiteDiv
-              background="rgba(255, 255, 255, 0.1)"
-              boxShadow="0 0 0 1px rgba(0, 0, 0, 0.1)"
-              color="rgba(48, 48, 48, 1)"
-              border="1px solid rgba(0, 0, 0, 0.1)"
-            >
-              <SiteBtn onClick={handleDes}>
-                <SiteSp>{secBtn}</SiteSp>
-              </SiteBtn>
-            </SiteDiv>
-          </SiteBo>
-        </SiteWr>
-      );
-    };
-
-    const ProductProps = ({
-      title,
-      subTitle,
-      imgSrc,
-      heText,
-      paraText,
-      firBtn,
-      secBtn,
-      handlePro,
-      exFir,
-      exSec,
-      exBtn,
-      imgSvg,
-    }) => {
-      return (
-        <ProWr>
-          <ProCon>
-            <ProStart>
-              <OreTop>
-                <OreSubTop>
-                  <OreSu>
-                    <OreDivImg>
-                      <span>
-                        <OreImg src={imgSrc} alt="" />
-                      </span>
-                    </OreDivImg>
-                    <OreHeDiv>
-                      <OreHe>{title}</OreHe>
-                    </OreHeDiv>
-                  </OreSu>
-                </OreSubTop>
-              </OreTop>
-              <ProSub>
-                <ProDiv>
-                  <ProTop>
-                    <ProTopSt>
-                      <ProTopFl>
-                        <ProTopLe>
-                          <ProTopLef>
-                            <ProTopLeft>
-                              <ProTopLeftTo>
-                                <ProTopLeftBtn>
-                                  <ProTopLeftSp>{subTitle}</ProTopLeftSp>
-                                </ProTopLeftBtn>
-                              </ProTopLeftTo>
-                              <ProTopRightTo>
-                                <ProTopPlus>
-                                  <ProPlus src={plusGrayIcon} alt="" />
-                                </ProTopPlus>
-                              </ProTopRightTo>
-                            </ProTopLeft>
-                          </ProTopLef>
-                        </ProTopLe>
-                        <ProTopRi>
-                          <span>
-                            <ProTopRiDiv>
-                              <ProTopRiBtn>
-                                <ProFilter src={filterIcon} alt="" />
-                              </ProTopRiBtn>
-                            </ProTopRiDiv>
-                          </span>
-                          <ProTopRiDiv>
-                            <ProTopRiBtn>
-                              <ProUpDow src={upDownIcon} alt="" />
-                            </ProTopRiBtn>
-                          </ProTopRiDiv>
-                        </ProTopRi>
-                      </ProTopFl>
-                    </ProTopSt>
-                  </ProTop>
-                  <ProMid>
-                    <ProMidSub>
-                      <ProMidStart>
-                        <ProMidTop>
-                          <ProMidHe>{heText}</ProMidHe>
-                          <ProMidPa>{paraText}</ProMidPa>
-                          <ProBtnWr>
-                            <ProBtnFl>
-                              <ProBtnLe onClick={handlePro}>
-                                <ProBtnSp>{firBtn}</ProBtnSp>
-                              </ProBtnLe>
-                              <ProBtnRi>
-                                <ProBtnSp>{secBtn}</ProBtnSp>
-                              </ProBtnRi>
-                            </ProBtnFl>
-                          </ProBtnWr>
-                        </ProMidTop>
-                        <ProMidImg src={imgSvg} alt="" />
-                      </ProMidStart>
-                    </ProMidSub>
-                  </ProMid>
-                  <ProBot>
-                    <ProBo>
-                      <ProBott>
-                        <ProBottHe>{exFir}</ProBottHe>
-                        <ProBottPa>{exSec}</ProBottPa>
-                        <ProBottDiv>
-                          <ProBottBtn>
-                            <ProBottSp>{exBtn}</ProBottSp>
-                          </ProBottBtn>
-                        </ProBottDiv>
-                      </ProBott>
-                    </ProBo>
-                  </ProBot>
-                </ProDiv>
-              </ProSub>
-            </ProStart>
-          </ProCon>
-        </ProWr>
-      );
-    };
-    const AbandonProps = ({ title, imgSrc, heText, paraText, imgSvg }) => {
-      return (
-        <ProWr>
-          <ProCon>
-            <ProStart>
-              <OreTop>
-                <OreSubTop>
-                  <OreSu>
-                    <OreDivImg>
-                      <span>
-                        <OreImg src={imgSrc} alt="" />
-                      </span>
-                    </OreDivImg>
-                    <OreHeDiv>
-                      <OreHe>{title}</OreHe>
-                    </OreHeDiv>
-                  </OreSu>
-                </OreSubTop>
-              </OreTop>
-              <ProSub>
-                <ProDiv>
-                  <ProMid>
-                    <ProMidSub>
-                      <ProMidStart>
-                        <ProMidTop>
-                          <ProMidHe>{heText}</ProMidHe>
-                          <AbaMidPa>{paraText}</AbaMidPa>
-                        </ProMidTop>
-                        <ProMidImg src={imgSvg} alt="" />
-                      </ProMidStart>
-                    </ProMidSub>
-                  </ProMid>
-                </ProDiv>
-              </ProSub>
-            </ProStart>
-          </ProCon>
-        </ProWr>
-      );
-    };
-
-    const OrderProps = ({
-      title,
-      subTitle,
-      imgSrc,
-      heText,
-      paraText,
-      firBtn,
-      imgImg,
-      exFir,
-      exSec,
-      imgSvg,
-      handleSub,
-    }) => {
-      return (
-        <OreWr>
-          <OreCon>
-            <OreSubCon>
-              <OreTop>
-                <OreSubTop>
-                  <OreSu>
-                    <OreDivImg>
-                      <span>
-                        <OreImg src={imgSrc} alt="" />
-                      </span>
-                    </OreDivImg>
-                    <OreHeDiv>
-                      <OreHe> {title}</OreHe>
-                    </OreHeDiv>
-                  </OreSu>
-                  <OreTopRight>
-                    <OreTopRi>
-                      <OreTopFi>
-                        <OreSubFi>
-                          <OreSubBtn>
-                            <OreSpa>{subTitle}</OreSpa>
-                            <OreSpan>
-                              <OreSubImg src={imgSvg} alt="" />
-                            </OreSpan>
-                          </OreSubBtn>
-                        </OreSubFi>
-                      </OreTopFi>
-                    </OreTopRi>
-                  </OreTopRight>
-                </OreSubTop>
-              </OreTop>
-              <OreMid>
-                <OreMidSub>
-                  <OreMidSu>
-                    <OreFlex>
-                      <CenterTop>
-                        <CenterTopImg src={imgImg} alt="" />
-                      </CenterTop>
-                      <CenterBot>
-                        <CenDivMain>
-                          <CenDiv>
-                            <CenDivSp>{heText}</CenDivSp>
-                          </CenDiv>
-                          <CenSp>{paraText}</CenSp>
-                        </CenDivMain>
-                        <CenterBotBtnDiv>
-                          <CenterBotBtn onClick={handleSub}>
-                            <CenterBotSp>{firBtn}</CenterBotSp>
-                          </CenterBotBtn>
-                        </CenterBotBtnDiv>
-                      </CenterBot>
-                    </OreFlex>
-                  </OreMidSu>
-                </OreMidSub>
-              </OreMid>
-              <OreBot>
-                <OreBotSub>
-                  <OreBotPa>{exFir}</OreBotPa>
-                  <OreBotSpa>
-                    <OreBotBtn>{exSec}</OreBotBtn>
-                  </OreBotSpa>
-                </OreBotSub>
-              </OreBot>
-            </OreSubCon>
-          </OreCon>
-        </OreWr>
-      );
-    };
-
-    const ReportProps = ({ title, tran }) => {
-      return (
-        <RepSec transformLoc={tran}>
-          <RepSecFi>
-            <RepSecBtn>
-              <RepBtnDiv>
-                <RepBtnSec>
-                  <RepBtnFl>
-                    <RepFl>
-                      <RepFlex>
-                        <RepFlTop>{title}</RepFlTop>
-                      </RepFlex>
-                    </RepFl>
-                    <ReportWr>
-                      <ReportText>
-                        <ReportTe>
-                          <ReportPa> 0 ريال</ReportPa>
-                        </ReportTe>
-                        <ReportTex>
-                          <ReportImg src={removeIcon} alt="" />
-                        </ReportTex>
-                      </ReportText>
-                      <ReportLine>
-                        <ReportLin>
-                          <ReportLi>
-                            <ReportLiFi>
-                              <ReportImg src={pulseIcon} alt="" />
-                            </ReportLiFi>
-                          </ReportLi>
-                        </ReportLin>
-                      </ReportLine>
-                    </ReportWr>
-                  </RepBtnFl>
-                </RepBtnSec>
-              </RepBtnDiv>
-            </RepSecBtn>
-          </RepSecFi>
-        </RepSec>
-      );
-    };
-
-    const AnalyticProps = ({ title, tran }) => {
-      return (
-        <AnalWr>
-          <AnalCon>
-            <AnalSub>
-              <AnalMain>
-                <AnalPad>
-                  <AnalFl>
-                    <AnalTop>
-                      <AnalTopBtn>
-                        <AnalTopPad>
-                          <AnalTopFl>
-                            <AnalTopGr>
-                              <span>
-                                <AnalTopGrBtn>
-                                  <AnalTopGrHe>
-                                    <AnalGrSp>
-                                      مجموع المبيعات من البداية
-                                    </AnalGrSp>
-                                  </AnalTopGrHe>
-                                </AnalTopGrBtn>
-                              </span>
-                            </AnalTopGr>
-                          </AnalTopFl>
-                        </AnalTopPad>
-                      </AnalTopBtn>
-                    </AnalTop>
-                    <GraphWr>
-                      <GraphTop>
-                        <GraphTopCon>
-                          <GraphTopPa>0 ريال</GraphTopPa>
-                        </GraphTopCon>
-                        <ReportTex>
-                          <ReportImg src={removeIcon} alt="" />
-                        </ReportTex>
-                      </GraphTop>
-                      <GraphBot>
-                        <GraphBotWr>
-                          <GraphBotCon>
-                            <GraphBotSt>
-                              <AllStart>
-                                <YAxisLabels>
-                                  <YAxisLabel>10 ريال</YAxisLabel>
-                                  <YAxisLabel>5 ريال</YAxisLabel>
-                                  <YAxisLabel>0 ريال</YAxisLabel>
-                                </YAxisLabels>
-                                <ChartLine />
-                                <XAxisLabels>
-                                  <XAxisLabel>12 AM</XAxisLabel>
-                                  <XAxisLabel>3 AM</XAxisLabel>
-                                  <XAxisLabel>6 AM</XAxisLabel>
-                                  <XAxisLabel>9 AM</XAxisLabel>
-                                  <XAxisLabel>12 PM</XAxisLabel>
-                                  <XAxisLabel>3 PM</XAxisLabel>
-                                  <XAxisLabel>6 PM</XAxisLabel>
-                                  <XAxisLabel>9 PM</XAxisLabel>
-                                </XAxisLabels>
-                              </AllStart>
-                              <GraWr>
-                                <GraBtn>
-                                  <GraBtnImgCon>
-                                    <GraBtnImg src={removeIcon} alt="" />
-                                  </GraBtnImgCon>
-                                  <GraSp>
-                                    <span>Jun 26, 2025</span>
-                                  </GraSp>
-                                </GraBtn>
-                                <GraBtn>
-                                  <GraBtnImgCon>
-                                    <GraBtnImg src={removeIcon} alt="" />
-                                  </GraBtnImgCon>
-                                  <GraSp>
-                                    <span>Jun 27, 2025</span>
-                                  </GraSp>
-                                </GraBtn>
-                              </GraWr>
-                            </GraphBotSt>
-                          </GraphBotCon>
-                        </GraphBotWr>
-                      </GraphBot>
-                    </GraphWr>
-                  </AnalFl>
-                </AnalPad>
-              </AnalMain>
-            </AnalSub>
-          </AnalCon>
-        </AnalWr>
-      );
-    };
-
-    const CampaignProps = ({ title, imgSrc, subTitle, btnText }) => {
-      return (
-        <AdWr>
-          <CampWr>
-            <CampCon>
-              <CampCol>
-                <CampFl>
-                  <CampFlTop>
-                    <CampFlHe>{title}</CampFlHe>
-                    <CampFlDiv>
-                      <CampFlPa>{subTitle}</CampFlPa>
-                    </CampFlDiv>
-                    <CampBtnWr>
-                      <CampBtnCon>
-                        <CampBtnBtn>
-                          <CampBtnSp>{btnText}</CampBtnSp>
-                        </CampBtnBtn>
-                      </CampBtnCon>
-                    </CampBtnWr>
-                  </CampFlTop>
-                  <img src={imgSrc} alt="" />
-                </CampFl>
-              </CampCol>
-            </CampCon>
-          </CampWr>
-        </AdWr>
-      );
-    };
-
-    const BreakProps = ({ title, tran }) => {
-      return (
-        <BreakWr>
-          <AnalCon>
-            <AnalSub>
-              <AnalMain>
-                <AnalPad>
-                  <AnalFl>
-                    <AnalTop>
-                      <AnalTopBtn>
-                        <AnalTopPad>
-                          <AnalTopFl>
-                            <AnalTopGr>
-                              <span>
-                                <AnalTopGrBtn>
-                                  <AnalTopGrHe>
-                                    <AnalGrSp>
-                                      مجموع المبيعات من البداية
-                                    </AnalGrSp>
-                                  </AnalTopGrHe>
-                                </AnalTopGrBtn>
-                              </span>
-                            </AnalTopGr>
-                          </AnalTopFl>
-                        </AnalTopPad>
-                      </AnalTopBtn>
-                    </AnalTop>
-                    <BreakCon>
-                      <BreakSub>
-                        <BreakRe>
-                          <BreakUl>
-                            {BreakArray.map((item, index) => {
-                              return (
-                                <BreakLi>
-                                  <BreakLiSp>
-                                    <BreakLiBtn>{item.title}</BreakLiBtn>
-                                  </BreakLiSp>
-                                  <BreakLiSpan>
-                                    <BreakPrice>ريال 0.00</BreakPrice>
-                                    <ReportTex>
-                                      <ReportImg src={removeIcon} alt="" />
-                                    </ReportTex>
-                                  </BreakLiSpan>
-                                </BreakLi>
-                              );
-                            })}
-                          </BreakUl>
-                        </BreakRe>
-                      </BreakSub>
-                    </BreakCon>
-                  </AnalFl>
-                </AnalPad>
-              </AnalMain>
-            </AnalSub>
-          </AnalCon>
-        </BreakWr>
-      );
-    };
-
-    const PageProps = ({ title, subTitle, imgSvg, tran }) => {
-      return (
-        <ProWr>
-          <ProCon>
-            <ProStart>
-              <OreTop>
-                <OreSubTop>
-                  <OreSu>
-                    <OreDivImg>
-                      <span>
-                        <OreImg src={marketsIcon} alt="" />
-                      </span>
-                    </OreDivImg>
-                    <OreHeDiv>
-                      <OreHe>{title}</OreHe>
-                    </OreHeDiv>
-                  </OreSu>
-                  {subTitle && (
-                    <OreTopRight>
-                      <OreTopRi>
-                        <OreTopFi>
-                          <OreSubFi>
-                            <RepBtn>
-                              <OreSpa>{subTitle}</OreSpa>
-                            </RepBtn>
-                          </OreSubFi>
-                        </OreTopFi>
-                      </OreTopRi>
-                    </OreTopRight>
-                  )}
-                </OreSubTop>
-              </OreTop>
-              <ProSub>
-                <ProDiv>
-                  <ProTop>
-                    <ProTopSt>
-                      <ProTopFl>
-                        <ProTopLe>
-                          <ProTopLef>
-                            <ProTopLeft>
-                              <ProTopRightTo>
-                                <MarketTopBtn>
-                                  <MarketMidImg src={selectIcon} alt="" />
-                                </MarketTopBtn>
-                              </ProTopRightTo>
-                            </ProTopLeft>
-                          </ProTopLef>
-                        </ProTopLe>
-                        <SearWr>
-                          <SearLe>
-                            <span>
-                              <SearLeImg src={inputIcon} alt="" />
-                            </span>
-                          </SearLe>
-                          <SearLeIn
-                            type="text"
-                            placeholder="ابحث بكل الاسواق"
-                          />
-                          <SearSha></SearSha>
-                        </SearWr>
-                        <ProTopRi>
-                          <span>
-                            <ProTopRiDiv>
-                              <MarketTopBtn>
-                                <MarketMidImg src={rightBlockIcon} alt="" />
-                              </MarketTopBtn>
-                            </ProTopRiDiv>
-                          </span>
-                        </ProTopRi>
-                      </ProTopFl>
-                    </ProTopSt>
-                  </ProTop>
-                  <MarkMid>
-                    <MarkTable>
-                      <MarkTabHe>
-                        <MarkTabTr>
-                          <MarkTh>
-                            <MarkBtnWr>
-                              <MarkBtnCon>
-                                <MarkBtn>
-                                  <MarkBtnSp>السوق</MarkBtnSp>
-                                  <span></span>
-                                </MarkBtn>
-                              </MarkBtnCon>
-                            </MarkBtnWr>
-                          </MarkTh>
-                          <MarkTw>
-                            <MarkTwDiv>
-                              <MarkBtnSp>الحالة</MarkBtnSp>
-                            </MarkTwDiv>
-                          </MarkTw>
-                          <MarkTw>
-                            <MarkTwDiv>
-                              <MarkBtnSp>تخصيص</MarkBtnSp>
-                            </MarkTwDiv>
-                          </MarkTw>
-                        </MarkTabTr>
-                      </MarkTabHe>
-                      <MarkTabBod>
-                        <BodyWr>
-                          <BodyTh>
-                            <BodyBtnWr>
-                              <BodyBtnCon>
-                                <BodyBtn>
-                                  <BodyBtnSp>
-                                    المملكة العربية السعودية
-                                  </BodyBtnSp>
-                                  <span></span>
-                                </BodyBtn>
-                              </BodyBtnCon>
-                            </BodyBtnWr>
-                          </BodyTh>
-                          <BodyTw>
-                            <BodyTwDiv>
-                              <MarkBtnSp>نشط</MarkBtnSp>
-                            </BodyTwDiv>
-                          </BodyTw>
-                          <BodyTw>
-                            <BodyTwDiv>
-                              <BodyBtSp>
-                                <BodyImg src={domainIcon} alt="" />
-                              </BodyBtSp>
-                              <BodyBtSp>
-                                <BodyImg src={catalogeIcon} alt="" />
-                              </BodyBtSp>
-                            </BodyTwDiv>
-                          </BodyTw>
-                        </BodyWr>
-                      </MarkTabBod>
-                      <MarkTabBod>
-                        <BodyWr>
-                          <BodyTh background={"rgba(248, 247, 255, 1)"}>
-                            <BodyBtnWr>
-                              <BodyBtnCon>
-                                <BodyBtn>
-                                  <BodyRiBtnSp>اصنع سوق عالمي</BodyRiBtnSp>
-                                  <span></span>
-                                </BodyBtn>
-                              </BodyBtnCon>
-                            </BodyBtnWr>
-                          </BodyTh>
-                          <BodyTw background={"rgba(248, 247, 255, 1)"}>
-                            <BodyTwDiv>
-                              <MarkBtnSp></MarkBtnSp>
-                            </BodyTwDiv>
-                          </BodyTw>
-                          <BodyTh background={"rgba(248, 247, 255, 1)"}>
-                            <BodyBtnWr>
-                              <BodyBtnCon>
-                                <BodyBtn>
-                                  <BodyRiBtnSp>ازالة</BodyRiBtnSp>
-                                  <span></span>
-                                </BodyBtn>
-                              </BodyBtnCon>
-                            </BodyBtnWr>
-                          </BodyTh>
-                        </BodyWr>
-                      </MarkTabBod>
-                    </MarkTable>
-                  </MarkMid>
-                </ProDiv>
-              </ProSub>
-            </ProStart>
-          </ProCon>
-        </ProWr>
-      );
-    };
+    if (EMPTY_TABS[activeTab])
+      return <EmptyTab {...EMPTY_TABS[activeTab]} onNavigate={goTo} />;
+    if (LIST_TABS[activeTab])
+      return <ListTab {...LIST_TABS[activeTab]} onNavigate={goTo} />;
+    if (MARKET_TABS[activeTab])
+      return <MarketsTab {...MARKET_TABS[activeTab]} />;
 
     switch (activeTab) {
       case "الرئيسية":
         return (
-          <StartSub>
-            <StartRe>
-              <StartSa>
-                <StartWa>
-                  <StartLa>
-                    <StartTop>
-                      <div></div>
-                    </StartTop>
-                    {inputModule ? (
-                      <ModalOverlay>
-                        <ModalContainer>
-                          <ModalClose
-                            onClick={() => handleToggle(setInputModule)}
-                          >
-                            <ModalImg src={crossIcon} alt="" />
-                          </ModalClose>
-                          <ModalHeader>اختار اسم لمتجرك</ModalHeader>
-                          <StoreInput
-                            placeholder="اختار اسم المتجر"
-                            value={localName}
-                            onChange={(e) => setLocalName(e.target.value)}
-                          />
-                          <ButtonRow>
-                            <Button onClick={handleStoreName}>
-                              {isLoading ? "جاري المعالجة ..." : "احفظ"}
-                            </Button>
-                          </ButtonRow>
-                        </ModalContainer>
-                      </ModalOverlay>
-                    ) : null}
-                    {toggleSubscribe ? (
-                      <TopUl>
-                        <TopLi>
-                          <TopStart>
-                            <TopRe>
-                              <TopFlex>
-                                <TopToo>
-                                  <div>
-                                    <TopMore>
-                                      <TopSpan>
-                                        <span>
-                                          "اختر خطة واحصل على 3 أشهر مقابل 1
-                                          ريال شهريًا
-                                        </span>
-                                      </TopSpan>
-                                    </TopMore>
-                                  </div>
-                                  <TopAt
-                                    onClick={() => {
-                                      handleDestination("/pay");
-                                    }}
-                                  >
-                                    <TopSelect>اختار الخطة</TopSelect>
-                                  </TopAt>
-                                </TopToo>
-                                <div>
-                                  <TopRight>
-                                    <TopBtn
-                                      onClick={() => {
-                                        handleToggle(setToggleSubscribe);
-                                      }}
-                                    >
-                                      <TopSp>
-                                        <TopImg src={crossIcon} alt="" />
-                                      </TopSp>
-                                    </TopBtn>
-                                  </TopRight>
-                                </div>
-                              </TopFlex>
-                            </TopRe>
-                          </TopStart>
-                        </TopLi>
-                      </TopUl>
-                    ) : null}
-                    <MidWr>
-                      <MidCo>
-                        <MidUl>
-                          <MidDiv>
-                            <MidStart>
-                              <MidSe>
-                                <MidThi>
-                                  <MidLa>
-                                    <MidTop>
-                                      <ChWr>
-                                        <ChCo>
-                                          <ChHe>{storeName}</ChHe>
-                                          <ChBtn
-                                            onClick={() => {
-                                              handleToggle(setInputModule);
-                                            }}
-                                          >
-                                            <ChSpan>
-                                              <ChImg src={penIcon} alt="" />
-                                            </ChSpan>
-                                          </ChBtn>
-                                        </ChCo>
-                                      </ChWr>
-                                    </MidTop>
-                                    <MidMid>
-                                      <StoWr>
-                                        <StoTop>
-                                          <SiteMapped
-                                            imgFirst={Board}
-                                            imgSec={Board2}
-                                            imgThi={Board3}
-                                            priBtn="تصفح المواقع"
-                                            secBtn="اصنع"
-                                            handlePri={() => {
-                                              handlePage("المتجر");
-                                            }}
-                                          />
-                                          <SiteMapped
-                                            imgFirst={Flower}
-                                            imgSec={WeddingCake}
-                                            imgThi={Chair}
-                                            priBtn="اضافة المنتجات"
-                                            secBtn="استيراد"
-                                            handlePri={() => {
-                                              handleDestination("/item");
-                                            }}
-                                          />
-                                        </StoTop>
-                                        <StoBot>
-                                          <StoreMapped
-                                            title={"أضف طرق الدفع"}
-                                            btnText={"تفعيل"}
-                                            arrayText={ImgArray1}
-                                            widthText={"5rem"}
-                                            handlePro={() => {
-                                              handleTab("المدفوعات");
-                                            }}
-                                          />
-                                          <StoreMapped
-                                            title={"راجع أسعار الشحن الخاصة بك"}
-                                            btnText={"مراجعة"}
-                                            arrayText={ImgArray2}
-                                            widthText={"4.5rem"}
-                                            handlePro={() => {
-                                              handleTab("الشحن");
-                                            }}
-                                          />
-                                          <StoreMapped
-                                            title={"خصص نطاقك"}
-                                            btnText={"تخصيص"}
-                                            arrayText={ImgArray3}
-                                            widthText={"1.5rem"}
-                                            boxText={"transparent"}
-                                            handlePro={() => {
-                                              handleTab("الرابط");
-                                            }}
-                                          />
-                                        </StoBot>
-                                      </StoWr>
-                                    </MidMid>
-                                  </MidLa>
-                                </MidThi>
-                              </MidSe>
-                            </MidStart>
-                          </MidDiv>
-                        </MidUl>
-                      </MidCo>
-                    </MidWr>
-                  </StartLa>
-                </StartWa>
-              </StartSa>
-            </StartRe>
-          </StartSub>
+          <HomeTab
+            storeName={storeName}
+            showBanner={showBanner}
+            onCloseBanner={closeBanner}
+            onChoosePlan={choosePlan}
+            onEditName={openNameModal}
+            onHero={handleHeroAction}
+            onSetup={goToSetting}
+          />
         );
       case "الطلبات":
         return (
-          <>
-            {preOrdered ? (
-              <BillingContainer>
-                <BillingHeader>
-                  <BillingFiltersContainer>
-                    <BillingFilterButtons>
-                      {filters.map((filter) => (
-                        <BillingFilterButton
-                          key={filter}
-                          active={activeFilter === filter}
-                          onClick={() => setActiveFilter(filter)}
-                        >
-                          {filter}
-                        </BillingFilterButton>
-                      ))}
-                    </BillingFilterButtons>
-
-                    <BillingActionButtons>
-                      <BillingActionButton>
-                        <ProFilter src={filterIcon} alt="Filter" />
-                      </BillingActionButton>
-                      <BillingActionButton>
-                        <ProFilter src={upDownIcon} alt="Sort" />
-                      </BillingActionButton>
-                    </BillingActionButtons>
-                  </BillingFiltersContainer>
-                </BillingHeader>
-
-                <BillingTableContainer>
-                  <BillingTable>
-                    <BillingTableHead>
-                      <BillingTableHeader>
-                        <BillingCheckbox type="checkbox" />
-                      </BillingTableHeader>
-                      <BillingTableHeader>تاريخ الطلب</BillingTableHeader>
-                      <BillingTableHeader>الاسم</BillingTableHeader>
-                      <BillingTableHeader>رقم الجوال</BillingTableHeader>
-                      <BillingTableHeader>تفاصيل الطلب</BillingTableHeader>
-                      <BillingTableHeader>المورد</BillingTableHeader>
-                      <BillingTableHeader align="center">
-                        عدد الضيوف
-                      </BillingTableHeader>
-                      <BillingTableHeader>تاريخ الزواج</BillingTableHeader>
-                      <BillingTableHeader align="center">
-                        حالة الطلب
-                      </BillingTableHeader>
-                    </BillingTableHead>
-
-                    <BillingTableBody>
-                      {isLoading ? (
-                        <BillingLoadingRow>جاري التحميل...</BillingLoadingRow>
-                      ) : (
-                        ordersData.map((quota, index) => (
-                          <BillingTableRow
-                            key={quota._id || index}
-                            onClick={() => onOrderClick(quota._id)}
-                          >
-                            <BillingTableCell>
-                              <BillingCheckbox
-                                type="checkbox"
-                                onClick={(e) => e.stopPropagation()} // Prevent row click when clicking checkbox
-                              />
-                            </BillingTableCell>
-                            <BillingTableCell>
-                              {new Date(quota.createdAt).toLocaleDateString(
-                                "ar-SA"
-                              )}
-                            </BillingTableCell>
-                            <BillingTableCell>
-                              {`${quota.firstName} ${quota.lastName}`}
-                            </BillingTableCell>
-                            <BillingTableCell>
-                              {quota.phoneNumber}
-                            </BillingTableCell>
-                            <BillingTableCell
-                              title={quota.weddingDetails || "لا توجد تفاصيل"}
-                            >
-                              {quota.weddingDetails || "لا توجد تفاصيل"}
-                            </BillingTableCell>
-                            <BillingTableCell>
-                              {quota.vendor?.name || "غير محدد"}
-                            </BillingTableCell>
-                            <BillingTableCell align="center" weight="500">
-                              {quota.guestCount}
-                            </BillingTableCell>
-                            <BillingTableCell>
-                              {quota.weddingDate}
-                            </BillingTableCell>
-                            <BillingTableCell align="center">
-                              <BillingStatusBadge status={quota.status}>
-                                {quota.status || "قيد المراجعة"}
-                              </BillingStatusBadge>
-                            </BillingTableCell>
-                          </BillingTableRow>
-                        ))
-                      )}
-                    </BillingTableBody>
-                  </BillingTable>
-                </BillingTableContainer>
-
-                <BillingPagination>
-                  <BillingExtra>
-                    <BillingPaginationButton disabled>
-                      <ArrowDir src={arrowRight} alt="Filter" />
-                    </BillingPaginationButton>
-                    <BillingPaginationButton>
-                      <ArrowDir src={arrowLeft} alt="Filter" />
-                    </BillingPaginationButton>
-                  </BillingExtra>
-                </BillingPagination>
-              </BillingContainer>
-            ) : (
-              <OrderProps
-                title="الطلبات"
-                subTitle="خيارات اكثر"
-                heText="ستظهر طلباتك هنا"
-                paraText="للحصول على الطلبات وقبول المدفوعات من العملاء، تحتاج إلى اختيار خطة. سيتم فرض رسوم الخطة عليك فقط بعد انتهاء الفترة التجريبية المجانية"
-                firBtn="اختار الخطة"
-                exFir="اعرف المزيد عن"
-                exSec="الطلبات"
-                imgSrc={ordersIcon}
-                imgImg={ordersImage}
-                imgSvg={arrowDown}
-                handleSub={() => {
-                  handleDestination("/pay");
-                }}
-              />
-            )}
-          </>
-        );
-      case "المنتجات":
-        return (
-          <ProductProps
-            title="المنتجات"
-            subTitle="الكل"
-            heText="أضف منتجاتك"
-            paraText="ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك"
-            firBtn="اضافة منتج"
-            handlePro={() => {
-              handleDestination("/item");
-            }}
-            secBtn="استورد"
-            exFir="ابحث عن منتجات لبيعها"
-            exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
-            exBtn="تصفح تطبيقات توريد المنتجات"
-            imgSrc={ordersIcon}
-            imgSvg={productsItem}
-          />
-        );
-      case "العملاء":
-        return (
-          <ProductProps
-            title="العملاء"
-            subTitle="الكل"
-            heText="كل ما يتعلق بالعملاء في مكان واحد"
-            paraText="قم بإدارة تفاصيل العملاء، واطّلع على سجل طلباتهم، وقم بتقسيمهم إلى مجموعات"
-            firBtn="اضافة عميل"
-            secBtn="استيراد العملاء"
-            exFir="احصل على عملاء من خلال التطبيقات"
-            exSec="نمِّ قائمة عملائك من خلال إضافة نموذج لجمع بيانات العملاء إلى متجرك وحملاتك التسويقية."
-            exBtn="اطّلع على التطبيقات الموصى بها"
-            imgSrc={tagIcon}
-            imgSvg={customersImage}
+          <OrdersTab
+            accessToken={accessToken}
+            onAuthError={handleAuthError}
+            onNavigate={goTo}
+            onOpenOrder={openOrder}
           />
         );
       case "التسويق":
-        return (
-          <OreWr>
-            <OreCon>
-              <OreSubCon>
-                <OreTop>
-                  <OreSubTop>
-                    <OreSu>
-                      <OreDivImg>
-                        <span>
-                          <OreImg src={contentIcon} alt="" />
-                        </span>
-                      </OreDivImg>
-                      <OreHeDiv>
-                        <OreHe>التسويق</OreHe>
-                      </OreHeDiv>
-                    </OreSu>
-                    <OreTopRight>
-                      <OreTopRi>
-                        <OreTopFi>
-                          {BtnArray.map((item, index) => {
-                            return (
-                              <OreSpan key={index}>
-                                <RepExBtn>
-                                  <RepSubImg src={item.icon} alt="" />
-                                </RepExBtn>
-                              </OreSpan>
-                            );
-                          })}
-                          <RepBtn>
-                            <OreSpa>تخصيص</OreSpa>
-                          </RepBtn>
-                        </OreTopFi>
-                      </OreTopRi>
-                    </OreTopRight>
-                  </OreSubTop>
-                </OreTop>
-                <RepBot>
-                  <RepDate>
-                    <RepTod>
-                      <RepTodBtn>
-                        <span>
-                          <BodyImg src={calendarIcon} alt="" />
-                        </span>
-                        <RepTodSp>اليوم</RepTodSp>
-                      </RepTodBtn>
-                    </RepTod>
-                    <RepTod>
-                      <RepTodBtn>
-                        <RepTodSp>مقارنة مع: ٢٤/٨/٢٠١٣</RepTodSp>
-                      </RepTodBtn>
-                    </RepTod>
-                  </RepDate>
-                  <AdWr>
-                    <AdGrid>
-                      {AdArray.map((item, index) => {
-                        return (
-                          <AdSec key={index}>
-                            <AdPad>
-                              <AdTop>
-                                <AdTopSp>
-                                  <AdTopSpan>{item.title}</AdTopSpan>
-                                </AdTopSp>
-                                <AdTopSp>
-                                  <AdTopBtn>
-                                    <AdTopSp>
-                                      <ChImg src={contentIcon} alt="" />
-                                    </AdTopSp>
-                                  </AdTopBtn>
-                                </AdTopSp>
-                              </AdTop>
-                              <AdMid>
-                                <ReportTex>
-                                  <ReportImg src={removeIcon} alt="" />
-                                </ReportTex>
-                              </AdMid>
-                              <AdBot>
-                                <AdBotWr>
-                                  <AdBotCon>
-                                    <AdBotRe>
-                                      <div
-                                        style={{
-                                          height: "2px",
-                                          width: "100%",
-                                          backgroundColor: "#00b2ff",
-                                          marginTop: "auto",
-                                        }}
-                                      />
-                                    </AdBotRe>
-                                  </AdBotCon>
-                                </AdBotWr>
-                              </AdBot>
-                            </AdPad>
-                          </AdSec>
-                        );
-                      })}
-                    </AdGrid>
-                  </AdWr>
-                  <CampaignProps
-                    imgSrc={campaignImage}
-                    subTitle="أنشئ حملات لتقييم مدى تأثير المبادرات التسويقية على أهداف عملك. قم بتسجيل نقاط التواصل سواء كانت عبر  الإنترنت أو دون اتصال، أضف  أنشطة الحملات من قنوات تسويقية متعددة، وتابع  النتائج بسهولة "
-                    title="مركز تتبع حملاتك التسويقية"
-                    btnText="اصنع حملتك"
-                  />
-                  <CampaignProps
-                    imgSrc={stateImage}
-                    subTitle="نمّ جمهورك على منصات التواصل الاجتماعي، واجذب عملاء جدد من خلال الاشتراك في النشرات البريدية، وزِد من معدلات التحويل باستخدام الدردشة، والمزيد"
-                    title="زِد عدد الزوار باستخدام تطبيقات التسويق"
-                    btnText="استكشف تسويق التطبيقات"
-                  />
-                </RepBot>
-              </OreSubCon>
-            </OreCon>
-          </OreWr>
-        );
-      case "الخصومات":
-        return (
-          <>
-            <OrderProps
-              title="الخصومات"
-              subTitle="خيارات اكثر"
-              heText="إدارة الخصومات والعروض الترويجية"
-              paraText="أضف رموز خصم وخصومات تلقائية تُطبق عند إتمام الدفع. يمكنك أيضًا استخدام الخصومات مع الأسعار المقارنة."
-              firBtn="انشاء خصومات"
-              exFir="اعرف المزيد عن"
-              exSec="الخصومات"
-              imgSrc={discountsIcon}
-              imgImg={discountImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "المحتوى":
-        return (
-          <>
-            <OrderProps
-              title="المحتوى"
-              subTitle="خيارات اكثر"
-              heText="بسّط عملية إنشاء المحتوى باستخدام الكائنات الوصفية"
-              paraText="تتيح لك الكائنات الوصفية تجميع الحقول وربطها بمختلف أجزاء متجرك. استخدمها لإنشاء محتوى مخصص أو هياكل بيانات خاصة بك"
-              firBtn="اضافة تعديف"
-              exFir="اعرف المزيد عن"
-              exSec="المحتوى"
-              imgSrc={contentIcon}
-              imgImg={contentImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "الأسواق":
-        return <PageProps title="الاسواق" />;
-      case "جزء":
-        return <PageProps title="جزء" />;
-      case "المجموعة":
-        return <PageProps title="المجموعة" subTitle="اصنع مجموعة" />;
+        return <MarketingTab />;
       case "التحليلات":
-        return (
-          <OreWr>
-            <OreCon>
-              <OreSubCon>
-                <OreTop>
-                  <OreSubTop>
-                    <OreSu>
-                      <OreDivImg>
-                        <span>
-                          <OreImg src={contentIcon} alt="" />
-                        </span>
-                      </OreDivImg>
-                      <OreHeDiv>
-                        <OreHe>التحليلات</OreHe>
-                      </OreHeDiv>
-                    </OreSu>
-                    <OreTopRight>
-                      <OreTopRi>
-                        <OreTopFi>
-                          {BtnArray.map((item, index) => {
-                            return (
-                              <OreSpan key={index}>
-                                <RepExBtn>
-                                  <RepSubImg src={item.icon} alt="" />
-                                </RepExBtn>
-                              </OreSpan>
-                            );
-                          })}
-                          <RepBtn>
-                            <OreSpa>تخصيص</OreSpa>
-                          </RepBtn>
-                        </OreTopFi>
-                      </OreTopRi>
-                    </OreTopRight>
-                  </OreSubTop>
-                </OreTop>
-                <RepBot>
-                  <RepDate>
-                    <RepTod>
-                      <RepTodBtn>
-                        <span>
-                          <BodyImg src={calendarIcon} alt="" />
-                        </span>
-                        <RepTodSp>اليوم</RepTodSp>
-                      </RepTodBtn>
-                    </RepTod>
-                    <RepTod>
-                      <RepTodBtn>
-                        <RepTodSp>مقارنة مع: ٢٤/٨/٢٠١٣</RepTodSp>
-                      </RepTodBtn>
-                    </RepTod>
-                  </RepDate>
-                  <RepMain>
-                    <RepTop>
-                      <RepTopDiv>
-                        <RepTopSta>
-                          <ReportProps
-                            title="صافي المبيعات"
-                            tran={"translate(-216px, 0px)"}
-                          />
-                          <ReportProps
-                            title="معدل عودة العملاء"
-                            tran={"translate(22px, 0px)"}
-                          />
-                          <ReportProps
-                            title="طلبات نفذت"
-                            tran={"translate(260px, 0px)"}
-                          />
-                          <ReportProps
-                            title="الطلبات"
-                            tran={"translate(499px, 0px)"}
-                          />
-                          <AnalyticProps />
-                          <BreakProps />
-                        </RepTopSta>
-                      </RepTopDiv>
-                    </RepTop>
-                    <RepBotto>
-                      <RepBotPa>
-                        Learn more about <span>analytic</span>
-                      </RepBotPa>
-                    </RepBotto>
-                  </RepMain>
-                </RepBot>
-              </OreSubCon>
-            </OreCon>
-          </OreWr>
-        );
-      case "مسودة":
-        return (
-          <>
-            <OrderProps
-              title="مسودة"
-              subTitle="خيارات اكثر"
-              heText="إنشاء الطلبات والفواتير يدويًا"
-              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
-              firBtn="انشاء مسودة طلب"
-              exFir="اعرف المزيد عن"
-              exSec="الطلبات"
-              imgSrc={ordersIcon}
-              imgImg={draftImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "المخزون":
-        return (
-          <>
-            <OrderProps
-              title="المخزون"
-              subTitle="خيارات اكثر"
-              heText="إنشاء الطلبات والفواتير يدويًا"
-              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
-              firBtn="انشاء مسودة طلب"
-              exFir="اعرف المزيد عن"
-              exSec="الطلبات"
-              imgSrc={ordersIcon}
-              imgImg={inventoryImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "تاريخ الشراء":
-        return (
-          <>
-            <OrderProps
-              title="تاريخ الشراء"
-              subTitle="خيارات اكثر"
-              heText="إنشاء الطلبات والفواتير يدويًا"
-              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
-              firBtn="انشاء مسودة طلب"
-              exFir="اعرف المزيد عن"
-              exSec="الطلبات"
-              imgSrc={ordersIcon}
-              imgImg={historyImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "التحويل":
-        return (
-          <>
-            <OrderProps
-              title="التحويل"
-              subTitle="خيارات اكثر"
-              heText="إنشاء الطلبات والفواتير يدويًا"
-              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
-              firBtn="انشاء مسودة طلب"
-              exFir="اعرف المزيد عن"
-              exSec="الطلبات"
-              imgSrc={ordersIcon}
-              imgImg={transferImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "الهدايا":
-        return (
-          <>
-            <OrderProps
-              title="الهدايا"
-              subTitle="خيارات اكثر"
-              heText="إنشاء الطلبات والفواتير يدويًا"
-              paraText="استخدم الطلبات المسودة لتلقي الطلبات عبر الهاتف، وأرسل الفواتير للعملاء عبر البريد الإلكتروني، وجمع المدفوعات "
-              firBtn="انشاء مسودة طلب"
-              exFir="اعرف المزيد عن"
-              exSec="الطلبات"
-              imgSrc={ordersIcon}
-              imgImg={giftImage}
-              imgSvg={arrowDown}
-            />
-          </>
-        );
-      case "الحملات":
-        return (
-          <>
-            <ProductProps
-              title="الحملات"
-              subTitle="الكل"
-              heText="أضف منتجاتك"
-              paraText="ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك"
-              firBtn="اضافة منتج"
-              handlePro={() => {
-                handleDestination("/item");
-              }}
-              secBtn="استورد"
-              exFir="ابحث عن منتجات لبيعها"
-              exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
-              exBtn="تصفح تطبيقات توريد المنتجات"
-              imgSrc={ordersIcon}
-              imgSvg={campaignImage}
-            />
-          </>
-        );
-      case "الاتمته":
-        return (
-          <>
-            <ProductProps
-              title="الاتمته"
-              subTitle="الكل"
-              heText="أضف منتجاتك"
-              paraText="ابدأ بتجهيز متجرك بمنتجات سيحبها عملاؤك"
-              firBtn="اضافة منتج"
-              handlePro={() => {
-                handleDestination("/item");
-              }}
-              secBtn="استورد"
-              exFir="ابحث عن منتجات لبيعها"
-              exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
-              exBtn="تصفح تطبيقات توريد المنتجات"
-              imgSrc={ordersIcon}
-              imgSvg={automationImage}
-            />
-          </>
-        );
-      case "السلات المتروكة":
-        return (
-          <>
-            <AbandonProps
-              title="السلات المتروكة"
-              subTitle="الكل"
-              heText="ستظهر عمليات الدفع المتروكة هنا"
-              paraText="اطّلع على الوقت الذي يضيف فيه العملاء منتجًا إلى سلة التسوق دون إتمام عملية الدفع. يمكنك أيضًا إرسال رابط السلة إلى العملاء عبر البريد الإلكتروني."
-              firBtn="اضافة منتج"
-              handlePro={() => {
-                handleDestination("/item");
-              }}
-              secBtn="استورد"
-              exFir="ابحث عن منتجات لبيعها"
-              exSec="اشحن منتجات الدروبشيبينغ أو الطباعة عند الطلب مباشرة من المورد إلى عميلك، وادفع فقط مقابل ما تبيعه"
-              exBtn="تصفح تطبيقات توريد المنتجات"
-              imgSrc={ordersIcon}
-              imgSvg={abandonImage}
-              handlePri={() => {
-                handleDestination("/item");
-              }}
-            />
-          </>
-        );
+        return <AnalyticsTab />;
       case "المتجر":
-        return (
-          <PageWrapper>
-            <MainContentArea>
-              {/* Header */}
-              <TopHeaderSection>
-                <HeaderFlexRow>
-                  <MainTitle>إعدادات حجز المواعيد</MainTitle>
-                  <SaveButton
-                    onClick={handleSaveAllSettings}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "جاري الحفظ..." : "حفظ جميع التغييرات"}
-                  </SaveButton>
-                </HeaderFlexRow>
-              </TopHeaderSection>
-
-              <TwoColumnGrid>
-                {/* Left Column - Settings */}
-                <LeftColumnWrapper>
-                  {/* Doctor Information Card */}
-                  <WhiteCard>
-                    <CardHeading>معلومات الطبيب</CardHeading>
-
-                    <TwoFieldGrid>
-                      <div>
-                        <FieldLabel>الاسم الأول</FieldLabel>
-                        <TextInput
-                          type="text"
-                          value={docFirstName}
-                          onChange={(e) => setDocFirstName(e.target.value)}
-                          placeholder="أدخل الاسم الأول"
-                        />
-                      </div>
-
-                      <div>
-                        <FieldLabel>الاسم الأخير</FieldLabel>
-                        <TextInput
-                          type="text"
-                          value={docLastName}
-                          onChange={(e) => setDocLastName(e.target.value)}
-                          placeholder="أدخل الاسم الأخير"
-                        />
-                      </div>
-                    </TwoFieldGrid>
-
-                    <InputFieldWrapper $marginBottom="1rem">
-                      <FieldLabel>التخصص</FieldLabel>
-                      <TextInput
-                        type="text"
-                        value={major}
-                        onChange={(e) => setMajor(e.target.value)}
-                        placeholder="مثال: طبيب رعاية أولية"
-                      />
-                    </InputFieldWrapper>
-
-                    <InputFieldWrapper>
-                      <FieldLabel>البلد</FieldLabel>
-                      <TextInput
-                        type="text"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        placeholder="أدخل البلد"
-                      />
-                    </InputFieldWrapper>
-                  </WhiteCard>
-
-                  {/* Profile Image Card */}
-                  <WhiteCard>
-                    <CardHeading>صورة الملف الشخصي</CardHeading>
-
-                    <ProfileImageRow>
-                      <div>
-                        {profileImg ? (
-                          <ProfileImagePreview src={profileImg} alt="Profile" />
-                        ) : (
-                          <ImagePlaceholder>
-                            <Upload size={32} color="#6b7280" />
-                          </ImagePlaceholder>
-                        )}
-                      </div>
-
-                      <ImageUploadArea>
-                        <UploadLabel>
-                          <Upload
-                            size={18}
-                            style={{
-                              marginRight: "0.5rem",
-                              verticalAlign: "middle",
-                            }}
-                          />
-                          اختر صورة جديدة
-                          <HiddenFileInput
-                            type="file"
-                            accept="image/*"
-                            onChange={handleProfileImageChange}
-                          />
-                        </UploadLabel>
-                        <UploadHintText>
-                          JPG, PNG أو GIF (الحد الأقصى 5 ميجابايت)
-                        </UploadHintText>
-                      </ImageUploadArea>
-                    </ProfileImageRow>
-                  </WhiteCard>
-
-                  {/* Working Hours Card */}
-                  <WhiteCard>
-                    <CardHeading>أوقات العمل</CardHeading>
-
-                    <InputFieldWrapper $marginBottom="1.5rem">
-                      <FieldLabel>أيام العمل</FieldLabel>
-                      <TwoFieldGrid>
-                        <div>
-                          <SmallFieldLabel>من يوم</SmallFieldLabel>
-                          <SelectDropdown
-                            value={workingHours.startDay}
-                            onChange={(e) =>
-                              setWorkingHours((prev) => ({
-                                ...prev,
-                                startDay: e.target.value,
-                              }))
-                            }
-                          >
-                            <option value="0">الأحد</option>
-                            <option value="1">الاثنين</option>
-                            <option value="2">الثلاثاء</option>
-                            <option value="3">الأربعاء</option>
-                            <option value="4">الخميس</option>
-                            <option value="5">الجمعة</option>
-                            <option value="6">السبت</option>
-                          </SelectDropdown>
-                        </div>
-
-                        <div>
-                          <SmallFieldLabel>إلى يوم</SmallFieldLabel>
-                          <SelectDropdown
-                            value={workingHours.endDay}
-                            onChange={(e) =>
-                              setWorkingHours((prev) => ({
-                                ...prev,
-                                endDay: e.target.value,
-                              }))
-                            }
-                          >
-                            <option value="0">الأحد</option>
-                            <option value="1">الاثنين</option>
-                            <option value="2">الثلاثاء</option>
-                            <option value="3">الأربعاء</option>
-                            <option value="4">الخميس</option>
-                            <option value="5">الجمعة</option>
-                            <option value="6">السبت</option>
-                          </SelectDropdown>
-                        </div>
-                      </TwoFieldGrid>
-                    </InputFieldWrapper>
-
-                    <div>
-                      <FieldLabel>ساعات العمل</FieldLabel>
-                      <TwoFieldGrid>
-                        <div>
-                          <SmallFieldLabel>من الساعة</SmallFieldLabel>
-                          <TimeInput
-                            type="time"
-                            value={workingHours.start}
-                            onChange={(e) =>
-                              setWorkingHours((prev) => ({
-                                ...prev,
-                                start: e.target.value,
-                              }))
-                            }
-                          />
-                        </div>
-
-                        <div>
-                          <SmallFieldLabel>إلى الساعة</SmallFieldLabel>
-                          <TimeInput
-                            type="time"
-                            value={workingHours.end}
-                            onChange={(e) =>
-                              setWorkingHours((prev) => ({
-                                ...prev,
-                                end: e.target.value,
-                              }))
-                            }
-                          />
-                        </div>
-                      </TwoFieldGrid>
-                    </div>
-                  </WhiteCard>
-
-                  {/* Payment Settings Card */}
-                  <WhiteCard>
-                    <CardHeading>إعدادات الدفع</CardHeading>
-
-                    <InputFieldWrapper $marginBottom="1rem">
-                      <CheckboxLabel>
-                        <CheckboxInput
-                          type="checkbox"
-                          checked={paymentSettings.enabled}
-                          onChange={(e) =>
-                            setPaymentSettings((prev) => ({
-                              ...prev,
-                              enabled: e.target.checked,
-                            }))
-                          }
-                        />
-                        <CheckboxText $bold>تفعيل نظام الدفع</CheckboxText>
-                      </CheckboxLabel>
-                    </InputFieldWrapper>
-
-                    <InputFieldWrapper $marginBottom="1rem">
-                      <FieldLabel>رسوم الموعد</FieldLabel>
-                      <NumberInput
-                        type="number"
-                        value={paymentSettings.appointmentFee}
-                        onChange={(e) =>
-                          setPaymentSettings((prev) => ({
-                            ...prev,
-                            appointmentFee: e.target.value,
-                          }))
-                        }
-                        min="0"
-                        step="0.01"
-                      />
-                    </InputFieldWrapper>
-
-                    <CheckboxGroup>
-                      <CheckboxLabel>
-                        <CheckboxInput
-                          type="checkbox"
-                          checked={paymentSettings.allowPayOnArrival}
-                          onChange={(e) =>
-                            setPaymentSettings((prev) => ({
-                              ...prev,
-                              allowPayOnArrival: e.target.checked,
-                            }))
-                          }
-                        />
-                        <CheckboxText>السماح بالدفع عند الوصول</CheckboxText>
-                      </CheckboxLabel>
-
-                      <CheckboxLabel>
-                        <CheckboxInput
-                          type="checkbox"
-                          checked={paymentSettings.allowOnlinePayment}
-                          onChange={(e) =>
-                            setPaymentSettings((prev) => ({
-                              ...prev,
-                              allowOnlinePayment: e.target.checked,
-                            }))
-                          }
-                        />
-                        <CheckboxText>السماح بالدفع الإلكتروني</CheckboxText>
-                      </CheckboxLabel>
-
-                      <CheckboxLabel>
-                        <CheckboxInput
-                          type="checkbox"
-                          checked={paymentSettings.requireUpfrontPayment}
-                          onChange={(e) =>
-                            setPaymentSettings((prev) => ({
-                              ...prev,
-                              requireUpfrontPayment: e.target.checked,
-                            }))
-                          }
-                        />
-                        <CheckboxText>يتطلب الدفع المسبق</CheckboxText>
-                      </CheckboxLabel>
-                      <CheckboxLabel>
-                        <CheckboxInput
-                          type="checkbox"
-                          checked={reviewSettings.enabled}
-                          onChange={(e) =>
-                            setReviewSettings((prev) => ({
-                              ...prev,
-                              enabled: e.target.checked,
-                            }))
-                          }
-                        />
-                        <CheckboxText>اظهار التقاييم</CheckboxText>
-                      </CheckboxLabel>
-                    </CheckboxGroup>
-                  </WhiteCard>
-
-                  {/* Holidays Card */}
-                  <WhiteCard>
-                    <CardHeading>العطلات الرسمية</CardHeading>
-
-                    <HolidayInputRow>
-                      <DateInputWrapper>
-                        <SmallFieldLabel>التاريخ</SmallFieldLabel>
-                        <DateInput
-                          type="date"
-                          value={newHoliday.date}
-                          onChange={(e) =>
-                            setNewHoliday((prev) => ({
-                              ...prev,
-                              date: e.target.value,
-                            }))
-                          }
-                        />
-                      </DateInputWrapper>
-
-                      <DescriptionInputWrapper>
-                        <SmallFieldLabel>الوصف</SmallFieldLabel>
-                        <TextInput
-                          type="text"
-                          value={newHoliday.description}
-                          onChange={(e) =>
-                            setNewHoliday((prev) => ({
-                              ...prev,
-                              description: e.target.value,
-                            }))
-                          }
-                          placeholder="مثال: عيد الفطر"
-                        />
-                      </DescriptionInputWrapper>
-
-                      <AddButton onClick={handleAddHoliday}>
-                        <Plus size={18} />
-                        إضافة
-                      </AddButton>
-                    </HolidayInputRow>
-
-                    {holidays.length > 0 && (
-                      <HolidayListSection>
-                        <HolidayListTitle>العطلات المضافة:</HolidayListTitle>
-                        <HolidayItemsWrapper>
-                          {holidays.map((holiday, index) => (
-                            <HolidayItem key={index}>
-                              <HolidayInfo>
-                                <HolidayName>{holiday.description}</HolidayName>
-                                <HolidayDate>
-                                  {new Date(holiday.date).toLocaleDateString(
-                                    "ar-SA"
-                                  )}
-                                </HolidayDate>
-                              </HolidayInfo>
-                              <DeleteButton
-                                onClick={() => handleRemoveHoliday(index)}
-                              >
-                                <Trash2 size={16} />
-                              </DeleteButton>
-                            </HolidayItem>
-                          ))}
-                        </HolidayItemsWrapper>
-                      </HolidayListSection>
-                    )}
-                  </WhiteCard>
-                </LeftColumnWrapper>
-
-                {/* Right Column - Phone Preview */}
-                <div>
-                  <RightColumnSticky>
-                    <PhonePreviewFrame>
-                      {/* Phone Preview Content */}
-                      <PreviewSection $padding="8px 12px">
-                        <PreviewTitle>حجز موعد</PreviewTitle>
-                      </PreviewSection>
-
-                      <PreviewSection $padding="6px 12px">
-                        <DoctorInfoRow>
-                          <DoctorAvatar
-                            src={
-                              profileImg ||
-                              "https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=128&auto=format&fit=crop"
-                            }
-                            alt="doctor"
-                          />
-                          <DoctorDetails>
-                            <DoctorName>
-                              {docFirstName && docLastName
-                                ? `د. ${docFirstName} ${docLastName}`
-                                : "د. هارولد واتسون، MD"}
-                            </DoctorName>
-                            <DoctorSpecialty>
-                              {major || "طبيب رعاية أولية"}
-                            </DoctorSpecialty>
-                            {reviewSettings.enabled ? (
-                              <RatingRow>
-                                <Rating
-                                  value={currentUser?.rating || 4.9}
-                                  reviews={currentUser?.reviews || 860}
-                                />
-                              </RatingRow>
-                            ) : null}
-                          </DoctorDetails>
-                        </DoctorInfoRow>
-                      </PreviewSection>
-
-                      <PreviewSection $padding="10px 12px">
-                        <ScheduleHeading>تفاصيل الجدولة</ScheduleHeading>
-                        <ReasonBox>
-                          <ReasonText>{reason}</ReasonText>
-                        </ReasonBox>
-                        {paymentSettings.enabled && (
-                          <FeeBox>
-                            رسوم الموعد: {paymentSettings.appointmentFee} ريال
-                          </FeeBox>
-                        )}
-                      </PreviewSection>
-
-                      <PreviewSection $padding="10px 12px">
-                        <ScheduleHeading>المواعيد المتاحة</ScheduleHeading>
-                        {availableDates.length === 0 ? (
-                          <NoWorkDaysAlert>
-                            لا توجد أيام عمل محددة
-                          </NoWorkDaysAlert>
-                        ) : (
-                          availableDates.slice(0, 2).map((date, idx) => {
-                            const dateKey = date.toISOString().split("T")[0];
-                            const slots = dateSlots[dateKey] || [];
-                            const previewSlots = slots.slice(0, 4);
-                            const isToday = idx === 0;
-
-                            return (
-                              <DateSlotSection key={dateKey}>
-                                <DateTitle>
-                                  {isToday ? "اليوم، " : ""}
-                                  {formatDate(date)}
-                                </DateTitle>
-                                {previewSlots.length === 0 ? (
-                                  <NoSlotsMessage>
-                                    لا توجد أوقات متاحة لهذا اليوم.
-                                  </NoSlotsMessage>
-                                ) : (
-                                  <TimeSlotGrid>
-                                    {previewSlots.map((time) => {
-                                      const slotKey = `${dateKey}-${time}`;
-                                      const selected = selectedSlot === slotKey;
-
-                                      return (
-                                        <TimeSlotButton
-                                          key={slotKey}
-                                          onClick={() =>
-                                            setSelectedSlot(slotKey)
-                                          }
-                                          $selected={selected}
-                                        >
-                                          {time}
-                                        </TimeSlotButton>
-                                      );
-                                    })}
-                                  </TimeSlotGrid>
-                                )}
-                              </DateSlotSection>
-                            );
-                          })
-                        )}
-                      </PreviewSection>
-                    </PhonePreviewFrame>
-                  </RightColumnSticky>
-                </div>
-              </TwoColumnGrid>
-            </MainContentArea>
-          </PageWrapper>
-        );
-
+        return <AppointmentSettings />;
       case "التطبيقات":
-        return (
-          <>
-            <div>التطبيقات ...</div>
-            <div></div>
-          </>
-        );
+        return <AppsTab />;
+      default:
+        return null;
     }
   };
 
+  const initials = (storeName || "MS").trim().slice(0, 2).toUpperCase();
+
   return (
-    <MaFirst>
-      <MaSec>
-        <MaAll>
-          <ContentSection>
-            <MainCon>
-              <LogoCon>
-                <LogoGrid>
-                  <LogoDiv>
-                    <LogoSubDiv>
-                      <LogoImg src={logo} alt="" />
-                    </LogoSubDiv>
-                  </LogoDiv>
-                  <SearchWr>
-                    <SearchCon>
-                      <SearchSu>
-                        <SearchSub>
-                          <SearchRe>
-                            <SearchBtn>
-                              <InputWr>
-                                <InputCon>
-                                  <InputSpan>
-                                    <InputImg src={inputIcon} alt="" />
-                                  </InputSpan>
-                                  <InputSpa>ابحث</InputSpa>
-                                </InputCon>
-                                <InputSp>
-                                  <InputKbd>⌘</InputKbd>
-                                  <InputKbd>K</InputKbd>
-                                </InputSp>
-                              </InputWr>
-                            </SearchBtn>
-                          </SearchRe>
-                        </SearchSub>
-                      </SearchSu>
-                    </SearchCon>
-                  </SearchWr>
-                  <NotifWr>
-                    <NotifCon></NotifCon>
-                    <NotifSub>
-                      <NotifStore>
-                        <NotifBtn>
-                          <NotifBtnDiv>
-                            <NotDiv>
-                              <NotSpan>MS</NotSpan>
-                            </NotDiv>
-                            <NotSp>{storeName}</NotSp>
-                          </NotifBtnDiv>
-                        </NotifBtn>
-                      </NotifStore>
-                    </NotifSub>
-                  </NotifWr>
-                </LogoGrid>
-              </LogoCon>
-              <NavCon></NavCon>
-              <MainSubCon>
-                <NavSide />
-                <StartCon>
-                  <StartDiv>{renderContent()}</StartDiv>
-                </StartCon>
-              </MainSubCon>
-            </MainCon>
-          </ContentSection>
-          <TimeOutModel />
-        </MaAll>
-      </MaSec>
-    </MaFirst>
+    <S.Shell>
+      <S.TopBar>
+        <S.Logo src={logo} alt="" onClick={() => goToTab("الرئيسية")} />
+        <S.SearchTrigger type="button">
+          <Search size={16} />
+          <span>ابحث</span>
+          <S.KbdGroup>
+            <S.Kbd>⌘</S.Kbd>
+            <S.Kbd>K</S.Kbd>
+          </S.KbdGroup>
+        </S.SearchTrigger>
+        <S.StoreChip type="button">
+          <S.Avatar>{initials}</S.Avatar>
+          <span>{storeName}</span>
+        </S.StoreChip>
+      </S.TopBar>
+
+      <S.Body>
+        <NavSide />
+        <S.Main>
+          <S.MainInner>{renderContent()}</S.MainInner>
+        </S.Main>
+      </S.Body>
+
+      {nameModalOpen && (
+        <StoreNameModal
+          value={localName}
+          onChange={setLocalName}
+          onClose={closeNameModal}
+          onSave={saveStoreName}
+          saving={savingName}
+        />
+      )}
+      <TimeoutModal open={showTimeout} onLogin={handleLogin} />
+    </S.Shell>
   );
 };
 
