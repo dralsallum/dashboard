@@ -1818,3 +1818,237 @@ export const AffixField = styled.div`
     pointer-events: none;
   }
 `;
+
+/* ============================================================
+   Analytics + marketing
+   ============================================================ */
+
+const pulse = keyframes`
+  0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+  70%  { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+`;
+
+export const ChartBox = styled.div`
+  margin-top: 0.75rem;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    direction: ltr;
+  }
+
+  .grid {
+    stroke: ${t.divider};
+    stroke-width: 1;
+  }
+
+  .axis {
+    fill: ${t.textSubtle};
+    font-size: 11px;
+    font-family: inherit;
+  }
+
+  .bar {
+    fill: ${t.primary};
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+
+  .line {
+    fill: none;
+    stroke: ${t.textSubtle};
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+    stroke-linejoin: round;
+  }
+`;
+
+export const BarRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 9rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+
+  span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  strong {
+    min-width: 2rem;
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+`;
+
+export const BarTrack = styled.div`
+  height: ${({ $tall }) => ($tall ? "10px" : "8px")};
+  border-radius: 999px;
+  background: ${t.divider};
+  overflow: hidden;
+`;
+
+export const BarFill = styled.div`
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: ${t.primary};
+  transition: width 0.3s ease;
+`;
+
+export const LiveDot = styled.span`
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: ${pulse} 2s infinite;
+`;
+
+export const Feed = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 420px;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid ${t.divider};
+    font-size: 0.8125rem;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    svg {
+      flex-shrink: 0;
+      color: ${t.textSubtle};
+    }
+
+    span {
+      flex: 1;
+      min-width: 0;
+    }
+
+    time {
+      flex-shrink: 0;
+      color: ${t.textSubtle};
+      font-size: 0.75rem;
+    }
+
+    &[data-join] span {
+      color: ${t.success};
+      font-weight: 600;
+    }
+  }
+`;
+
+export const VarChip = styled.button`
+  height: 1.625rem;
+  padding: 0 0.625rem;
+  border: 1px solid ${t.border};
+  border-radius: 999px;
+  background: ${t.surface};
+  color: ${t.text};
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: ${t.primary};
+    background: ${t.primaryTint};
+  }
+
+  ${focusRing}
+`;
+
+export const EmailPreview = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid ${t.border};
+  border-radius: ${t.radiusSm};
+  background: ${t.surfaceAlt};
+
+  small {
+    color: ${t.textSubtle};
+    font-size: 0.6875rem;
+  }
+
+  strong {
+    font-size: 0.9375rem;
+  }
+
+  p {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 0.875rem;
+    line-height: 1.8;
+  }
+
+  footer {
+    padding-top: 0.5rem;
+    border-top: 1px solid ${t.divider};
+    color: ${t.textSubtle};
+    font-size: 0.6875rem;
+    text-align: center;
+    text-decoration: underline;
+  }
+`;
+
+export const Switch = styled.button`
+  position: relative;
+  width: 2.5rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: ${({ $on }) => ($on ? "#16a34a" : t.border)};
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    inset-inline-start: ${({ $on }) => ($on ? "calc(100% - 19px)" : "3px")};
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: inset-inline-start 0.2s ease;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
+
+  ${focusRing}
+`;
+
+export const IconBubble = styled.span`
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: ${({ $on }) => ($on ? t.successTint : t.surfaceAlt)};
+  color: ${({ $on }) => ($on ? t.success : t.textSubtle)};
+`;

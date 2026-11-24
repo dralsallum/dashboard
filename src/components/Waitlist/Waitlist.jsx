@@ -984,6 +984,68 @@ const infoBreaks = [
   },
 ];
 
+// ─── ANONYMOUS TRACKING (التحليلات + الحملات) ────────────────────────────────
+// A random id per browser tab + the utm_* params of the link the visitor came from.
+// No personal data is sent until they actually join the waitlist.
+const SESSION_KEY = "aman_sid";
+const ATTRIBUTION_KEY = "aman_attr";
+
+const randomId = () =>
+  (
+    window.crypto?.randomUUID?.() ||
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+  ).replace(/[^A-Za-z0-9_-]/g, "");
+
+const getSessionId = () => {
+  try {
+    let id = sessionStorage.getItem(SESSION_KEY);
+    if (!id) {
+      id = randomId();
+      sessionStorage.setItem(SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return randomId();
+  }
+};
+
+// First link wins for the whole visit (so moving between pages keeps the source)
+const getAttribution = () => {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(ATTRIBUTION_KEY) || "null");
+    if (saved) return saved;
+  } catch {
+    /* ignore */
+  }
+  const p = new URLSearchParams(window.location.search);
+  const attribution = {
+    source: p.get("utm_source") || "",
+    medium: p.get("utm_medium") || "",
+    campaign: p.get("utm_campaign") || "",
+    content: p.get("utm_content") || "",
+    term: p.get("utm_term") || "",
+    referrer: document.referrer || "",
+  };
+  try {
+    sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
+  } catch {
+    /* ignore */
+  }
+  return attribution;
+};
+
+// Fire-and-forget: tracking must never slow down or break the quiz
+const track = (type, extra = {}) => {
+  publicRequest
+    .post("/track", {
+      type,
+      sessionId: getSessionId(),
+      attribution: getAttribution(),
+      ...extra,
+    })
+    .catch(() => {});
+};
+
 // ─── PACKAGES ─────────────────────────────────────────────────────────────────
 // Loaded from the backend: GET /api/packages?featured=true
 // (dashboard → المنتجات → mark up to 3 active products as "مميز").
@@ -1079,6 +1141,11 @@ const Waitlist = () => {
   useEffect(() => {
     dispatch(clearCart());
   }, [dispatch]);
+
+  // Count the visit (the server ignores repeats in the same session)
+  useEffect(() => {
+    track("visit");
+  }, []);
 
   // Load the featured packages (dashboard → المنتجات → مميز)
   useEffect(() => {
@@ -1221,6 +1288,7 @@ const Waitlist = () => {
 
   const handleContinue = () => {
     if (flowStep === "intro") {
+      track("quiz_start");
       setFlowStep("quiz");
       return;
     }
@@ -1250,11 +1318,13 @@ const Waitlist = () => {
         newAnswers = { ...answers, [currentQ.id]: selectedSingleAnswer };
       }
       setAnswers(newAnswers);
+      track("question", { step: currentQuestion, stepId: currentQ.id });
       setSelectedAnswers([]);
       setSelectedSingleAnswer("");
       setTextInput("");
       const nextQ = currentQuestion + 1;
       if (nextQ >= questions.length) {
+        track("quiz_complete");
         setFlowStep("userInfo");
         return;
       }
@@ -1314,6 +1384,7 @@ const Waitlist = () => {
         dob: userInfo.dob,
         city: userInfo.city,
         answers,
+        attribution: { ...getAttribution(), sessionId: getSessionId() },
         interestedPackage: selectedProduct
           ? {
               productId: selectedProduct._id,

@@ -11,31 +11,38 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
+  Activity,
   ArrowUpDown,
   BookOpen,
-  Calendar,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  Clock,
   Copy,
   Download,
+  ExternalLink,
   Filter,
   Globe,
   LayoutGrid,
-  Maximize2,
-  Minus,
+  Link,
+  Mail,
+  Monitor,
   Package,
   Pencil,
   Plus,
   RefreshCw,
   Search,
+  Send,
   SlidersHorizontal,
+  Smartphone,
   Star,
+  Tablet,
   Trash2,
   Upload,
   X,
+  Zap,
 } from "lucide-react";
 
 import NavSide from "../NavSide/NavSide";
@@ -68,7 +75,6 @@ import giftImage from "../../assets/gift.svg";
 import transferImage from "../../assets/transfer.svg";
 import automationImage from "../../assets/automation.svg";
 import campaignImage from "../../assets/campaign.svg";
-import stateImage from "../../assets/state.svg";
 import discountImage from "../../assets/discount.svg";
 import productsImage from "../../assets/products.svg";
 // Brand / product images
@@ -149,18 +155,6 @@ const STATUS_TONES = {
   ملغية: "danger",
   cancelled: "danger",
   failed: "danger",
-};
-
-const shortDateFmt = new Intl.DateTimeFormat("ar-SA-u-ca-gregory", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-const getYesterday = () => {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d;
 };
 
 const formatDayLabel = (date) =>
@@ -357,27 +351,6 @@ const LIST_TABS = {
       cta: "اطّلع على التطبيقات الموصى بها",
     },
   },
-  الحملات: {
-    icon: ordersIcon,
-    image: campaignImage,
-    title: "الحملات",
-    heading: "أطلق حملتك التسويقية الأولى",
-    text: "خطّط لحملاتك عبر القنوات المختلفة وتابع أثرها على مبيعاتك من مكان واحد.",
-    primary: "إنشاء حملة",
-    promo: {
-      heading: "زِد عدد الزوار باستخدام تطبيقات التسويق",
-      text: "اربط حساباتك على منصات التواصل الاجتماعي والبريد الإلكتروني لإدارة حملاتك بسهولة.",
-      cta: "استكشف تطبيقات التسويق",
-    },
-  },
-  الاتمته: {
-    icon: ordersIcon,
-    image: automationImage,
-    title: "الأتمتة",
-    heading: "وفّر وقتك بالأتمتة",
-    text: "أنشئ مسارات تلقائية لرسائل الترحيب، والسلات المتروكة، ومتابعة العملاء بعد الشراء.",
-    primary: "إنشاء أتمتة",
-  },
   "السلات المتروكة": {
     icon: ordersIcon,
     image: abandonImage,
@@ -392,59 +365,6 @@ const MARKET_TABS = {
   الأسواق: { title: "الأسواق" },
   جزء: { title: "جزء" },
 };
-
-const MARKETING_METRICS = [
-  "جلسات المتجر الإلكتروني",
-  "معدل التحويل",
-  "متوسط قيمة الطلب",
-  "إجمالي المبيعات",
-  "المبيعات من التسويق",
-  "الطلبات من التسويق",
-];
-
-const CAMPAIGNS = [
-  {
-    image: campaignImage,
-    title: "مركز تتبع حملاتك التسويقية",
-    text: "أنشئ حملات لتقييم مدى تأثير المبادرات التسويقية على أهداف عملك. سجّل نقاط التواصل عبر الإنترنت أو دون اتصال، وأضف أنشطة الحملات من قنوات تسويقية متعددة، وتابع النتائج بسهولة.",
-    cta: "اصنع حملتك",
-  },
-  {
-    image: stateImage,
-    title: "زِد عدد الزوار باستخدام تطبيقات التسويق",
-    text: "نمّ جمهورك على منصات التواصل الاجتماعي، واجذب عملاء جدد من خلال الاشتراك في النشرات البريدية، وزِد من معدلات التحويل باستخدام الدردشة، والمزيد.",
-    cta: "استكشف تسويق التطبيقات",
-  },
-];
-
-const ANALYTICS_KPIS = [
-  { title: "صافي المبيعات", value: "0 ريال" },
-  { title: "معدل عودة العملاء", value: "0%" },
-  { title: "طلبات نفذت", value: "0" },
-  { title: "الطلبات", value: "0" },
-];
-
-const ANALYTICS_BREAKDOWN = [
-  { title: "كامل المبيعات", value: 0 },
-  { title: "الخصومات", value: 0 },
-  { title: "الترجيع", value: 0 },
-  { title: "صافي المبيعات", value: 0, total: true },
-  { title: "تكاليف الشحن", value: 0 },
-  { title: "الضريبة", value: 0 },
-  { title: "جميع المبيعات", value: 0, total: true },
-];
-
-const Y_LABELS = ["10 ريال", "5 ريال", "0 ريال"];
-const X_LABELS = [
-  "12 AM",
-  "3 AM",
-  "6 AM",
-  "9 AM",
-  "12 PM",
-  "3 PM",
-  "6 PM",
-  "9 PM",
-];
 
 const DEFAULT_HOURS = {
   start: "09:00",
@@ -477,65 +397,10 @@ const PageHeader = memo(({ icon, title, children }) => (
   </S.Row>
 ));
 
-const ReportActions = memo(() => (
-  <>
-    <S.Button type="button" $icon aria-label="تحديث">
-      <RefreshCw size={15} />
-    </S.Button>
-    <S.Button type="button" $icon aria-label="توسيع">
-      <Maximize2 size={15} />
-    </S.Button>
-    <S.Button type="button" $variant="primary">
-      تخصيص
-    </S.Button>
-  </>
-));
-
-const DateFilters = memo(({ compare }) => (
-  <S.Row $wrap>
-    <S.Button type="button">
-      <Calendar size={15} />
-      اليوم
-    </S.Button>
-    <S.Button type="button">مقارنة مع: {compare}</S.Button>
-  </S.Row>
-));
-
 const LearnMore = memo(({ topic }) => (
   <S.Text $muted $center $size="0.8125rem">
     اعرف المزيد عن <S.LinkButton type="button">{topic}</S.LinkButton>
   </S.Text>
-));
-
-const TrendIcon = memo(() => (
-  <S.Trend>
-    <Minus size={12} />
-  </S.Trend>
-));
-
-const MetricCard = memo(({ title, value }) => (
-  <S.Card>
-    <S.CardLabel>{title}</S.CardLabel>
-    <S.Row $between>
-      <S.MetricValue>{value}</S.MetricValue>
-      <TrendIcon />
-    </S.Row>
-    <S.Sparkline
-      viewBox="0 0 100 32"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <line
-        x1="0"
-        y1="30"
-        x2="100"
-        y2="30"
-        stroke={T.primary}
-        strokeWidth="2"
-        vectorEffect="non-scaling-stroke"
-      />
-    </S.Sparkline>
-  </S.Card>
 ));
 
 const Rating = memo(({ value, reviews }) => (
@@ -5257,141 +5122,2281 @@ const DiscountsTab = memo(({ accessToken, onAuthError }) => {
 });
 
 /* ============================================================
-   Tab: التسويق
+   Shared: data hook, date range, chart, bars  (analytics + marketing)
    ============================================================ */
 
-const MarketingTab = memo(() => {
-  const compare = useMemo(() => shortDateFmt.format(getYesterday()), []);
+const RANGE_PRESETS = [
+  { days: 7, label: "7 أيام" },
+  { days: 30, label: "30 يوماً" },
+  { days: 90, label: "90 يوماً" },
+];
+
+const SOURCE_LABELS = {
+  direct: "مباشر",
+  instagram: "انستقرام",
+  snapchat: "سناب شات",
+  tiktok: "تيك توك",
+  x: "إكس (تويتر)",
+  google: "قوقل",
+  facebook: "فيسبوك",
+  whatsapp: "واتساب",
+  linkedin: "لينكدإن",
+  youtube: "يوتيوب",
+  bing: "بينق",
+  email: "البريد الإلكتروني",
+  sms: "رسائل SMS",
+  influencer: "مشاهير",
+  other: "أخرى",
+};
+const sourceLabel = (s) => SOURCE_LABELS[s] || s || "مباشر";
+
+// Quiz question order = ANSWER_LABELS order
+const QUIZ_STEPS = Object.keys(ANSWER_LABELS);
+const questionLabel = (step) =>
+  ANSWER_LABELS[QUIZ_STEPS[step]] || `السؤال ${Number(step) + 1}`;
+
+const pct = (r) =>
+  r === null || r === undefined || Number.isNaN(r)
+    ? "—"
+    : `${(r * 100).toLocaleString("ar-SA", { maximumFractionDigits: 1 })}٪`;
+const num = (n) => Number(n || 0).toLocaleString("ar-SA");
+
+const timeAgo = (d) => {
+  const s = Math.max(0, (Date.now() - new Date(d).getTime()) / 1000);
+  if (s < 60) return "الآن";
+  if (s < 3600) return `منذ ${Math.floor(s / 60)} د`;
+  return `منذ ${Math.floor(s / 3600)} س`;
+};
+
+// GET with loading/error, optional silent polling while the tab is visible
+const useAdminGet = (accessToken, onAuthError, path, { pollMs = 0 } = {}) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    if (!accessToken || !path) {
+      setLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    const load = async (silent) => {
+      if (!silent) setLoading(true);
+      try {
+        const { data: d } = await userRequest.get(path, {
+          signal: controller.signal,
+        });
+        setData(d);
+        setError("");
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        const status = err.response?.status;
+        if (status === 401) onAuthError();
+        if (!silent) {
+          setError(
+            status === 404
+              ? `المسار غير موجود على الخادم بعد (/api${path.split("?")[0]})`
+              : amanapiError(status, "تعذّر جلب البيانات"),
+          );
+        }
+      } finally {
+        if (!silent && !controller.signal.aborted) setLoading(false);
+      }
+    };
+    load(false);
+    const timer = pollMs
+      ? setInterval(
+          () => document.visibilityState === "visible" && load(true),
+          pollMs,
+        )
+      : null;
+    return () => {
+      controller.abort();
+      if (timer) clearInterval(timer);
+    };
+  }, [accessToken, onAuthError, path, pollMs, reloadKey]);
+
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+  return { data, setData, loading, error, reload };
+};
+
+// Wraps a write call so an expired session shows the login popup
+const callApi = async (fn, onAuthError) => {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err.response?.status === 401) onAuthError();
+    throw err;
+  }
+};
+
+const RangePicker = memo(({ days, onChange }) => (
+  <S.Segmented role="tablist">
+    {RANGE_PRESETS.map((r) => (
+      <S.SegmentButton
+        key={r.days}
+        type="button"
+        role="tab"
+        aria-selected={days === r.days}
+        $active={days === r.days}
+        onClick={() => onChange(r.days)}
+      >
+        {r.label}
+      </S.SegmentButton>
+    ))}
+  </S.Segmented>
+));
+
+const LoadState = ({ loading, error, onRetry, children }) =>
+  loading ? (
+    <S.Card $padding="3rem">
+      <S.Text $muted $center>
+        جاري التحميل...
+      </S.Text>
+    </S.Card>
+  ) : error ? (
+    <S.Card $padding="3rem">
+      <S.Text $center style={{ color: T.danger }}>
+        {error}{" "}
+        <S.LinkButton type="button" onClick={onRetry}>
+          إعادة المحاولة
+        </S.LinkButton>
+      </S.Text>
+    </S.Card>
+  ) : (
+    children
+  );
+
+// Daily bars (sign-ups) + line (visitors). Time runs left → right.
+const TrendChart = memo(({ daily }) => {
+  const W = 720;
+  const H = 220;
+  const pad = { t: 14, r: 12, b: 26, l: 34 };
+  const n = Math.max(daily.length, 1);
+  const peak = Math.max(
+    1,
+    ...daily.map((d) => Math.max(d.signups, d.visitors)),
+  );
+  const step = 10 ** Math.floor(Math.log10(peak));
+  const top = Math.ceil(peak / step) * step;
+  const iw = W - pad.l - pad.r;
+  const ih = H - pad.t - pad.b;
+  const bw = iw / n;
+  const x = (i) => pad.l + i * bw + bw / 2;
+  const y = (v) => pad.t + ih - (v / top) * ih;
+  const labelEvery = Math.ceil(n / 8);
+  const line = daily
+    .map(
+      (d, i) =>
+        `${i ? "L" : "M"}${x(i).toFixed(1)},${y(d.visitors).toFixed(1)}`,
+    )
+    .join(" ");
+
+  return (
+    <S.ChartBox>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        role="img"
+        aria-label="التسجيلات والزوار يومياً"
+      >
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+          <g key={f}>
+            <line
+              x1={pad.l}
+              x2={W - pad.r}
+              y1={y(top * f)}
+              y2={y(top * f)}
+              className="grid"
+            />
+            <text
+              x={pad.l - 6}
+              y={y(top * f) + 4}
+              textAnchor="end"
+              className="axis"
+            >
+              {Math.round(top * f)}
+            </text>
+          </g>
+        ))}
+        {daily.map((d, i) => (
+          <g key={d.date}>
+            <rect
+              x={x(i) - bw * 0.3}
+              y={y(d.signups)}
+              width={Math.max(bw * 0.6, 1)}
+              height={Math.max(pad.t + ih - y(d.signups), 0)}
+              rx="2"
+              className="bar"
+            >
+              <title>{`${d.date}: ${d.signups} تسجيل · ${d.visitors} زائر`}</title>
+            </rect>
+            {i % labelEvery === 0 && (
+              <text x={x(i)} y={H - 8} textAnchor="middle" className="axis">
+                {d.date.slice(8)}/{d.date.slice(5, 7)}
+              </text>
+            )}
+          </g>
+        ))}
+        {daily.length > 1 && <path d={line} className="line" />}
+      </svg>
+      <S.Legend>
+        <S.LegendItem $color={T.primary}>التسجيلات</S.LegendItem>
+        <S.LegendItem $color={T.primarySoft} $dashed>
+          الزوار
+        </S.LegendItem>
+      </S.Legend>
+    </S.ChartBox>
+  );
+});
+
+const BarList = memo(({ rows, empty = "لا توجد بيانات بعد", format = num }) => {
+  const max = Math.max(1, ...rows.map((r) => r.count));
+  if (!rows.length) {
+    return (
+      <S.Text $muted $size="0.8125rem">
+        {empty}
+      </S.Text>
+    );
+  }
+  return (
+    <S.Stack $gap="0.5rem">
+      {rows.map((r) => (
+        <S.BarRow key={r.label} title={`${r.label}: ${r.count}`}>
+          <span>{r.label}</span>
+          <S.BarTrack>
+            <S.BarFill style={{ width: `${(r.count / max) * 100}%` }} />
+          </S.BarTrack>
+          <strong>{format(r.count)}</strong>
+        </S.BarRow>
+      ))}
+    </S.Stack>
+  );
+});
+
+const FunnelView = memo(({ funnel }) => {
+  const first = funnel[0]?.count || 0;
+  return (
+    <S.Stack $gap="0.625rem">
+      {funnel.map((f, i) => {
+        const prev = i ? funnel[i - 1].count : null;
+        return (
+          <S.Stack key={f.step} $gap="0.25rem">
+            <S.Row $between>
+              <S.Text $size="0.8125rem" style={{ fontWeight: 600 }}>
+                {f.label}
+              </S.Text>
+              <S.Text $size="0.8125rem">
+                <strong>{num(f.count)}</strong>{" "}
+                <S.Text as="span" $muted $size="0.75rem">
+                  {first ? pct(f.count / first) : ""}
+                </S.Text>
+              </S.Text>
+            </S.Row>
+            <S.BarTrack $tall>
+              <S.BarFill
+                style={{ width: `${first ? (f.count / first) * 100 : 0}%` }}
+              />
+            </S.BarTrack>
+            {prev !== null && prev > 0 && prev > f.count && (
+              <S.Text $muted $size="0.75rem">
+                خرج {num(prev - f.count)} ({pct((prev - f.count) / prev)}) قبل
+                هذه الخطوة
+              </S.Text>
+            )}
+          </S.Stack>
+        );
+      })}
+    </S.Stack>
+  );
+});
+
+/* ============================================================
+   Tab: التحليلات  (overview)
+   ============================================================ */
+
+const AnalyticsTab = memo(({ accessToken, onAuthError }) => {
+  const [days, setDays] = useState(30);
+  const { data, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    `/analytics/overview?days=${days}`,
+  );
+  const t = data?.totals;
 
   return (
     <S.Page>
-      <PageHeader icon={contentIcon} title="التسويق">
-        <ReportActions />
+      <PageHeader icon={contentIcon} title="التحليلات">
+        <RangePicker days={days} onChange={setDays} />
+        <S.Button type="button" $icon aria-label="تحديث" onClick={reload}>
+          <RefreshCw size={15} />
+        </S.Button>
       </PageHeader>
-      <DateFilters compare={compare} />
 
-      <S.Grid $cols={3}>
-        {MARKETING_METRICS.map((title) => (
-          <MetricCard key={title} title={title} value="—" />
-        ))}
-      </S.Grid>
+      <LoadState loading={loading && !data} error={error} onRetry={reload}>
+        {data && (
+          <>
+            {t.visitors === 0 && (
+              <S.Notice>
+                <Activity size={16} style={{ color: T.textMuted }} />
+                <span>
+                  بيانات الزيارات ومسار الاستبيان تبدأ من لحظة نشر نسخة صفحة
+                  قائمة الانتظار التي تحتوي على التتبع. التسجيلات تظهر من كل
+                  البيانات السابقة.
+                </span>
+              </S.Notice>
+            )}
 
-      {CAMPAIGNS.map((c) => (
-        <S.Card key={c.title} $padding="2rem">
-          <S.Split>
-            <S.Stack $gap="0.75rem">
-              <S.Heading $size="1.25rem">{c.title}</S.Heading>
-              <S.Text $muted>{c.text}</S.Text>
-              <div>
-                <S.Button type="button" $variant="primary">
-                  {c.cta}
-                </S.Button>
-              </div>
-            </S.Stack>
-            <S.Illustration src={c.image} alt="" $w="200px" />
-          </S.Split>
-        </S.Card>
-      ))}
+            <S.Grid $cols={4}>
+              <StatCard
+                label="الزوار"
+                value={num(t.visitors)}
+                hint={`خلال آخر ${num(days)} يوماً`}
+              />
+              <StatCard label="التسجيلات" value={num(t.signups)} />
+              <StatCard
+                label="معدل التحويل"
+                value={pct(t.conversionRate)}
+                hint="من زار الصفحة ← انضم للقائمة"
+              />
+              <StatCard
+                label="أكملوا الاستبيان"
+                value={num(t.quizCompletes)}
+                hint={
+                  t.quizStarts
+                    ? `${pct(t.quizCompletes / t.quizStarts)} ممن بدأوه`
+                    : ""
+                }
+              />
+            </S.Grid>
+
+            <S.Card $padding="1.25rem">
+              <S.CardLabel>التسجيلات والزوار يومياً</S.CardLabel>
+              <TrendChart daily={data.daily} />
+            </S.Card>
+
+            <S.Grid $cols={2}>
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>مسار الاستبيان</S.CardLabel>
+                <FunnelView funnel={data.funnel} />
+              </S.Card>
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>أكثر المصادر جلباً للتسجيلات</S.CardLabel>
+                <BarList
+                  rows={data.sources
+                    .slice(0, 6)
+                    .map((s) => ({
+                      label: sourceLabel(s.source),
+                      count: s.joins,
+                    }))}
+                  empty="لم تُسجَّل مصادر بعد"
+                />
+              </S.Card>
+            </S.Grid>
+
+            <S.Grid $cols={3}>
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>حسب الباقة</S.CardLabel>
+                <BarList rows={data.byPackage} />
+              </S.Card>
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>حسب المدينة</S.CardLabel>
+                <BarList rows={data.byCity.slice(0, 8)} />
+              </S.Card>
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>حسب الجنس</S.CardLabel>
+                <BarList rows={data.byGender} />
+              </S.Card>
+            </S.Grid>
+          </>
+        )}
+      </LoadState>
     </S.Page>
   );
 });
 
 /* ============================================================
-   Tab: التحليلات
+   Tab: الربورت  (reports + CSV)
    ============================================================ */
 
-const FlatLine = memo(({ color, dashed }) => (
-  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-    <line
-      x1="0"
-      y1="100"
-      x2="100"
-      y2="100"
-      stroke={color}
-      strokeWidth="2"
-      strokeDasharray={dashed ? "4 4" : undefined}
-      vectorEffect="non-scaling-stroke"
-    />
-  </svg>
-));
+const REPORTS = [
+  {
+    id: "funnel",
+    label: "مسار الاستبيان",
+    columns: [
+      "الخطوة",
+      "عدد الزوار",
+      "من إجمالي الزوار",
+      "التسرب من الخطوة السابقة",
+    ],
+    rows: (d) => {
+      const visitors = d.totals.visitors;
+      const steps = [
+        { label: "زاروا الصفحة", count: d.funnel[0].count },
+        { label: "بدأوا الاستبيان", count: d.funnel[1].count },
+        ...d.questions.map((q) => ({
+          label: `أجابوا: ${questionLabel(q.step)}`,
+          count: q.count,
+        })),
+        { label: "أكملوا الاستبيان", count: d.funnel[2].count },
+        { label: "انضموا لقائمة الانتظار", count: d.funnel[3].count },
+      ];
+      return steps.map((s, i) => {
+        const prev = i ? steps[i - 1].count : null;
+        return [
+          s.label,
+          num(s.count),
+          visitors ? pct(s.count / visitors) : "—",
+          prev ? pct(Math.max(prev - s.count, 0) / prev) : "—",
+        ];
+      });
+    },
+  },
+  {
+    id: "sources",
+    label: "مصادر الزيارات",
+    columns: ["المصدر", "الزوار", "التسجيلات", "معدل التحويل"],
+    rows: (d) =>
+      d.sources.map((s) => [
+        sourceLabel(s.source),
+        num(s.visitors),
+        num(s.joins),
+        pct(s.rate),
+      ]),
+  },
+  {
+    id: "daily",
+    label: "يومياً",
+    columns: ["التاريخ", "الزوار", "التسجيلات"],
+    rows: (d) =>
+      [...d.daily]
+        .reverse()
+        .map((r) => [r.date, num(r.visitors), num(r.signups)]),
+  },
+  {
+    id: "package",
+    label: "حسب الباقة",
+    columns: ["الباقة", "التسجيلات", "النسبة"],
+    rows: (d) =>
+      d.byPackage.map((r) => [
+        r.label,
+        num(r.count),
+        pct(r.count / (d.totals.signups || 1)),
+      ]),
+  },
+  {
+    id: "city",
+    label: "حسب المدينة",
+    columns: ["المدينة", "التسجيلات", "النسبة"],
+    rows: (d) =>
+      d.byCity.map((r) => [
+        r.label,
+        num(r.count),
+        pct(r.count / (d.totals.signups || 1)),
+      ]),
+  },
+  {
+    id: "gender",
+    label: "حسب الجنس",
+    columns: ["الجنس", "التسجيلات", "النسبة"],
+    rows: (d) =>
+      d.byGender.map((r) => [
+        r.label,
+        num(r.count),
+        pct(r.count / (d.totals.signups || 1)),
+      ]),
+  },
+];
 
-const AnalyticsTab = memo(
-  ({ kpis = ANALYTICS_KPIS, breakdown = ANALYTICS_BREAKDOWN }) => {
-    const dates = useMemo(
-      () => ({
-        today: shortDateFmt.format(new Date()),
-        compare: shortDateFmt.format(getYesterday()),
-      }),
-      [],
+const ReportsTab = memo(({ accessToken, onAuthError }) => {
+  const [reportId, setReportId] = useState("funnel");
+  const [days, setDays] = useState(30);
+  const [custom, setCustom] = useState({ from: "", to: "" });
+  const useCustom = custom.from && custom.to && custom.to >= custom.from;
+  const path = useCustom
+    ? `/analytics/overview?from=${custom.from}&to=${custom.to}`
+    : `/analytics/overview?days=${days}`;
+  const { data, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    path,
+  );
+
+  const report = REPORTS.find((r) => r.id === reportId);
+  const rows = data ? report.rows(data) : [];
+  const rangeLabel = useCustom
+    ? `${custom.from} → ${custom.to}`
+    : `آخر ${days} يوماً`;
+
+  const exportCsv = () => {
+    const lines = [report.columns, ...rows].map((r) =>
+      r.map(csvCell).join(","),
     );
+    downloadFile(
+      `﻿${lines.join("\r\n")}\r\n`,
+      `report-${report.id}-${useCustom ? `${custom.from}_${custom.to}` : `${days}d`}.csv`,
+      "text/csv;charset=utf-8",
+    );
+  };
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="الربورت">
+        <S.Button type="button" disabled={!rows.length} onClick={exportCsv}>
+          <Download size={15} />
+          تصدير CSV
+        </S.Button>
+      </PageHeader>
+
+      <S.Card $padding="1rem" $gap="0.75rem">
+        <S.Row $between $wrap $gap="0.75rem">
+          <RangePicker
+            days={useCustom ? null : days}
+            onChange={(d) => {
+              setDays(d);
+              setCustom({ from: "", to: "" });
+            }}
+          />
+          <S.Row $gap="0.5rem" $wrap>
+            <S.Text as="span" $muted $size="0.8125rem">
+              أو من
+            </S.Text>
+            <S.Input
+              type="date"
+              value={custom.from}
+              onChange={(e) =>
+                setCustom((c) => ({ ...c, from: e.target.value }))
+              }
+              style={{ width: "auto", height: "2rem" }}
+            />
+            <S.Text as="span" $muted $size="0.8125rem">
+              إلى
+            </S.Text>
+            <S.Input
+              type="date"
+              value={custom.to}
+              min={custom.from || undefined}
+              onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}
+              style={{ width: "auto", height: "2rem" }}
+            />
+          </S.Row>
+        </S.Row>
+      </S.Card>
+
+      <S.Card $flush $overflow>
+        <S.ViewTabs role="tablist">
+          {REPORTS.map((r) => (
+            <S.ViewTab
+              key={r.id}
+              type="button"
+              role="tab"
+              aria-selected={reportId === r.id}
+              $active={reportId === r.id}
+              onClick={() => setReportId(r.id)}
+            >
+              {r.label}
+            </S.ViewTab>
+          ))}
+        </S.ViewTabs>
+        <LoadState loading={loading && !data} error={error} onRetry={reload}>
+          <S.TableScroll>
+            <S.DataTable>
+              <thead>
+                <tr>
+                  {report.columns.map((c) => (
+                    <th key={c}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={report.columns.length}
+                      style={{
+                        textAlign: "center",
+                        color: T.textMuted,
+                        padding: "2.5rem",
+                      }}
+                    >
+                      لا توجد بيانات في هذه الفترة
+                    </td>
+                  </tr>
+                ) : (
+                  rows.map((r, i) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <tr key={i}>
+                      {r.map((cell, j) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <td
+                          key={j}
+                          style={j === 0 ? { fontWeight: 600 } : undefined}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </S.DataTable>
+          </S.TableScroll>
+          <S.TableFooter>
+            <span>
+              {report.label} · {rangeLabel}
+            </span>
+          </S.TableFooter>
+        </LoadState>
+      </S.Card>
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Tab: لايف  (live view, refreshes every 15s)
+   ============================================================ */
+
+const EVENT_TEXT = {
+  visit: () => "زار الصفحة",
+  quiz_start: () => "بدأ الاستبيان",
+  question: (e) =>
+    `أجاب على: ${ANSWER_LABELS[e.stepId] || questionLabel(e.step)}`,
+  quiz_complete: () => "أكمل الاستبيان",
+  waitlist_join: () => "انضم لقائمة الانتظار",
+};
+
+const DeviceIcon = ({ device }) =>
+  device === "mobile" ? (
+    <Smartphone size={15} />
+  ) : device === "tablet" ? (
+    <Tablet size={15} />
+  ) : (
+    <Monitor size={15} />
+  );
+
+const LiveTab = memo(({ accessToken, onAuthError }) => {
+  const { data, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/analytics/live",
+    {
+      pollMs: 15000,
+    },
+  );
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="لايف">
+        <S.Row $gap="0.5rem">
+          <S.LiveDot />
+          <S.Text as="span" $muted $size="0.8125rem">
+            {data
+              ? `آخر تحديث ${new Date(data.at).toLocaleTimeString("ar-SA")}`
+              : "يتحدث كل 15 ثانية"}
+          </S.Text>
+        </S.Row>
+        <S.Button type="button" $icon aria-label="تحديث" onClick={reload}>
+          <RefreshCw size={15} />
+        </S.Button>
+      </PageHeader>
+
+      <LoadState loading={loading && !data} error={error} onRetry={reload}>
+        {data && (
+          <>
+            <S.Grid $cols={4}>
+              <S.Card $gap="0.375rem" $padding="1.25rem">
+                <S.CardLabel>زوار الآن</S.CardLabel>
+                <S.MetricValue $big style={{ fontSize: "2.25rem" }}>
+                  {num(data.activeNow)}
+                </S.MetricValue>
+                <S.Text $muted $size="0.75rem">
+                  نشطون خلال آخر 5 دقائق
+                </S.Text>
+              </S.Card>
+              <StatCard
+                label="داخل الاستبيان الآن"
+                value={num(data.stages.inQuiz)}
+              />
+              <StatCard label="زوار اليوم" value={num(data.today.visitors)} />
+              <StatCard label="تسجيلات اليوم" value={num(data.today.signups)} />
+            </S.Grid>
+
+            <S.Grid $cols={2}>
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>أين هم الآن؟</S.CardLabel>
+                <BarList
+                  rows={[
+                    { label: "يتصفحون الصفحة", count: data.stages.browsing },
+                    { label: "داخل الاستبيان", count: data.stages.inQuiz },
+                    { label: "أكملوا الاستبيان", count: data.stages.finished },
+                    { label: "انضموا للتو", count: data.stages.joined },
+                  ]}
+                />
+                {data.steps.length > 0 && (
+                  <>
+                    <S.CardLabel>عند أي سؤال</S.CardLabel>
+                    <BarList
+                      rows={[...data.steps]
+                        .sort((a, b) => a.step - b.step)
+                        .map((s) => ({
+                          label: questionLabel(s.step),
+                          count: s.count,
+                        }))}
+                    />
+                  </>
+                )}
+              </S.Card>
+
+              <S.Card $padding="1.25rem" $gap="1rem">
+                <S.CardLabel>الأجهزة</S.CardLabel>
+                <BarList
+                  rows={[
+                    { label: "جوال", count: data.devices.mobile },
+                    { label: "كمبيوتر", count: data.devices.desktop },
+                    { label: "تابلت", count: data.devices.tablet },
+                  ]}
+                />
+              </S.Card>
+            </S.Grid>
+
+            <S.Card $padding="1.25rem" $gap="0.5rem">
+              <S.CardLabel>آخر النشاطات (آخر ساعة)</S.CardLabel>
+              {data.recent.length === 0 ? (
+                <S.Text $muted $size="0.8125rem">
+                  لا يوجد نشاط خلال الساعة الماضية.
+                </S.Text>
+              ) : (
+                <S.Feed>
+                  {data.recent.map((e) => (
+                    <li
+                      key={e._id}
+                      data-join={e.type === "waitlist_join" || undefined}
+                    >
+                      <DeviceIcon device={e.device} />
+                      <span>
+                        زائر من <strong>{sourceLabel(e.source)}</strong>{" "}
+                        {EVENT_TEXT[e.type]?.(e) || e.type}
+                      </span>
+                      <time>{timeAgo(e.createdAt)}</time>
+                    </li>
+                  ))}
+                </S.Feed>
+              )}
+            </S.Card>
+          </>
+        )}
+      </LoadState>
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Marketing: shared email pieces (segment, content, test send)
+   ============================================================ */
+
+const EMPTY_SEGMENT = { packages: [], cities: [], statuses: [], genders: [] };
+const MESSAGE_VARIABLES = [
+  ["{{firstName}}", "الاسم الأول"],
+  ["{{lastName}}", "اسم العائلة"],
+  ["{{package}}", "الباقة"],
+  ["{{city}}", "المدينة"],
+];
+const SAMPLE_PERSON = {
+  firstName: "محمد",
+  lastName: "العتيبي",
+  package: "الشاملة",
+  city: "الرياض",
+};
+const fillSample = (text) =>
+  String(text || "").replace(
+    /\{\{\s*(firstName|lastName|package|city)\s*\}\}/g,
+    (_, k) => SAMPLE_PERSON[k],
+  );
+
+const segmentSummary = (seg) => {
+  const parts = [];
+  if (seg?.packages?.length) parts.push(`الباقة: ${seg.packages.join("، ")}`);
+  if (seg?.cities?.length) parts.push(`المدينة: ${seg.cities.join("، ")}`);
+  if (seg?.genders?.length) parts.push(`الجنس: ${seg.genders.join("، ")}`);
+  if (seg?.statuses?.length) {
+    parts.push(
+      `الحالة: ${seg.statuses.map((s) => WAITLIST_STATUS[s]?.label || s).join("، ")}`,
+    );
+  }
+  return parts.length ? parts.join(" · ") : "كل قائمة الانتظار";
+};
+
+// Options for the segment filters, from the real waitlist
+const useSegmentOptions = (accessToken, onAuthError) => {
+  const { entries } = useWaitlist(accessToken, onAuthError);
+  return useMemo(() => {
+    const real = (rows) => rows.filter((r) => r.value !== "—");
+    return {
+      packages: real(facetOf(entries, (r) => r.packageName)),
+      cities: real(facetOf(entries, (r) => r.city)),
+      genders: real(facetOf(entries, (r) => answerText(r, "sex"))),
+      statuses: Object.entries(WAITLIST_STATUS).map(([value, s]) => ({
+        value,
+        label: s.label,
+        count: entries.filter((e) => (e.status || "pending") === value).length,
+      })),
+    };
+  }, [entries]);
+};
+
+const SegmentCard = memo(
+  ({ segment, onChange, options, count, counting, note }) => (
+    <S.Card $padding="1.25rem" $gap="0.75rem" style={{ overflow: "visible" }}>
+      <S.Row $between>
+        <S.Heading $size="0.9375rem">المستلمون</S.Heading>
+        {count !== undefined && (
+          <S.StatusBadge $tone={count ? "success" : "neutral"}>
+            {counting ? "..." : `${num(count)} مستلم`}
+          </S.StatusBadge>
+        )}
+      </S.Row>
+      <S.Row $wrap $gap="0.5rem">
+        <MultiFilter
+          label="الباقة"
+          options={options.packages}
+          value={segment.packages}
+          onChange={(v) => onChange({ ...segment, packages: v })}
+        />
+        <MultiFilter
+          label="المدينة"
+          options={options.cities}
+          value={segment.cities}
+          onChange={(v) => onChange({ ...segment, cities: v })}
+        />
+        <MultiFilter
+          label="الجنس"
+          options={options.genders}
+          value={segment.genders}
+          onChange={(v) => onChange({ ...segment, genders: v })}
+        />
+        <MultiFilter
+          label="الحالة"
+          options={options.statuses}
+          value={segment.statuses}
+          onChange={(v) => onChange({ ...segment, statuses: v })}
+        />
+      </S.Row>
+      <S.Text $muted $size="0.75rem">
+        {segmentSummary(segment)}
+        {note ? ` · ${note}` : ""}
+      </S.Text>
+    </S.Card>
+  ),
+);
+
+const EmailContentCard = memo(({ subject, body, onChange }) => {
+  const bodyRef = useRef(null);
+  const insert = (token) => {
+    const el = bodyRef.current;
+    if (!el) return onChange({ subject, body: body + token });
+    const start = el.selectionStart ?? body.length;
+    const end = el.selectionEnd ?? body.length;
+    const next = body.slice(0, start) + token + body.slice(end);
+    onChange({ subject, body: next });
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + token.length, start + token.length);
+    });
+    return undefined;
+  };
+
+  return (
+    <S.Card $padding="1.25rem" $gap="0.75rem">
+      <S.Heading $size="0.9375rem">محتوى الرسالة</S.Heading>
+      <S.Field>
+        <S.FieldLabel $small>العنوان</S.FieldLabel>
+        <S.Input
+          value={subject}
+          onChange={(e) => onChange({ subject: e.target.value, body })}
+          placeholder="مثال: {{firstName}}، باقات الفحص السنوي متاحة الآن"
+        />
+      </S.Field>
+      <S.Field>
+        <S.FieldLabel $small>النص</S.FieldLabel>
+        <S.Textarea
+          ref={bodyRef}
+          rows={8}
+          value={body}
+          onChange={(e) => onChange({ subject, body: e.target.value })}
+          placeholder={
+            "مرحباً {{firstName}}،\n\nاكتب رسالتك هنا. سطر فارغ = فقرة جديدة، والروابط تصبح قابلة للضغط."
+          }
+        />
+      </S.Field>
+      <S.Row $wrap $gap="0.375rem">
+        <S.Text as="span" $muted $size="0.75rem">
+          أدرج:
+        </S.Text>
+        {MESSAGE_VARIABLES.map(([token, label]) => (
+          <S.VarChip key={token} type="button" onClick={() => insert(token)}>
+            {label}
+          </S.VarChip>
+        ))}
+      </S.Row>
+      {(subject || body) && (
+        <S.EmailPreview>
+          <small>معاينة (ببيانات مثال)</small>
+          <strong>{fillSample(subject) || "—"}</strong>
+          <p>{fillSample(body)}</p>
+          <footer>إلغاء الاشتراك</footer>
+        </S.EmailPreview>
+      )}
+    </S.Card>
+  );
+});
+
+const TestSend = memo(({ onSend, disabled }) => {
+  const [to, setTo] = useState(() => {
+    try {
+      return localStorage.getItem("dashboard.testEmail") || "";
+    } catch {
+      return "";
+    }
+  });
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const send = async () => {
+    setBusy(true);
+    setResult(null);
+    try {
+      localStorage.setItem("dashboard.testEmail", to);
+    } catch {
+      /* ignore */
+    }
+    try {
+      const msg = await onSend(to.trim());
+      setResult({ ok: true, text: msg });
+    } catch (err) {
+      setResult({ ok: false, text: apiMessage(err, "تعذّر الإرسال") });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <S.Card $padding="1.25rem" $gap="0.75rem">
+      <S.Heading $size="0.9375rem">رسالة تجريبية</S.Heading>
+      <S.Input
+        type="email"
+        value={to}
+        onChange={(e) => setTo(e.target.value)}
+        placeholder="your@email.com"
+        style={{ direction: "ltr" }}
+      />
+      <S.Button
+        type="button"
+        disabled={disabled || busy || !to.includes("@")}
+        onClick={send}
+      >
+        <Send size={14} />
+        {busy ? "جارٍ الإرسال..." : "أرسل لي نسخة تجريبية"}
+      </S.Button>
+      {result && (
+        <S.Text
+          $size="0.8125rem"
+          style={{ color: result.ok ? T.success : T.danger }}
+        >
+          {result.text}
+        </S.Text>
+      )}
+    </S.Card>
+  );
+});
+
+const EmailSetupNotice = ({ status }) =>
+  status && !status.email ? (
+    <S.Notice>
+      <Mail size={16} style={{ color: T.warning }} />
+      <span>
+        إرسال البريد غير مفعّل بعد. أضف <strong>SES_FROM_EMAIL</strong> (بريد
+        موثّق في Amazon SES) في إعدادات الخادم على Heroku. يمكنك تجهيز الرسائل
+        والأتمتة الآن، وستبدأ بالعمل فور التفعيل.
+      </span>
+    </S.Notice>
+  ) : null;
+
+/* ============================================================
+   Tab: التسويق  (overview + email broadcasts)
+   ============================================================ */
+
+const MESSAGE_STATES = {
+  sending: { label: "جارٍ الإرسال", tone: "warning" },
+  sent: { label: "أُرسلت", tone: "success" },
+  failed: { label: "فشلت", tone: "danger" },
+};
+
+const BroadcastComposer = memo(
+  ({ accessToken, onAuthError, emailReady, onBack, onSent }) => {
+    const options = useSegmentOptions(accessToken, onAuthError);
+    const [segment, setSegment] = useState(EMPTY_SEGMENT);
+    const [content, setContent] = useState({ subject: "", body: "" });
+    const [audience, setAudience] = useState({
+      count: undefined,
+      counting: false,
+    });
+    const [sending, setSending] = useState(false);
+    const [error, setError] = useState("");
+
+    // Live recipient count (debounced)
+    useEffect(() => {
+      let cancelled = false;
+      setAudience((a) => ({ ...a, counting: true }));
+      const timer = setTimeout(async () => {
+        try {
+          const { data } = await userRequest.post("/messages/audience", {
+            segment,
+          });
+          if (!cancelled) setAudience({ count: data.count, counting: false });
+        } catch {
+          if (!cancelled) setAudience({ count: undefined, counting: false });
+        }
+      }, 350);
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+      };
+    }, [segment]);
+
+    const send = async () => {
+      if (!content.subject.trim() || !content.body.trim())
+        return setError("اكتب عنوان الرسالة ونصها");
+      if (!audience.count) return setError("لا يوجد مستلمون في هذه الشريحة");
+      if (
+        !window.confirm(
+          `إرسال الرسالة إلى ${audience.count} شخص؟ لا يمكن التراجع بعد الإرسال.`,
+        )
+      )
+        return undefined;
+      setSending(true);
+      setError("");
+      try {
+        await callApi(
+          () => userRequest.post("/messages/send", { ...content, segment }),
+          onAuthError,
+        );
+        onSent();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر الإرسال"));
+        setSending(false);
+      }
+      return undefined;
+    };
 
     return (
-      <S.Page>
-        <PageHeader icon={contentIcon} title="التحليلات">
-          <ReportActions />
-        </PageHeader>
-        <DateFilters compare={dates.compare} />
-
-        <S.Grid $cols={4}>
-          {kpis.map((k) => (
-            <MetricCard key={k.title} title={k.title} value={k.value} />
-          ))}
-        </S.Grid>
-
-        <S.MainGrid>
-          <S.Card>
-            <S.CardLabel>المبيعات حسب الوقت</S.CardLabel>
-            <S.Row $between>
-              <S.MetricValue $big>0 ريال</S.MetricValue>
-              <TrendIcon />
-            </S.Row>
-
-            <S.ChartArea>
-              <S.YLabels>
-                {Y_LABELS.map((l) => (
-                  <span key={l}>{l}</span>
-                ))}
-              </S.YLabels>
-              <S.Plot>
-                <FlatLine color={T.primarySoft} dashed />
-                <FlatLine color={T.primary} />
-              </S.Plot>
-              <S.XLabels>
-                {X_LABELS.map((l) => (
-                  <span key={l}>{l}</span>
-                ))}
-              </S.XLabels>
-            </S.ChartArea>
-
-            <S.Legend>
-              <S.LegendItem $color={T.primary}>{dates.today}</S.LegendItem>
-              <S.LegendItem $color={T.primarySoft} $dashed>
-                {dates.compare}
-              </S.LegendItem>
-            </S.Legend>
-          </S.Card>
-
-          <S.Card>
-            <S.CardLabel>تفصيل إجمالي المبيعات</S.CardLabel>
-            <S.BreakList>
-              {breakdown.map(({ title, value, total }) => (
-                <S.BreakItem key={title} $total={total}>
-                  <span>{title}</span>
-                  <S.Amount>
-                    {Number(value || 0).toFixed(2)} ريال
-                    <TrendIcon />
-                  </S.Amount>
-                </S.BreakItem>
-              ))}
-            </S.BreakList>
-          </S.Card>
-        </S.MainGrid>
-
-        <LearnMore topic="التحليلات" />
+      <S.Page $max="1100px">
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="رجوع"
+              onClick={onBack}
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.PageTitle>رسالة بريد جديدة</S.PageTitle>
+          </S.Row>
+          <S.Row>
+            <S.Button type="button" onClick={onBack}>
+              إلغاء
+            </S.Button>
+            <S.Button
+              type="button"
+              $variant="primary"
+              disabled={!emailReady || sending}
+              onClick={send}
+            >
+              <Send size={15} />
+              {sending
+                ? "جارٍ الإرسال..."
+                : `إرسال${audience.count ? ` إلى ${num(audience.count)}` : ""}`}
+            </S.Button>
+          </S.Row>
+        </S.Row>
+        {error && <S.Alert>{error}</S.Alert>}
+        <S.EditorGrid>
+          <S.Stack $gap="1rem">
+            <SegmentCard
+              segment={segment}
+              onChange={setSegment}
+              options={options}
+              count={audience.count}
+              counting={audience.counting}
+              note="يُستبعد من ألغى الاشتراك ومن لا يملك بريداً"
+            />
+            <EmailContentCard
+              subject={content.subject}
+              body={content.body}
+              onChange={setContent}
+            />
+          </S.Stack>
+          <S.Stack $gap="1rem">
+            <TestSend
+              disabled={
+                !emailReady || !content.subject.trim() || !content.body.trim()
+              }
+              onSend={async (to) => {
+                const { data } = await callApi(
+                  () => userRequest.post("/messages/test", { ...content, to }),
+                  onAuthError,
+                );
+                return data.message;
+              }}
+            />
+            <S.Card $padding="1.25rem" $gap="0.5rem">
+              <S.Heading $size="0.9375rem">نصائح</S.Heading>
+              <S.SummaryList>
+                <li>أرسل نسخة تجريبية لنفسك قبل الإرسال للجميع.</li>
+                <li>كل رسالة تحتوي تلقائياً على رابط إلغاء الاشتراك.</li>
+                <li>
+                  الإرسال يستمر في الخلفية، ويمكنك متابعة التقدم من صفحة
+                  التسويق.
+                </li>
+              </S.SummaryList>
+            </S.Card>
+          </S.Stack>
+        </S.EditorGrid>
       </S.Page>
     );
   },
 );
+
+const MarketingTab = memo(({ accessToken, onAuthError, onGoTab }) => {
+  const [composing, setComposing] = useState(false);
+  const status = useAdminGet(accessToken, onAuthError, "/messages/status").data;
+  const campaigns = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/campaigns/admin?days=30",
+  );
+  const automations = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/automations/admin",
+  );
+  const messages = useAdminGet(accessToken, onAuthError, "/messages/admin");
+  const sendingNow = (messages.data || []).some((m) => m.status === "sending");
+
+  // Refresh every 5s while a broadcast is still going out
+  const { reload: reloadMessages } = messages;
+  useEffect(() => {
+    if (!sendingNow) return undefined;
+    const timer = setInterval(reloadMessages, 5000);
+    return () => clearInterval(timer);
+  }, [sendingNow, reloadMessages]);
+
+  if (composing) {
+    return (
+      <BroadcastComposer
+        accessToken={accessToken}
+        onAuthError={onAuthError}
+        emailReady={Boolean(status?.email)}
+        onBack={() => setComposing(false)}
+        onSent={() => {
+          setComposing(false);
+          messages.reload();
+        }}
+      />
+    );
+  }
+
+  const list = campaigns.data?.campaigns || [];
+  const campaignJoins = list.reduce((n, c) => n + c.stats.joins, 0);
+  const sentTotal = (messages.data || []).reduce(
+    (n, m) => n + (m.sent || 0),
+    0,
+  );
+  const activeAutomations = (automations.data || []).filter(
+    (a) => a.enabled,
+  ).length;
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="التسويق">
+        <S.Button type="button" onClick={() => onGoTab("الحملات")}>
+          <Link size={15} />
+          حملة جديدة
+        </S.Button>
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setComposing(true)}
+        >
+          <Mail size={15} />
+          رسالة بريد جديدة
+        </S.Button>
+      </PageHeader>
+
+      <EmailSetupNotice status={status} />
+
+      <S.Grid $cols={4}>
+        <StatCard
+          label="الحملات النشطة"
+          value={num(list.filter((c) => c.status === "active").length)}
+        />
+        <StatCard
+          label="تسجيلات من الحملات"
+          value={num(campaignJoins)}
+          hint="آخر 30 يوماً"
+        />
+        <StatCard label="رسائل بريد أُرسلت" value={num(sentTotal)} />
+        <StatCard label="أتمتة مفعّلة" value={num(activeAutomations)} />
+      </S.Grid>
+
+      <S.Card $flush>
+        <S.TableToolbar>
+          <S.Heading $size="0.9375rem">رسائل البريد</S.Heading>
+          <S.Button
+            type="button"
+            $size="sm"
+            $icon
+            aria-label="تحديث"
+            onClick={messages.reload}
+          >
+            <RefreshCw size={14} />
+          </S.Button>
+        </S.TableToolbar>
+        <LoadState
+          loading={messages.loading && !messages.data}
+          error={messages.error}
+          onRetry={messages.reload}
+        >
+          {(messages.data || []).length === 0 ? (
+            <S.Text $muted $center style={{ padding: "2.5rem 1rem" }}>
+              لم تُرسل أي رسالة بعد.{" "}
+              <S.LinkButton type="button" onClick={() => setComposing(true)}>
+                اكتب أول رسالة
+              </S.LinkButton>
+            </S.Text>
+          ) : (
+            <S.TableScroll>
+              <S.DataTable>
+                <thead>
+                  <tr>
+                    <th>العنوان</th>
+                    <th>المستلمون</th>
+                    <th>التسليم</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {messages.data.map((m) => {
+                    const st = MESSAGE_STATES[m.status] || MESSAGE_STATES.sent;
+                    return (
+                      <tr key={m._id}>
+                        <td>
+                          <S.Stack $gap="0.125rem">
+                            <strong>{m.subject}</strong>
+                            <S.Text as="span" $muted $size="0.75rem">
+                              {segmentSummary(m.segment)}
+                            </S.Text>
+                          </S.Stack>
+                        </td>
+                        <td>{num(m.recipients)}</td>
+                        <td>
+                          {num(m.sent)} أُرسلت
+                          {m.failed ? (
+                            <S.Text
+                              as="span"
+                              $size="0.75rem"
+                              style={{ color: T.danger }}
+                              title={m.error}
+                            >
+                              {" "}
+                              · {num(m.failed)} فشلت
+                            </S.Text>
+                          ) : null}
+                        </td>
+                        <td>
+                          <S.StatusBadge $tone={st.tone}>
+                            {st.label}
+                          </S.StatusBadge>
+                        </td>
+                        <td>{fmtDateTime(m.sentAt || m.createdAt)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </S.DataTable>
+            </S.TableScroll>
+          )}
+        </LoadState>
+      </S.Card>
+
+      <S.Card $padding="1.25rem" $gap="1rem">
+        <S.Row $between>
+          <S.CardLabel>أفضل الحملات (آخر 30 يوماً)</S.CardLabel>
+          <S.LinkButton
+            type="button"
+            style={{ fontSize: "0.8125rem" }}
+            onClick={() => onGoTab("الحملات")}
+          >
+            كل الحملات
+          </S.LinkButton>
+        </S.Row>
+        <BarList
+          rows={[...list]
+            .sort((a, b) => b.stats.joins - a.stats.joins)
+            .slice(0, 5)
+            .map((c) => ({ label: c.name, count: c.stats.joins }))}
+          empty="أنشئ حملة لتتبع التسجيلات القادمة من كل قناة."
+        />
+      </S.Card>
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Tab: الحملات  (tracked links)
+   ============================================================ */
+
+const CHANNELS = [
+  ["instagram", "social"],
+  ["snapchat", "social"],
+  ["tiktok", "social"],
+  ["x", "social"],
+  ["google", "cpc"],
+  ["whatsapp", "messaging"],
+  ["email", "email"],
+  ["sms", "sms"],
+  ["influencer", "influencer"],
+  ["other", ""],
+];
+const LANDING_KEY = "dashboard.campaigns.landingUrl";
+
+const campaignLink = (c) => {
+  if (!c.landingUrl) return "";
+  try {
+    const url = new URL(c.landingUrl);
+    url.searchParams.set("utm_source", c.channel);
+    if (c.medium) url.searchParams.set("utm_medium", c.medium);
+    url.searchParams.set("utm_campaign", c.slug);
+    return url.toString();
+  } catch {
+    return "";
+  }
+};
+
+const slugify = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
+const CampaignEditor = memo(({ campaign, onBack, onSave, onDelete }) => {
+  const isNew = !campaign;
+  const [form, setForm] = useState(() => ({
+    name: campaign?.name ?? "",
+    channel: campaign?.channel ?? "instagram",
+    medium: campaign?.medium ?? "social",
+    slug: campaign?.slug ?? "",
+    landingUrl:
+      campaign?.landingUrl ??
+      (() => {
+        try {
+          return localStorage.getItem(LANDING_KEY) || "";
+        } catch {
+          return "";
+        }
+      })(),
+    cost: campaign?.cost || "",
+    notes: campaign?.notes ?? "",
+    status: campaign?.status ?? "active",
+  }));
+  const [slugTouched, setSlugTouched] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  // Suggest an id like "instagram-2026-11" until the user edits it
+  useEffect(() => {
+    if (slugTouched) return;
+    const d = new Date();
+    const fromName = slugify(form.name);
+    setForm((f) => ({
+      ...f,
+      slug:
+        fromName ||
+        `${f.channel}-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+    }));
+  }, [form.name, form.channel, slugTouched]);
+
+  const link = campaignLink(form);
+
+  const save = async () => {
+    if (!form.name.trim()) return setError("اسم الحملة مطلوب");
+    if (!/^[a-z0-9][a-z0-9-]{1,59}$/.test(form.slug)) {
+      return setError("معرّف الحملة: أحرف إنجليزية صغيرة وأرقام وشرطة فقط");
+    }
+    if (!/^https?:\/\//i.test(form.landingUrl))
+      return setError("رابط الصفحة يجب أن يبدأ بـ https://");
+    setSaving(true);
+    setError("");
+    try {
+      localStorage.setItem(LANDING_KEY, form.landingUrl);
+    } catch {
+      /* ignore */
+    }
+    try {
+      await onSave(campaign?._id, { ...form, cost: Number(form.cost) || 0 });
+      onBack();
+    } catch (err) {
+      setError(apiMessage(err, "تعذّر حفظ الحملة"));
+      setSaving(false);
+    }
+    return undefined;
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <S.Page $max="1000px">
+      <S.Row $between $wrap $gap="1rem">
+        <S.Row>
+          <S.Button
+            type="button"
+            $variant="ghost"
+            $icon
+            aria-label="رجوع"
+            onClick={onBack}
+          >
+            <ChevronRight size={18} />
+          </S.Button>
+          <S.PageTitle>{isNew ? "حملة جديدة" : campaign.name}</S.PageTitle>
+        </S.Row>
+        <S.Row>
+          <S.Button type="button" onClick={onBack}>
+            إلغاء
+          </S.Button>
+          <S.Button
+            type="button"
+            $variant="primary"
+            disabled={saving}
+            onClick={save}
+          >
+            {saving ? "جارٍ الحفظ..." : "حفظ"}
+          </S.Button>
+        </S.Row>
+      </S.Row>
+      {error && <S.Alert>{error}</S.Alert>}
+
+      <S.EditorGrid>
+        <S.Stack $gap="1rem">
+          <S.Card $padding="1.25rem" $gap="1rem">
+            <S.Field>
+              <S.FieldLabel>اسم الحملة</S.FieldLabel>
+              <S.Input
+                value={form.name}
+                onChange={bind(setForm, "name")}
+                placeholder="مثال: إعلان سناب — رمضان"
+              />
+            </S.Field>
+            <S.FormGrid>
+              <S.Field>
+                <S.FieldLabel $small>القناة</S.FieldLabel>
+                <S.Select
+                  value={form.channel}
+                  onChange={(e) => {
+                    const ch = e.target.value;
+                    setForm((f) => ({
+                      ...f,
+                      channel: ch,
+                      medium: CHANNELS.find(([c]) => c === ch)?.[1] ?? f.medium,
+                    }));
+                  }}
+                >
+                  {CHANNELS.map(([c]) => (
+                    <option key={c} value={c}>
+                      {sourceLabel(c)}
+                    </option>
+                  ))}
+                </S.Select>
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>النوع (utm_medium)</S.FieldLabel>
+                <S.Input
+                  value={form.medium}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      medium: e.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9_-]/g, ""),
+                    }))
+                  }
+                  placeholder="social / cpc / email"
+                  style={{ direction: "ltr" }}
+                />
+              </S.Field>
+            </S.FormGrid>
+            <S.Field>
+              <S.FieldLabel $small>معرّف الحملة (utm_campaign)</S.FieldLabel>
+              <S.Input
+                value={form.slug}
+                onChange={(e) => {
+                  setSlugTouched(true);
+                  setForm((f) => ({
+                    ...f,
+                    slug: e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9-]/g, ""),
+                  }));
+                }}
+                style={{ direction: "ltr" }}
+              />
+              <S.Text $muted $size="0.75rem">
+                لا تغيّره بعد نشر الرابط، وإلا ستُحسب الزيارات الجديدة كحملة
+                أخرى.
+              </S.Text>
+            </S.Field>
+            <S.Field>
+              <S.FieldLabel $small>رابط صفحة قائمة الانتظار</S.FieldLabel>
+              <S.Input
+                value={form.landingUrl}
+                onChange={bind(setForm, "landingUrl")}
+                placeholder="https://yoursite.com/waitlist"
+                style={{ direction: "ltr" }}
+              />
+            </S.Field>
+          </S.Card>
+
+          <S.Card $padding="1.25rem" $gap="0.75rem">
+            <S.Heading $size="0.9375rem">رابط الحملة</S.Heading>
+            {link ? (
+              <>
+                <S.CodeTag
+                  style={{
+                    fontSize: "0.8125rem",
+                    whiteSpace: "normal",
+                    wordBreak: "break-all",
+                    letterSpacing: 0,
+                  }}
+                >
+                  {link}
+                </S.CodeTag>
+                <S.Row>
+                  <S.Button type="button" $variant="primary" onClick={copy}>
+                    {copied ? <Check size={15} /> : <Copy size={15} />}
+                    {copied ? "تم النسخ" : "نسخ الرابط"}
+                  </S.Button>
+                  <S.Button
+                    type="button"
+                    as="a"
+                    href={link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <ExternalLink size={15} />
+                    فتح
+                  </S.Button>
+                </S.Row>
+                <S.Text $muted $size="0.75rem">
+                  ضع هذا الرابط في الإعلان أو البايو أو الرسالة. كل من يدخل منه
+                  ويسجّل يُحسب لهذه الحملة.
+                </S.Text>
+              </>
+            ) : (
+              <S.Text $muted $size="0.8125rem">
+                أدخل رابط الصفحة ليظهر رابط الحملة.
+              </S.Text>
+            )}
+          </S.Card>
+        </S.Stack>
+
+        <S.Stack $gap="1rem">
+          <S.Card $padding="1.25rem" $gap="0.75rem">
+            <S.Heading $size="0.9375rem">التكلفة (اختياري)</S.Heading>
+            <S.AffixField>
+              <S.Input
+                type="number"
+                min="0"
+                value={form.cost}
+                onChange={bind(setForm, "cost")}
+                placeholder="0"
+              />
+              <span>ر.س</span>
+            </S.AffixField>
+            <S.Text $muted $size="0.75rem">
+              لحساب تكلفة كل تسجيل.
+            </S.Text>
+          </S.Card>
+          <S.Card $padding="1.25rem" $gap="0.75rem">
+            <S.Heading $size="0.9375rem">الحالة</S.Heading>
+            <S.Select value={form.status} onChange={bind(setForm, "status")}>
+              <option value="active">نشطة</option>
+              <option value="archived">مؤرشفة</option>
+            </S.Select>
+          </S.Card>
+          <S.Card $padding="1.25rem" $gap="0.75rem">
+            <S.Heading $size="0.9375rem">ملاحظات</S.Heading>
+            <S.Textarea
+              rows={3}
+              value={form.notes}
+              onChange={bind(setForm, "notes")}
+            />
+          </S.Card>
+        </S.Stack>
+      </S.EditorGrid>
+
+      {!isNew && (
+        <S.Row style={{ justifyContent: "flex-end" }}>
+          <S.Button
+            type="button"
+            $variant="danger"
+            onClick={async () => {
+              if (
+                !window.confirm(
+                  `حذف الحملة "${campaign.name}"؟ تبقى الزيارات المسجلة لكن لن تظهر هنا.`,
+                )
+              )
+                return;
+              try {
+                await onDelete(campaign._id);
+                onBack();
+              } catch (err) {
+                setError(apiMessage(err, "تعذّر حذف الحملة"));
+              }
+            }}
+          >
+            <Trash2 size={15} />
+            حذف الحملة
+          </S.Button>
+        </S.Row>
+      )}
+    </S.Page>
+  );
+});
+
+const CAMPAIGN_GRID =
+  "minmax(220px, 1.8fr) 0.9fr 0.8fr 0.8fr 0.8fr 0.9fr 0.9fr 0.5fr";
+
+const CampaignsTab = memo(({ accessToken, onAuthError }) => {
+  const [days, setDays] = useState(30);
+  const [editing, setEditing] = useState(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const { data, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    `/campaigns/admin?days=${days}`,
+  );
+
+  const all = data?.campaigns || [];
+  const rows = all.filter((c) => showArchived || c.status === "active");
+
+  const save = async (id, payload) => {
+    await callApi(
+      () =>
+        id
+          ? userRequest.put(`/campaigns/${id}`, payload)
+          : userRequest.post("/campaigns", payload),
+      onAuthError,
+    );
+    reload();
+  };
+  const remove = async (id) => {
+    await callApi(() => userRequest.delete(`/campaigns/${id}`), onAuthError);
+    reload();
+  };
+
+  const copy = async (c) => {
+    try {
+      await navigator.clipboard.writeText(campaignLink(c));
+      setCopiedId(c._id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  if (editing) {
+    return (
+      <CampaignEditor
+        key={editing}
+        campaign={editing === "new" ? null : all.find((c) => c._id === editing)}
+        onBack={() => setEditing(null)}
+        onSave={save}
+        onDelete={remove}
+      />
+    );
+  }
+
+  const totals = rows.reduce(
+    (t, c) => ({
+      visitors: t.visitors + c.stats.visitors,
+      joins: t.joins + c.stats.joins,
+      cost: t.cost + (c.cost || 0),
+    }),
+    { visitors: 0, joins: 0, cost: 0 },
+  );
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="الحملات">
+        <RangePicker days={days} onChange={setDays} />
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setEditing("new")}
+        >
+          <Plus size={15} />
+          حملة جديدة
+        </S.Button>
+      </PageHeader>
+
+      <LoadState loading={loading && !data} error={error} onRetry={reload}>
+        {all.length === 0 ? (
+          <S.EmptyState>
+            <S.Illustration src={campaignImage} alt="" $w="200px" />
+            <S.Heading $size="1.125rem">اعرف أي إعلان يجلب التسجيلات</S.Heading>
+            <S.Text $muted>
+              أنشئ رابطاً خاصاً لكل حملة (سناب، انستقرام، مشاهير، رسائل…). كل
+              زائر يدخل من الرابط ويكمل الاستبيان ويسجّل يُحسب لتلك الحملة.
+            </S.Text>
+            <S.Button
+              type="button"
+              $variant="primary"
+              onClick={() => setEditing("new")}
+            >
+              <Plus size={15} />
+              إنشاء أول حملة
+            </S.Button>
+          </S.EmptyState>
+        ) : (
+          <>
+            <S.Grid $cols={3}>
+              <StatCard label="زوار من الحملات" value={num(totals.visitors)} />
+              <StatCard
+                label="تسجيلات من الحملات"
+                value={num(totals.joins)}
+                hint={pct(
+                  totals.visitors ? totals.joins / totals.visitors : null,
+                )}
+              />
+              <StatCard
+                label="تكلفة التسجيل"
+                value={
+                  totals.joins && totals.cost
+                    ? formatSAR(totals.cost / totals.joins)
+                    : "—"
+                }
+                hint={
+                  totals.cost
+                    ? `إجمالي الإنفاق ${formatSAR(totals.cost)}`
+                    : "أضف التكلفة لكل حملة"
+                }
+              />
+            </S.Grid>
+
+            <S.Card $flush>
+              <S.TableToolbar>
+                <S.Check>
+                  <input
+                    type="checkbox"
+                    checked={showArchived}
+                    onChange={(e) => setShowArchived(e.target.checked)}
+                  />
+                  إظهار الحملات المؤرشفة
+                </S.Check>
+              </S.TableToolbar>
+              <S.TableScroll $minH="240px">
+                <S.GridTable $columns={CAMPAIGN_GRID} $minWidth="980px">
+                  <S.Th>الحملة</S.Th>
+                  <S.Th>القناة</S.Th>
+                  <S.Th $align="center">الزوار</S.Th>
+                  <S.Th $align="center">بدأوا</S.Th>
+                  <S.Th $align="center">سجّلوا</S.Th>
+                  <S.Th $align="center">التحويل</S.Th>
+                  <S.Th $align="center">تكلفة التسجيل</S.Th>
+                  <S.Th $align="center">الرابط</S.Th>
+                  {rows.length === 0 ? (
+                    <S.TableMessage>لا توجد حملات نشطة.</S.TableMessage>
+                  ) : (
+                    rows.map((c) => (
+                      <S.Tr key={c._id} onClick={() => setEditing(c._id)}>
+                        <S.Td>
+                          <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+                            <S.Row $gap="0.375rem">
+                              <S.Ellipsis style={{ fontWeight: 600 }}>
+                                {c.name}
+                              </S.Ellipsis>
+                              {c.status === "archived" && (
+                                <S.StatusBadge $tone="neutral">
+                                  مؤرشفة
+                                </S.StatusBadge>
+                              )}
+                            </S.Row>
+                            <S.Ellipsis
+                              style={{
+                                fontSize: "0.75rem",
+                                color: T.textMuted,
+                                direction: "ltr",
+                                textAlign: "right",
+                              }}
+                            >
+                              {c.slug}
+                            </S.Ellipsis>
+                          </S.Stack>
+                        </S.Td>
+                        <S.Td>{sourceLabel(c.channel)}</S.Td>
+                        <S.Td $align="center">{num(c.stats.visitors)}</S.Td>
+                        <S.Td $align="center">{num(c.stats.quizStarts)}</S.Td>
+                        <S.Td $align="center" $weight={700}>
+                          {num(c.stats.joins)}
+                        </S.Td>
+                        <S.Td $align="center">
+                          {pct(c.stats.conversionRate)}
+                        </S.Td>
+                        <S.Td $align="center">
+                          {c.stats.costPerJoin
+                            ? formatSAR(c.stats.costPerJoin)
+                            : "—"}
+                        </S.Td>
+                        <S.Td
+                          $align="center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <S.Button
+                            type="button"
+                            $variant="ghost"
+                            $size="sm"
+                            $icon
+                            aria-label="نسخ الرابط"
+                            onClick={() => copy(c)}
+                          >
+                            {copiedId === c._id ? (
+                              <Check size={14} />
+                            ) : (
+                              <Copy size={14} />
+                            )}
+                          </S.Button>
+                        </S.Td>
+                      </S.Tr>
+                    ))
+                  )}
+                </S.GridTable>
+              </S.TableScroll>
+              <S.TableFooter>
+                <span>
+                  الأرقام لآخر {num(days)} يوماً · الزائر يُحسب مرة واحدة لكل
+                  زيارة
+                </span>
+              </S.TableFooter>
+            </S.Card>
+          </>
+        )}
+      </LoadState>
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Tab: الاتمته  (automatic emails)
+   ============================================================ */
+
+const AUTOMATION_TEMPLATES = [
+  {
+    name: "رسالة ترحيب",
+    delayDays: 0,
+    subject: "أهلاً {{firstName}}، تم تسجيلك في قائمة الانتظار",
+    body: "مرحباً {{firstName}}،\n\nشكراً لاهتمامك بباقة {{package}}. سجّلناك في قائمة الانتظار وسنتواصل معك فور فتح الحجز.\n\nمع التحية،\nفريق العيادة",
+  },
+  {
+    name: "تذكير بعد 3 أيام",
+    delayDays: 3,
+    subject: "{{firstName}}، هل لديك أي سؤال عن باقة {{package}}؟",
+    body: "مرحباً {{firstName}}،\n\nما زلت في قائمة الانتظار لباقة {{package}}. إذا كان لديك أي سؤال عن التحاليل المشمولة، يسعدنا الرد عليك.\n\nمع التحية،\nفريق العيادة",
+  },
+];
+
+const timingLabel = (a) =>
+  a.delayDays
+    ? `بعد ${num(a.delayDays)} يوم من الانضمام`
+    : "مباشرة بعد الانضمام";
+
+const AutomationEditor = memo(
+  ({
+    automation,
+    template,
+    accessToken,
+    onAuthError,
+    emailReady,
+    onBack,
+    onSave,
+    onDelete,
+  }) => {
+    const isNew = !automation;
+    const options = useSegmentOptions(accessToken, onAuthError);
+    const base = automation || template || {};
+    const [form, setForm] = useState({
+      name: base.name || "",
+      delayDays: base.delayDays ?? 0,
+      subject: base.subject || "",
+      body: base.body || "",
+      segment: { ...EMPTY_SEGMENT, ...(base.segment || {}) },
+      enabled: automation ? automation.enabled : false,
+    });
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    const save = async () => {
+      if (!form.name.trim()) return setError("اسم الأتمتة مطلوب");
+      if (!form.subject.trim() || !form.body.trim())
+        return setError("اكتب عنوان الرسالة ونصها");
+      setSaving(true);
+      setError("");
+      try {
+        await onSave(automation?._id, {
+          ...form,
+          delayDays: Number(form.delayDays) || 0,
+        });
+        onBack();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حفظ الأتمتة"));
+        setSaving(false);
+      }
+      return undefined;
+    };
+
+    return (
+      <S.Page $max="1100px">
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="رجوع"
+              onClick={onBack}
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.PageTitle>{isNew ? "أتمتة جديدة" : automation.name}</S.PageTitle>
+          </S.Row>
+          <S.Row>
+            <S.Button type="button" onClick={onBack}>
+              إلغاء
+            </S.Button>
+            <S.Button
+              type="button"
+              $variant="primary"
+              disabled={saving}
+              onClick={save}
+            >
+              {saving ? "جارٍ الحفظ..." : "حفظ"}
+            </S.Button>
+          </S.Row>
+        </S.Row>
+        {error && <S.Alert>{error}</S.Alert>}
+
+        <S.EditorGrid>
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="1rem">
+              <S.Field>
+                <S.FieldLabel>اسم الأتمتة</S.FieldLabel>
+                <S.Input
+                  value={form.name}
+                  onChange={bind(setForm, "name")}
+                  placeholder="مثال: رسالة ترحيب"
+                />
+              </S.Field>
+              <S.Heading $size="0.9375rem">متى تُرسل؟</S.Heading>
+              <S.RadioRow>
+                <input
+                  type="radio"
+                  name="timing"
+                  checked={Number(form.delayDays) === 0}
+                  onChange={() => setForm((f) => ({ ...f, delayDays: 0 }))}
+                />
+                مباشرة بعد انضمام الشخص لقائمة الانتظار
+              </S.RadioRow>
+              <S.RadioRow>
+                <input
+                  type="radio"
+                  name="timing"
+                  checked={Number(form.delayDays) > 0}
+                  onChange={() =>
+                    setForm((f) => ({
+                      ...f,
+                      delayDays: Number(f.delayDays) > 0 ? f.delayDays : 3,
+                    }))
+                  }
+                />
+                بعد
+                <S.Input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={Number(form.delayDays) > 0 ? form.delayDays : ""}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, delayDays: e.target.value }))
+                  }
+                  onFocus={() =>
+                    Number(form.delayDays) === 0 &&
+                    setForm((f) => ({ ...f, delayDays: 3 }))
+                  }
+                  style={{ width: "5rem", height: "2rem" }}
+                />
+                يوم من الانضمام
+              </S.RadioRow>
+            </S.Card>
+
+            <SegmentCard
+              segment={form.segment}
+              onChange={(segment) => setForm((f) => ({ ...f, segment }))}
+              options={options}
+              note="من ينطبق عليه الشرط فقط"
+            />
+
+            <EmailContentCard
+              subject={form.subject}
+              body={form.body}
+              onChange={({ subject, body }) =>
+                setForm((f) => ({ ...f, subject, body }))
+              }
+            />
+          </S.Stack>
+
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">التفعيل</S.Heading>
+                <S.Switch
+                  type="button"
+                  role="switch"
+                  aria-checked={form.enabled}
+                  $on={form.enabled}
+                  onClick={() =>
+                    setForm((f) => ({ ...f, enabled: !f.enabled }))
+                  }
+                />
+              </S.Row>
+              <S.Text $muted $size="0.75rem">
+                {form.enabled
+                  ? "مفعّلة: تُرسل لمن ينضم من الآن فصاعداً."
+                  : "متوقفة. عند التفعيل لن تُرسل لمن انضم قبل ذلك — فقط للمنضمين الجدد."}
+              </S.Text>
+              {!isNew && (
+                <S.Text $size="0.8125rem">
+                  أُرسلت {num(automation.sentCount)} مرة
+                  {automation.failedCount
+                    ? ` · فشلت ${num(automation.failedCount)}`
+                    : ""}
+                </S.Text>
+              )}
+            </S.Card>
+            {!isNew && (
+              <TestSend
+                disabled={!emailReady}
+                onSend={async (to) => {
+                  const { data } = await callApi(
+                    () =>
+                      userRequest.post(`/automations/${automation._id}/test`, {
+                        to,
+                      }),
+                    onAuthError,
+                  );
+                  return data.message;
+                }}
+              />
+            )}
+          </S.Stack>
+        </S.EditorGrid>
+
+        {!isNew && (
+          <S.Row style={{ justifyContent: "flex-end" }}>
+            <S.Button
+              type="button"
+              $variant="danger"
+              onClick={async () => {
+                if (!window.confirm(`حذف "${automation.name}"؟`)) return;
+                try {
+                  await onDelete(automation._id);
+                  onBack();
+                } catch (err) {
+                  setError(apiMessage(err, "تعذّر الحذف"));
+                }
+              }}
+            >
+              <Trash2 size={15} />
+              حذف الأتمتة
+            </S.Button>
+          </S.Row>
+        )}
+      </S.Page>
+    );
+  },
+);
+
+const AutomationsTab = memo(({ accessToken, onAuthError }) => {
+  const [editing, setEditing] = useState(null); // null | { id } | { template }
+  const [busyId, setBusyId] = useState(null);
+  const status = useAdminGet(accessToken, onAuthError, "/messages/status").data;
+  const { data, setData, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/automations/admin",
+  );
+  const list = data || [];
+
+  const save = async (id, payload) => {
+    const { data: saved } = await callApi(
+      () =>
+        id
+          ? userRequest.put(`/automations/${id}`, payload)
+          : userRequest.post("/automations", payload),
+      onAuthError,
+    );
+    setData((prev) =>
+      id
+        ? (prev || []).map((a) => (a._id === id ? saved : a))
+        : [saved, ...(prev || [])],
+    );
+  };
+  const remove = async (id) => {
+    await callApi(() => userRequest.delete(`/automations/${id}`), onAuthError);
+    setData((prev) => (prev || []).filter((a) => a._id !== id));
+  };
+  const toggle = async (a) => {
+    setBusyId(a._id);
+    try {
+      await save(a._id, { enabled: !a.enabled });
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر التحديث"));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (editing) {
+    return (
+      <AutomationEditor
+        key={editing.id || editing.template?.name || "new"}
+        automation={editing.id ? list.find((a) => a._id === editing.id) : null}
+        template={editing.template}
+        accessToken={accessToken}
+        onAuthError={onAuthError}
+        emailReady={Boolean(status?.email)}
+        onBack={() => setEditing(null)}
+        onSave={save}
+        onDelete={remove}
+      />
+    );
+  }
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="الاتمته">
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setEditing({ template: null })}
+        >
+          <Plus size={15} />
+          أتمتة جديدة
+        </S.Button>
+      </PageHeader>
+
+      <EmailSetupNotice status={status} />
+
+      <LoadState loading={loading && !data} error={error} onRetry={reload}>
+        {list.length === 0 ? (
+          <S.EmptyState>
+            <S.Illustration src={automationImage} alt="" $w="200px" />
+            <S.Heading $size="1.125rem">رسائل تلقائية لكل من ينضم</S.Heading>
+            <S.Text $muted>ابدأ بقالب جاهز وعدّله كما تريد:</S.Text>
+            <S.Row $wrap style={{ justifyContent: "center" }}>
+              {AUTOMATION_TEMPLATES.map((t) => (
+                <S.Button
+                  key={t.name}
+                  type="button"
+                  onClick={() => setEditing({ template: t })}
+                >
+                  <Zap size={15} />
+                  {t.name}
+                </S.Button>
+              ))}
+            </S.Row>
+          </S.EmptyState>
+        ) : (
+          <S.Stack $gap="0.75rem">
+            {list.map((a) => (
+              <S.Card key={a._id} $padding="1rem 1.25rem">
+                <S.Row $between $wrap $gap="1rem">
+                  <S.Row
+                    $gap="0.875rem"
+                    style={{ minWidth: 0, flex: 1, cursor: "pointer" }}
+                    onClick={() => setEditing({ id: a._id })}
+                  >
+                    <S.IconBubble $on={a.enabled}>
+                      {a.delayDays ? <Clock size={18} /> : <Zap size={18} />}
+                    </S.IconBubble>
+                    <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+                      <strong>{a.name}</strong>
+                      <S.Text $muted $size="0.8125rem">
+                        {timingLabel(a)} · {segmentSummary(a.segment)}
+                      </S.Text>
+                      <S.Ellipsis
+                        style={{ fontSize: "0.75rem", color: T.textSubtle }}
+                      >
+                        البريد: {a.subject}
+                      </S.Ellipsis>
+                    </S.Stack>
+                  </S.Row>
+                  <S.Row $gap="1rem">
+                    <S.Text $muted $size="0.8125rem">
+                      {num(a.sentCount)} أُرسلت
+                    </S.Text>
+                    <S.Switch
+                      type="button"
+                      role="switch"
+                      aria-checked={a.enabled}
+                      aria-label={a.enabled ? "إيقاف" : "تفعيل"}
+                      $on={a.enabled}
+                      disabled={busyId === a._id}
+                      onClick={() => toggle(a)}
+                    />
+                  </S.Row>
+                </S.Row>
+              </S.Card>
+            ))}
+            <S.Row $wrap $gap="0.5rem">
+              <S.Text as="span" $muted $size="0.8125rem">
+                قوالب:
+              </S.Text>
+              {AUTOMATION_TEMPLATES.map((t) => (
+                <S.VarChip
+                  key={t.name}
+                  type="button"
+                  onClick={() => setEditing({ template: t })}
+                >
+                  {t.name}
+                </S.VarChip>
+              ))}
+            </S.Row>
+          </S.Stack>
+        )}
+      </LoadState>
+    </S.Page>
+  );
+});
 
 /* ============================================================
    Tab: المتجر (appointment settings)
@@ -6094,10 +8099,43 @@ const Dashboard = () => {
             onOpenOrder={openOrder}
           />
         );
-      case "التسويق":
-        return <MarketingTab />;
       case "التحليلات":
-        return <AnalyticsTab />;
+        return (
+          <AnalyticsTab
+            accessToken={accessToken}
+            onAuthError={handleAuthError}
+          />
+        );
+      case "الربورت":
+        return (
+          <ReportsTab accessToken={accessToken} onAuthError={handleAuthError} />
+        );
+      case "لايف":
+        return (
+          <LiveTab accessToken={accessToken} onAuthError={handleAuthError} />
+        );
+      case "التسويق":
+        return (
+          <MarketingTab
+            accessToken={accessToken}
+            onAuthError={handleAuthError}
+            onGoTab={goToTab}
+          />
+        );
+      case "الحملات":
+        return (
+          <CampaignsTab
+            accessToken={accessToken}
+            onAuthError={handleAuthError}
+          />
+        );
+      case "الاتمته":
+        return (
+          <AutomationsTab
+            accessToken={accessToken}
+            onAuthError={handleAuthError}
+          />
+        );
       case "المتجر":
         return <AppointmentSettings />;
       case "التطبيقات":
