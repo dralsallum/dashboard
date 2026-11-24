@@ -1765,3 +1765,56 @@ export const Textarea = styled.textarea`
   line-height: 1.6;
   resize: vertical;
 `;
+
+/* ============================================================
+   Discounts
+   ============================================================ */
+
+export const CodeTag = styled.span`
+  display: ${({ $inline }) => ($inline ? "inline-block" : "block")};
+  align-self: flex-start;
+  max-width: 100%;
+  padding: ${({ $inline }) => ($inline ? "0.125rem 0.5rem" : "0.5rem 0.75rem")};
+  border: 1px dashed ${t.primarySoft};
+  border-radius: 6px;
+  background: ${t.surfaceAlt};
+  color: ${t.text};
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: ${({ $inline }) => ($inline ? "0.8125rem" : "1.125rem")};
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  direction: ltr;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const SummaryList = styled.ul`
+  margin: 0;
+  padding-inline-start: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  color: ${t.text};
+  font-size: 0.8125rem;
+  line-height: 1.6;
+`;
+
+export const AffixField = styled.div`
+  position: relative;
+
+  input {
+    padding-inline-end: 2.75rem;
+  }
+
+  span {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 0.75rem;
+    transform: translateY(-50%);
+    color: ${t.textMuted};
+    font-size: 0.875rem;
+    font-weight: 600;
+    pointer-events: none;
+  }
+`;

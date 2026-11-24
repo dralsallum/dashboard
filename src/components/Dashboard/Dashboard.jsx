@@ -268,15 +268,6 @@ const SETUP_CARDS = [
 
 // Centered empty-state tabs
 const EMPTY_TABS = {
-  الخصومات: {
-    icon: discountsIcon,
-    image: discountImage,
-    title: "الخصومات",
-    heading: "إدارة الخصومات والعروض الترويجية",
-    text: "أضف رموز خصم وخصومات تلقائية تُطبق عند إتمام الدفع. يمكنك أيضًا استخدام الخصومات مع الأسعار المقارنة.",
-    cta: "انشاء خصومات",
-    topic: "الخصومات",
-  },
   المحتوى: {
     icon: contentIcon,
     image: contentImage,
@@ -4335,6 +4326,937 @@ const InventoryTab = memo(({ accessToken, onAuthError, onGoProducts }) => {
 });
 
 /* ============================================================
+   Tab: الخصومات  (discount codes from /api/discounts)
+   ============================================================ */
+
+const DISCOUNT_STATES = {
+  active: { label: "نشط", tone: "success" },
+  scheduled: { label: "مجدول", tone: "warning" },
+  expired: { label: "منتهي", tone: "neutral" },
+  used_up: { label: "مستنفد", tone: "neutral" },
+  disabled: { label: "معطل", tone: "danger" },
+};
+
+// Same rules as the server (models/Discount.js → stateOf)
+const discountStateOf = (d, now = new Date()) => {
+  if (d.status === "disabled") return "disabled";
+  if (d.startsAt && new Date(d.startsAt) > now) return "scheduled";
+  if (d.endsAt && new Date(d.endsAt) < now) return "expired";
+  if (d.usageLimit && d.usedCount >= d.usageLimit) return "used_up";
+  return "active";
+};
+
+const DISCOUNT_VIEWS = [
+  { id: "all", label: "الكل", test: () => true },
+  { id: "active", label: "نشط", test: (d) => discountStateOf(d) === "active" },
+  {
+    id: "scheduled",
+    label: "مجدول",
+    test: (d) => discountStateOf(d) === "scheduled",
+  },
+  {
+    id: "ended",
+    label: "منتهي",
+    test: (d) => ["expired", "used_up"].includes(discountStateOf(d)),
+  },
+  {
+    id: "disabled",
+    label: "معطل",
+    test: (d) => discountStateOf(d) === "disabled",
+  },
+];
+
+const CODE_RE = /^[A-Z0-9_-]{3,30}$/;
+const DISCOUNT_GRID = "minmax(220px, 1.6fr) 1.3fr 0.8fr 0.8fr 1.4fr";
+
+const discountValueLabel = (d) =>
+  d.type === "percentage" ? `${d.value}٪` : formatSAR(d.value);
+
+const fmtDateTime = (d) =>
+  d
+    ? new Date(d).toLocaleString("ar-SA-u-ca-gregory", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : "";
+
+// ISO → value for <input type="datetime-local"> (local time)
+const toLocalInput = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${toDateKey(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+// No 0/O/1/I so codes are easy to read out loud
+const generateCode = (length = 8) => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(length);
+  window.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+};
+
+const appliesLabel = (d, packagesById) => {
+  if (d.appliesTo !== "packages") return "كل الباقات";
+  const names = (d.packageIds || [])
+    .map((id) => packagesById[id]?.name)
+    .filter(Boolean);
+  if (names.length === 0) return "باقات محددة";
+  return names.length <= 2 ? names.join("، ") : `${names.length} باقات`;
+};
+
+/* ---------- Data ---------- */
+
+const useDiscounts = (accessToken, onAuthError) => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await userRequest.get("/discounts/admin", {
+          signal: controller.signal,
+        });
+        setItems(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        const status = err.response?.status;
+        if (status === 401) onAuthError();
+        setError(
+          status === 404
+            ? "مسار الخصومات غير موجود على الخادم بعد (/api/discounts)"
+            : amanapiError(status, "تعذّر جلب أكواد الخصم"),
+        );
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    })();
+    return () => controller.abort();
+  }, [accessToken, onAuthError, reloadKey]);
+
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+
+  const guard = useCallback(
+    async (fn) => {
+      try {
+        return await fn();
+      } catch (err) {
+        if (err.response?.status === 401) onAuthError();
+        throw err;
+      }
+    },
+    [onAuthError],
+  );
+
+  const save = useCallback(
+    (id, payload) =>
+      guard(async () => {
+        const { data } = id
+          ? await userRequest.put(`/discounts/${id}`, payload)
+          : await userRequest.post("/discounts", payload);
+        setItems((prev) =>
+          prev.some((d) => d._id === data._id)
+            ? prev.map((d) => (d._id === data._id ? data : d))
+            : [data, ...prev],
+        );
+        return data;
+      }),
+    [guard],
+  );
+
+  const remove = useCallback(
+    (id) =>
+      guard(async () => {
+        await userRequest.delete(`/discounts/${id}`);
+        setItems((prev) => prev.filter((d) => d._id !== id));
+      }),
+    [guard],
+  );
+
+  return { items, loading, error, reload, save, remove };
+};
+
+/* ---------- Editor ---------- */
+
+const discountToForm = (d) => ({
+  code: d?.code ?? "",
+  title: d?.title ?? "",
+  type: d?.type ?? "percentage",
+  value: d?.value ?? "",
+  appliesTo: d?.appliesTo ?? "all",
+  packageIds: (d?.packageIds ?? []).map(String),
+  hasMin: Boolean(d?.minPurchase),
+  minPurchase: d?.minPurchase || "",
+  hasLimit: Boolean(d?.usageLimit),
+  usageLimit: d?.usageLimit ?? "",
+  oncePerCustomer: Boolean(d?.oncePerCustomer),
+  startsAt: toLocalInput(d?.startsAt ?? new Date().toISOString()),
+  hasEnd: Boolean(d?.endsAt),
+  endsAt: toLocalInput(d?.endsAt),
+  status: d?.status ?? "active",
+});
+
+const DiscountEditor = memo(
+  ({ discount, packages, onBack, onSave, onDelete }) => {
+    const isNew = !discount;
+    const [form, setForm] = useState(() => discountToForm(discount));
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState("");
+
+    const code = form.code.trim().toUpperCase();
+    const value = Number(form.value);
+    const packagesById = useMemo(
+      () => Object.fromEntries(packages.map((p) => [String(p._id), p])),
+      [packages],
+    );
+
+    const togglePackage = (id) =>
+      setForm((f) => ({
+        ...f,
+        packageIds: f.packageIds.includes(id)
+          ? f.packageIds.filter((x) => x !== id)
+          : [...f.packageIds, id],
+      }));
+
+    // Live price example (first chosen package, or the first package)
+    const examplePkg =
+      (form.appliesTo === "packages"
+        ? packagesById[form.packageIds[0]]
+        : packages[0]) || null;
+    const example = useMemo(() => {
+      if (!examplePkg || !(value > 0)) return null;
+      const subtotal = Number(examplePkg.price) || 0;
+      const off =
+        form.type === "percentage"
+          ? (subtotal * Math.min(value, 100)) / 100
+          : Math.min(value, subtotal);
+      const after = subtotal - off;
+      return { name: examplePkg.name, subtotal, after, total: after * 1.15 };
+    }, [examplePkg, value, form.type]);
+
+    const handleSave = async () => {
+      if (!CODE_RE.test(code))
+        return setError(
+          "الكود يجب أن يكون من 3 إلى 30 حرفاً إنجليزياً أو أرقاماً (مسموح - و _)",
+        );
+      if (!(value > 0)) return setError("أدخل قيمة خصم صحيحة");
+      if (form.type === "percentage" && value > 100)
+        return setError("النسبة لا يمكن أن تتجاوز 100٪");
+      if (form.appliesTo === "packages" && form.packageIds.length === 0)
+        return setError("اختر باقة واحدة على الأقل");
+      if (form.hasLimit && !(Number(form.usageLimit) >= 1))
+        return setError("أدخل حداً صحيحاً لعدد مرات الاستخدام");
+      if (
+        form.hasEnd &&
+        (!form.endsAt || new Date(form.endsAt) <= new Date(form.startsAt))
+      ) {
+        return setError("تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية");
+      }
+
+      const payload = {
+        code,
+        title: form.title.trim(),
+        type: form.type,
+        value,
+        appliesTo: form.appliesTo,
+        packageIds: form.appliesTo === "packages" ? form.packageIds : [],
+        minPurchase: form.hasMin ? Number(form.minPurchase) || 0 : 0,
+        usageLimit: form.hasLimit ? Number(form.usageLimit) : null,
+        oncePerCustomer: form.oncePerCustomer,
+        startsAt: form.startsAt
+          ? new Date(form.startsAt).toISOString()
+          : new Date().toISOString(),
+        endsAt:
+          form.hasEnd && form.endsAt
+            ? new Date(form.endsAt).toISOString()
+            : null,
+        status: form.status,
+      };
+
+      setSaving(true);
+      setError("");
+      try {
+        await onSave(discount?._id, payload);
+        onBack();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حفظ الكود. يرجى المحاولة مرة أخرى."));
+        setSaving(false);
+      }
+    };
+
+    const handleDelete = async () => {
+      if (
+        !window.confirm(
+          `حذف الكود "${discount.code}"؟ لن يتمكن العملاء من استخدامه بعد الآن.`,
+        )
+      )
+        return;
+      setDeleting(true);
+      try {
+        await onDelete(discount._id);
+        onBack();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حذف الكود."));
+        setDeleting(false);
+      }
+    };
+
+    // What the code will be once saved (for the summary badge)
+    const previewState =
+      DISCOUNT_STATES[
+        discountStateOf({
+          status: form.status,
+          startsAt: form.startsAt,
+          endsAt: form.hasEnd ? form.endsAt : null,
+          usageLimit: form.hasLimit ? Number(form.usageLimit) : null,
+          usedCount: discount?.usedCount ?? 0,
+        })
+      ];
+
+    const summary = [
+      value > 0 &&
+        `خصم ${form.type === "percentage" ? `${value}٪` : formatSAR(value)} على ${appliesLabel(
+          { appliesTo: form.appliesTo, packageIds: form.packageIds },
+          packagesById,
+        )}`,
+      form.hasMin && Number(form.minPurchase) > 0
+        ? `حد أدنى للشراء ${formatSAR(form.minPurchase)}`
+        : "بدون حد أدنى للشراء",
+      form.hasLimit && Number(form.usageLimit) >= 1
+        ? `يُستخدم ${Number(form.usageLimit).toLocaleString("ar-SA")} مرة كحد أقصى`
+        : "عدد استخدامات غير محدود",
+      form.oncePerCustomer && "مرة واحدة لكل عميل",
+      form.startsAt && `يبدأ ${fmtDateTime(form.startsAt)}`,
+      form.hasEnd && form.endsAt
+        ? `ينتهي ${fmtDateTime(form.endsAt)}`
+        : "بدون تاريخ انتهاء",
+    ].filter(Boolean);
+
+    return (
+      <S.Page $max="1100px">
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="رجوع إلى الخصومات"
+              onClick={onBack}
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.PageTitle>{isNew ? "إنشاء كود خصم" : discount.code}</S.PageTitle>
+          </S.Row>
+          <S.Row>
+            <S.Button type="button" onClick={onBack}>
+              إلغاء
+            </S.Button>
+            <S.Button
+              type="button"
+              $variant="primary"
+              disabled={saving}
+              onClick={handleSave}
+            >
+              {saving ? "جارٍ الحفظ..." : "حفظ"}
+            </S.Button>
+          </S.Row>
+        </S.Row>
+
+        {error && <S.Alert>{error}</S.Alert>}
+
+        <S.EditorGrid>
+          {/* ---------- Main column ---------- */}
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">كود الخصم</S.Heading>
+                <S.LinkButton
+                  type="button"
+                  style={{ fontSize: "0.8125rem" }}
+                  onClick={() =>
+                    setForm((f) => ({ ...f, code: generateCode() }))
+                  }
+                >
+                  توليد كود عشوائي
+                </S.LinkButton>
+              </S.Row>
+              <S.Input
+                value={form.code}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    code: e.target.value
+                      .toUpperCase()
+                      .replace(/[^A-Z0-9_-]/g, ""),
+                  }))
+                }
+                placeholder="مثال: SAVE15"
+                maxLength={30}
+                style={{
+                  direction: "ltr",
+                  textAlign: "right",
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                }}
+              />
+              <S.Text $muted $size="0.75rem">
+                يكتبه العميل عند الدفع. حروف إنجليزية وأرقام فقط، ولا يهم حجم
+                الأحرف.
+              </S.Text>
+              <S.Field>
+                <S.FieldLabel $small>
+                  ملاحظة داخلية (لا تظهر للعميل)
+                </S.FieldLabel>
+                <S.Input
+                  value={form.title}
+                  onChange={bind(setForm, "title")}
+                  placeholder="مثال: حملة اليوم الوطني"
+                />
+              </S.Field>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">قيمة الخصم</S.Heading>
+              <S.Segmented role="tablist">
+                {[
+                  ["percentage", "نسبة مئوية"],
+                  ["fixed", "مبلغ ثابت"],
+                ].map(([id, label]) => (
+                  <S.SegmentButton
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={form.type === id}
+                    $active={form.type === id}
+                    onClick={() => setForm((f) => ({ ...f, type: id }))}
+                  >
+                    {label}
+                  </S.SegmentButton>
+                ))}
+              </S.Segmented>
+              <S.AffixField style={{ maxWidth: "14rem" }}>
+                <S.Input
+                  type="number"
+                  min="0"
+                  max={form.type === "percentage" ? 100 : undefined}
+                  step="0.01"
+                  value={form.value}
+                  onChange={bind(setForm, "value")}
+                  placeholder="0"
+                />
+                <span>{form.type === "percentage" ? "٪" : "ر.س"}</span>
+              </S.AffixField>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">ينطبق على</S.Heading>
+              <S.RadioRow>
+                <input
+                  type="radio"
+                  name="applies"
+                  checked={form.appliesTo === "all"}
+                  onChange={() => setForm((f) => ({ ...f, appliesTo: "all" }))}
+                />
+                كل الباقات
+              </S.RadioRow>
+              <S.RadioRow>
+                <input
+                  type="radio"
+                  name="applies"
+                  checked={form.appliesTo === "packages"}
+                  onChange={() =>
+                    setForm((f) => ({ ...f, appliesTo: "packages" }))
+                  }
+                />
+                باقات محددة
+              </S.RadioRow>
+              {form.appliesTo === "packages" && (
+                <S.SubCard>
+                  {packages.length === 0 ? (
+                    <S.Text $muted $size="0.8125rem">
+                      لا توجد منتجات بعد. أضفها من صفحة المنتجات أولاً.
+                    </S.Text>
+                  ) : (
+                    packages.map((p) => (
+                      <S.Check key={p._id}>
+                        <input
+                          type="checkbox"
+                          checked={form.packageIds.includes(String(p._id))}
+                          onChange={() => togglePackage(String(p._id))}
+                        />
+                        <ProductThumb src={p.images?.[0]} size={28} />
+                        <span style={{ flex: 1 }}>{p.name}</span>
+                        <S.Text as="span" $muted $size="0.8125rem">
+                          {formatSAR(p.price)}
+                        </S.Text>
+                      </S.Check>
+                    ))
+                  )}
+                </S.SubCard>
+              )}
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">الحد الأدنى للشراء</S.Heading>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={form.hasMin}
+                  onChange={bind(setForm, "hasMin")}
+                />
+                يتطلب حداً أدنى لسعر الباقة (قبل الضريبة)
+              </S.Check>
+              {form.hasMin && (
+                <S.AffixField style={{ maxWidth: "14rem" }}>
+                  <S.Input
+                    type="number"
+                    min="0"
+                    value={form.minPurchase}
+                    onChange={bind(setForm, "minPurchase")}
+                    placeholder="0"
+                  />
+                  <span>ر.س</span>
+                </S.AffixField>
+              )}
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">حدود الاستخدام</S.Heading>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={form.hasLimit}
+                  onChange={bind(setForm, "hasLimit")}
+                />
+                تحديد عدد مرات استخدام الكود إجمالاً
+              </S.Check>
+              {form.hasLimit && (
+                <S.Input
+                  type="number"
+                  min="1"
+                  value={form.usageLimit}
+                  onChange={bind(setForm, "usageLimit")}
+                  placeholder="مثال: 100"
+                  style={{ maxWidth: "14rem" }}
+                />
+              )}
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={form.oncePerCustomer}
+                  onChange={bind(setForm, "oncePerCustomer")}
+                />
+                مرة واحدة فقط لكل عميل (حسب الجوال أو البريد)
+              </S.Check>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">مدة الصلاحية</S.Heading>
+              <S.FormGrid>
+                <S.Field>
+                  <S.FieldLabel $small>يبدأ في</S.FieldLabel>
+                  <S.Input
+                    type="datetime-local"
+                    value={form.startsAt}
+                    onChange={bind(setForm, "startsAt")}
+                  />
+                </S.Field>
+                {form.hasEnd && (
+                  <S.Field>
+                    <S.FieldLabel $small>ينتهي في</S.FieldLabel>
+                    <S.Input
+                      type="datetime-local"
+                      value={form.endsAt}
+                      onChange={bind(setForm, "endsAt")}
+                    />
+                  </S.Field>
+                )}
+              </S.FormGrid>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={form.hasEnd}
+                  onChange={bind(setForm, "hasEnd")}
+                />
+                تحديد تاريخ انتهاء
+              </S.Check>
+            </S.Card>
+          </S.Stack>
+
+          {/* ---------- Side column ---------- */}
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">الملخص</S.Heading>
+                <S.StatusBadge $tone={previewState.tone}>
+                  {previewState.label}
+                </S.StatusBadge>
+              </S.Row>
+              <S.CodeTag>{code || "—"}</S.CodeTag>
+              <S.SummaryList>
+                {summary.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </S.SummaryList>
+              {example && (
+                <S.InfoBox $accent>
+                  مثال: {example.name} {formatSAR(example.subtotal)} ←{" "}
+                  {formatSAR(example.after)}
+                  <S.Text $muted $size="0.75rem" style={{ fontWeight: 400 }}>
+                    يدفع العميل {formatSAR(example.total)} شامل الضريبة 15٪
+                  </S.Text>
+                </S.InfoBox>
+              )}
+              {!isNew && (
+                <S.Text $muted $size="0.8125rem">
+                  استُخدم {(discount.usedCount || 0).toLocaleString("ar-SA")}{" "}
+                  مرة
+                  {discount.usageLimit
+                    ? ` من ${discount.usageLimit.toLocaleString("ar-SA")}`
+                    : ""}
+                </S.Text>
+              )}
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">الحالة</S.Heading>
+              <S.Select value={form.status} onChange={bind(setForm, "status")}>
+                <option value="active">مفعّل</option>
+                <option value="disabled">معطل</option>
+              </S.Select>
+              <S.Text $muted $size="0.75rem">
+                عطّل الكود لإيقافه فوراً دون حذفه.
+              </S.Text>
+            </S.Card>
+          </S.Stack>
+        </S.EditorGrid>
+
+        {!isNew && (
+          <S.Row style={{ justifyContent: "flex-end" }}>
+            <S.Button
+              type="button"
+              $variant="danger"
+              disabled={deleting}
+              onClick={handleDelete}
+            >
+              <Trash2 size={15} />
+              {deleting ? "جارٍ الحذف..." : "حذف الكود"}
+            </S.Button>
+          </S.Row>
+        )}
+      </S.Page>
+    );
+  },
+);
+
+/* ---------- List ---------- */
+
+const DiscountsTab = memo(({ accessToken, onAuthError }) => {
+  const dc = useDiscounts(accessToken, onAuthError);
+  const pk = usePackages(accessToken, onAuthError);
+  const [editing, setEditing] = useState(null); // null | "new" | discount id
+  const [view, setView] = useState("all");
+  const [query, setQuery] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
+  const [busyId, setBusyId] = useState(null);
+
+  const packagesById = useMemo(
+    () => Object.fromEntries(pk.items.map((p) => [String(p._id), p])),
+    [pk.items],
+  );
+
+  const rows = useMemo(() => {
+    const test = DISCOUNT_VIEWS.find((v) => v.id === view).test;
+    const q = normalizeAr(query);
+    return dc.items.filter(
+      (d) => test(d) && (!q || normalizeAr(`${d.code} ${d.title}`).includes(q)),
+    );
+  }, [dc.items, view, query]);
+
+  const stats = useMemo(
+    () => ({
+      active: dc.items.filter((d) => discountStateOf(d) === "active").length,
+      scheduled: dc.items.filter((d) => discountStateOf(d) === "scheduled")
+        .length,
+      uses: dc.items.reduce((n, d) => n + (d.usedCount || 0), 0),
+    }),
+    [dc.items],
+  );
+
+  const copyCode = async (d) => {
+    try {
+      await navigator.clipboard.writeText(d.code);
+      setCopiedId(d._id);
+      setTimeout(() => setCopiedId((id) => (id === d._id ? null : id)), 1500);
+    } catch {
+      /* clipboard blocked — nothing to do */
+    }
+  };
+
+  const toggleStatus = async (d) => {
+    setBusyId(d._id);
+    try {
+      await dc.save(d._id, {
+        status: d.status === "disabled" ? "active" : "disabled",
+      });
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر تحديث الكود"));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (editing) {
+    const discount =
+      editing === "new" ? null : dc.items.find((d) => d._id === editing);
+    return (
+      <DiscountEditor
+        key={editing}
+        discount={discount}
+        packages={pk.items}
+        onBack={() => setEditing(null)}
+        onSave={dc.save}
+        onDelete={dc.remove}
+      />
+    );
+  }
+
+  return (
+    <S.Page>
+      <PageHeader icon={discountsIcon} title="الخصومات">
+        <S.Button
+          type="button"
+          $icon
+          aria-label="تحديث"
+          disabled={dc.loading}
+          onClick={dc.reload}
+        >
+          <RefreshCw size={15} />
+        </S.Button>
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setEditing("new")}
+        >
+          <Plus size={15} />
+          إنشاء كود خصم
+        </S.Button>
+      </PageHeader>
+
+      {dc.loading || dc.error ? (
+        <NeedProducts
+          loading={dc.loading}
+          error={dc.error}
+          onRetry={dc.reload}
+        />
+      ) : dc.items.length === 0 ? (
+        <S.EmptyState>
+          <S.Illustration src={discountImage} alt="" $w="200px" />
+          <S.Heading $size="1.125rem">إدارة أكواد الخصم</S.Heading>
+          <S.Text $muted>
+            أنشئ أكواد خصم بنسبة مئوية أو مبلغ ثابت، لكل الباقات أو لباقات
+            محددة، مع حد للاستخدام وتاريخ انتهاء.
+          </S.Text>
+          <S.Button
+            type="button"
+            $variant="primary"
+            onClick={() => setEditing("new")}
+          >
+            <Plus size={15} />
+            إنشاء كود خصم
+          </S.Button>
+        </S.EmptyState>
+      ) : (
+        <>
+          <S.Grid $cols={3}>
+            <StatCard
+              label="أكواد نشطة"
+              value={stats.active.toLocaleString("ar-SA")}
+            />
+            <StatCard
+              label="أكواد مجدولة"
+              value={stats.scheduled.toLocaleString("ar-SA")}
+            />
+            <StatCard
+              label="إجمالي الاستخدامات"
+              value={stats.uses.toLocaleString("ar-SA")}
+            />
+          </S.Grid>
+
+          <S.Card $flush $overflow>
+            <S.ViewTabs role="tablist">
+              {DISCOUNT_VIEWS.map((v) => (
+                <S.ViewTab
+                  key={v.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={view === v.id}
+                  $active={view === v.id}
+                  onClick={() => setView(v.id)}
+                >
+                  {v.label}
+                  <S.MenuCount>{dc.items.filter(v.test).length}</S.MenuCount>
+                </S.ViewTab>
+              ))}
+            </S.ViewTabs>
+
+            <S.FilterBar>
+              <S.SearchField style={{ maxWidth: "20rem" }}>
+                <Search size={15} />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="ابحث بالكود أو الملاحظة"
+                />
+              </S.SearchField>
+            </S.FilterBar>
+
+            <S.TableScroll $minH="300px">
+              <S.GridTable $columns={DISCOUNT_GRID} $minWidth="860px">
+                <S.Th>الكود</S.Th>
+                <S.Th>الخصم</S.Th>
+                <S.Th $align="center">الاستخدام</S.Th>
+                <S.Th $align="center">الحالة</S.Th>
+                <S.Th>الصلاحية</S.Th>
+
+                {rows.length === 0 ? (
+                  <S.TableMessage>لا توجد أكواد في هذا العرض.</S.TableMessage>
+                ) : (
+                  rows.map((d) => {
+                    const st = DISCOUNT_STATES[discountStateOf(d)];
+                    return (
+                      <S.Tr key={d._id} onClick={() => setEditing(d._id)}>
+                        <S.Td>
+                          <S.Row $gap="0.5rem" style={{ minWidth: 0 }}>
+                            <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+                              <S.CodeTag $inline>{d.code}</S.CodeTag>
+                              {d.title && (
+                                <S.Ellipsis
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: T.textMuted,
+                                  }}
+                                >
+                                  {d.title}
+                                </S.Ellipsis>
+                              )}
+                            </S.Stack>
+                            <S.Button
+                              type="button"
+                              $variant="ghost"
+                              $size="sm"
+                              $icon
+                              aria-label="نسخ الكود"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyCode(d);
+                              }}
+                            >
+                              {copiedId === d._id ? (
+                                <Check size={14} />
+                              ) : (
+                                <Copy size={14} />
+                              )}
+                            </S.Button>
+                          </S.Row>
+                        </S.Td>
+                        <S.Td>
+                          <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+                            <strong>{discountValueLabel(d)}</strong>
+                            <S.Ellipsis
+                              style={{
+                                fontSize: "0.75rem",
+                                color: T.textMuted,
+                              }}
+                            >
+                              {appliesLabel(d, packagesById)}
+                              {d.minPurchase
+                                ? ` · حد أدنى ${formatSAR(d.minPurchase)}`
+                                : ""}
+                            </S.Ellipsis>
+                          </S.Stack>
+                        </S.Td>
+                        <S.Td $align="center">
+                          {(d.usedCount || 0).toLocaleString("ar-SA")}
+                          {d.usageLimit
+                            ? ` / ${d.usageLimit.toLocaleString("ar-SA")}`
+                            : ""}
+                        </S.Td>
+                        <S.Td
+                          $align="center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <S.StatusBadge
+                            as="button"
+                            type="button"
+                            $tone={st.tone}
+                            disabled={busyId === d._id}
+                            title={
+                              d.status === "disabled"
+                                ? "اضغط للتفعيل"
+                                : "اضغط للتعطيل"
+                            }
+                            onClick={() => toggleStatus(d)}
+                            style={{
+                              border: "none",
+                              cursor: "pointer",
+                              font: "inherit",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {st.label}
+                          </S.StatusBadge>
+                        </S.Td>
+                        <S.Td>
+                          <S.Stack
+                            $gap="0.125rem"
+                            style={{ fontSize: "0.8125rem" }}
+                          >
+                            <span>من {fmtDateTime(d.startsAt)}</span>
+                            <S.Text as="span" $muted $size="0.75rem">
+                              {d.endsAt
+                                ? `إلى ${fmtDateTime(d.endsAt)}`
+                                : "بدون تاريخ انتهاء"}
+                            </S.Text>
+                          </S.Stack>
+                        </S.Td>
+                      </S.Tr>
+                    );
+                  })
+                )}
+              </S.GridTable>
+            </S.TableScroll>
+
+            <S.TableFooter>
+              <span>
+                {rows.length.toLocaleString("ar-SA")} من{" "}
+                {dc.items.length.toLocaleString("ar-SA")} كود · اضغط على الحالة
+                للتفعيل أو التعطيل
+              </span>
+            </S.TableFooter>
+          </S.Card>
+        </>
+      )}
+    </S.Page>
+  );
+});
+
+/* ============================================================
    Tab: التسويق
    ============================================================ */
 
@@ -5101,6 +6023,11 @@ const Dashboard = () => {
   /* ---------- Content ---------- */
 
   const renderContent = () => {
+    if (activeTab === "الخصومات") {
+      return (
+        <DiscountsTab accessToken={accessToken} onAuthError={handleAuthError} />
+      );
+    }
     if (activeTab === "المنتجات") {
       return (
         <ProductsTab
