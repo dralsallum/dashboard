@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   ArrowUpDown,
@@ -239,7 +239,7 @@ const HERO_CARDS = [
     images: [Flower, WeddingCake, Chair],
     primary: "اضافة المنتجات",
     secondary: "استيراد",
-    action: { type: "route", value: "/item" },
+    action: { type: "newProduct" },
   },
 ];
 
@@ -3056,16 +3056,7 @@ const usePackages = (accessToken, onAuthError) => {
     [guard],
   );
 
-  const seed = useCallback(
-    () =>
-      guard(async () => {
-        const { data } = await userRequest.post("/packages/seed");
-        setItems(Array.isArray(data) ? data : []);
-      }),
-    [guard],
-  );
-
-  return { items, loading, error, reload, save, updateStock, remove, seed };
+  return { items, loading, error, reload, save, updateStock, remove };
 };
 
 /* ---------- Shared bits ---------- */
@@ -3578,303 +3569,299 @@ const PRODUCT_SORTS = [
 
 const PRODUCT_GRID = "minmax(260px, 2.2fr) 0.8fr 0.6fr 1fr 1fr 1fr";
 
-const ProductsTab = memo(({ accessToken, onAuthError }) => {
-  const pk = usePackages(accessToken, onAuthError);
-  const [editing, setEditing] = useState(null); // null | "new" | product id
-  const [view, setView] = useState("all");
-  const [query, setQuery] = useState("");
-  const [collections, setCollections] = useState([]);
-  const [sortId, setSortId] = useState("order");
-  const [busyId, setBusyId] = useState(null);
-  const [seeding, setSeeding] = useState(false);
+const ProductsTab = memo(
+  ({ accessToken, onAuthError, startNew, onCloseNew }) => {
+    const pk = usePackages(accessToken, onAuthError);
+    const [editing, setEditing] = useState(startNew ? "new" : null); // null | "new" | product id
 
-  const featuredCount = pk.items.filter((p) => p.featured).length;
-  const collectionFacet = useMemo(
-    () => facetOf(pk.items, (p) => p.productCollection),
-    [pk.items],
-  );
-  const collectionNames = collectionFacet
-    .filter((c) => c.value !== "—")
-    .map((c) => c.value);
+    // /item and the home "اضافة المنتجات" button land here with ?new=1
+    useEffect(() => {
+      if (startNew) setEditing("new");
+    }, [startNew]);
 
-  const rows = useMemo(() => {
-    const viewTest = PRODUCT_VIEWS.find((v) => v.id === view).test;
-    const q = normalizeAr(query);
-    const sorter = PRODUCT_SORTS.find((s) => s.id === sortId).fn;
-    return pk.items
-      .filter(
-        (p) =>
-          viewTest(p) &&
-          (!collections.length ||
-            collections.includes(p.productCollection || "—")) &&
-          (!q ||
-            normalizeAr(
-              `${p.name} ${p.description} ${p.productCollection}`,
-            ).includes(q)),
-      )
-      .sort(sorter);
-  }, [pk.items, view, query, collections, sortId]);
+    const closeEditor = () => {
+      setEditing(null);
+      if (startNew) onCloseNew?.(); // drop ?new=1 so a refresh shows the list
+    };
+    const [view, setView] = useState("all");
+    const [query, setQuery] = useState("");
+    const [collections, setCollections] = useState([]);
+    const [sortId, setSortId] = useState("order");
+    const [busyId, setBusyId] = useState(null);
 
-  const toggleFeatured = async (p) => {
-    if (!p.featured && featuredCount >= MAX_FEATURED) {
-      alert(
-        `يمكن تمييز ${MAX_FEATURED} منتجات فقط. ألغِ تمييز منتج آخر أولاً.`,
-      );
-      return;
-    }
-    setBusyId(p._id);
-    try {
-      await pk.save(p._id, { featured: !p.featured });
-    } catch (err) {
-      alert(apiMessage(err, "تعذّر تحديث المنتج"));
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const seed = async () => {
-    setSeeding(true);
-    try {
-      await pk.seed();
-    } catch (err) {
-      alert(apiMessage(err, "تعذّر استيراد الباقات"));
-    } finally {
-      setSeeding(false);
-    }
-  };
-
-  if (editing) {
-    const product =
-      editing === "new" ? null : pk.items.find((p) => p._id === editing);
-    return (
-      <ProductEditor
-        key={editing}
-        product={product}
-        collections={collectionNames}
-        featuredCount={featuredCount}
-        onBack={() => setEditing(null)}
-        onSave={pk.save}
-        onDelete={pk.remove}
-      />
+    const featuredCount = pk.items.filter((p) => p.featured).length;
+    const collectionFacet = useMemo(
+      () => facetOf(pk.items, (p) => p.productCollection),
+      [pk.items],
     );
-  }
+    const collectionNames = collectionFacet
+      .filter((c) => c.value !== "—")
+      .map((c) => c.value);
 
-  const activeSort = PRODUCT_SORTS.find((s) => s.id === sortId);
+    const rows = useMemo(() => {
+      const viewTest = PRODUCT_VIEWS.find((v) => v.id === view).test;
+      const q = normalizeAr(query);
+      const sorter = PRODUCT_SORTS.find((s) => s.id === sortId).fn;
+      return pk.items
+        .filter(
+          (p) =>
+            viewTest(p) &&
+            (!collections.length ||
+              collections.includes(p.productCollection || "—")) &&
+            (!q ||
+              normalizeAr(
+                `${p.name} ${p.description} ${p.productCollection}`,
+              ).includes(q)),
+        )
+        .sort(sorter);
+    }, [pk.items, view, query, collections, sortId]);
 
-  return (
-    <S.Page>
-      <PageHeader icon={ordersIcon} title="المنتجات">
-        <S.Button
-          type="button"
-          $icon
-          aria-label="تحديث"
-          disabled={pk.loading}
-          onClick={pk.reload}
-        >
-          <RefreshCw size={15} />
-        </S.Button>
-        <S.Button
-          type="button"
-          $variant="primary"
-          onClick={() => setEditing("new")}
-        >
-          <Plus size={15} />
-          إضافة منتج
-        </S.Button>
-      </PageHeader>
+    const toggleFeatured = async (p) => {
+      if (!p.featured && featuredCount >= MAX_FEATURED) {
+        alert(
+          `يمكن تمييز ${MAX_FEATURED} منتجات فقط. ألغِ تمييز منتج آخر أولاً.`,
+        );
+        return;
+      }
+      setBusyId(p._id);
+      try {
+        await pk.save(p._id, { featured: !p.featured });
+      } catch (err) {
+        alert(apiMessage(err, "تعذّر تحديث المنتج"));
+      } finally {
+        setBusyId(null);
+      }
+    };
 
-      {pk.loading || pk.error ? (
-        <NeedProducts
-          loading={pk.loading}
-          error={pk.error}
-          onRetry={pk.reload}
+    if (editing) {
+      const product =
+        editing === "new" ? null : pk.items.find((p) => p._id === editing);
+      return (
+        <ProductEditor
+          key={editing}
+          product={product}
+          collections={collectionNames}
+          featuredCount={featuredCount}
+          onBack={closeEditor}
+          onSave={pk.save}
+          onDelete={pk.remove}
         />
-      ) : pk.items.length === 0 ? (
-        <S.EmptyState>
-          <S.Illustration src={productsImage} alt="" $w="200px" />
-          <S.Heading $size="1.125rem">أضف منتجاتك</S.Heading>
-          <S.Text $muted>
-            ابدأ بإضافة باقاتك، أو استورد الباقات الثلاث الحالية (الأساسية،
-            الشاملة، المتقدمة) بنقرة واحدة.
-          </S.Text>
-          <S.Row $wrap style={{ justifyContent: "center" }}>
+      );
+    }
+
+    const activeSort = PRODUCT_SORTS.find((s) => s.id === sortId);
+
+    return (
+      <S.Page>
+        <PageHeader icon={ordersIcon} title="المنتجات">
+          <S.Button
+            type="button"
+            $icon
+            aria-label="تحديث"
+            disabled={pk.loading}
+            onClick={pk.reload}
+          >
+            <RefreshCw size={15} />
+          </S.Button>
+          <S.Button
+            type="button"
+            $variant="primary"
+            onClick={() => setEditing("new")}
+          >
+            <Plus size={15} />
+            إضافة منتج
+          </S.Button>
+        </PageHeader>
+
+        {pk.loading || pk.error ? (
+          <NeedProducts
+            loading={pk.loading}
+            error={pk.error}
+            onRetry={pk.reload}
+          />
+        ) : pk.items.length === 0 ? (
+          <S.EmptyState>
+            <S.Illustration src={productsImage} alt="" $w="200px" />
+            <S.Heading $size="1.125rem">أضف منتجاتك</S.Heading>
+            <S.Text $muted>
+              ابدأ بإضافة باقاتك. المنتجات النشطة المميزة (حتى {MAX_FEATURED})
+              تظهر في صفحة قائمة الانتظار.
+            </S.Text>
             <S.Button
               type="button"
               $variant="primary"
-              disabled={seeding}
-              onClick={seed}
+              onClick={() => setEditing("new")}
             >
-              {seeding ? "جارٍ الاستيراد..." : "استيراد الباقات الحالية"}
-            </S.Button>
-            <S.Button type="button" onClick={() => setEditing("new")}>
               <Plus size={15} />
               إضافة منتج
             </S.Button>
-          </S.Row>
-        </S.EmptyState>
-      ) : (
-        <>
-          <S.Notice>
-            <Star size={16} fill="currentColor" />
-            <span>
-              المنتجات المميزة النشطة تظهر في صفحة قائمة الانتظار —{" "}
-              <strong>
-                {featuredCount} من {MAX_FEATURED}
-              </strong>{" "}
-              مميزة. اضغط على النجمة للتمييز أو الإلغاء.
-            </span>
-          </S.Notice>
-
-          <S.Card $flush $overflow>
-            <S.ViewTabs role="tablist">
-              {PRODUCT_VIEWS.map((v) => (
-                <S.ViewTab
-                  key={v.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={view === v.id}
-                  $active={view === v.id}
-                  onClick={() => setView(v.id)}
-                >
-                  {v.label}
-                  <S.MenuCount>{pk.items.filter(v.test).length}</S.MenuCount>
-                </S.ViewTab>
-              ))}
-            </S.ViewTabs>
-
-            <S.FilterBar>
-              <S.Row $gap="0.5rem" $wrap style={{ flex: 1, minWidth: 0 }}>
-                <S.SearchField style={{ maxWidth: "20rem" }}>
-                  <Search size={15} />
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="ابحث في المنتجات"
-                  />
-                </S.SearchField>
-                <MultiFilter
-                  label="المجموعة"
-                  options={collectionFacet}
-                  value={collections}
-                  onChange={setCollections}
-                />
-              </S.Row>
-              <Popover
-                align="end"
-                trigger={({ toggle }) => (
-                  <S.Button type="button" $size="sm" onClick={toggle}>
-                    <ArrowUpDown size={14} />
-                    {activeSort.label}
-                  </S.Button>
-                )}
-              >
-                {({ close }) =>
-                  PRODUCT_SORTS.map((s) => (
-                    <S.MenuItem
-                      key={s.id}
-                      type="button"
-                      $active={sortId === s.id}
-                      onClick={() => {
-                        setSortId(s.id);
-                        close();
-                      }}
-                    >
-                      {s.label}
-                      {sortId === s.id && (
-                        <Check
-                          size={14}
-                          style={{ marginInlineStart: "auto" }}
-                        />
-                      )}
-                    </S.MenuItem>
-                  ))
-                }
-              </Popover>
-            </S.FilterBar>
-
-            <S.TableScroll $minH="320px">
-              <S.GridTable $columns={PRODUCT_GRID} $minWidth="860px">
-                <S.Th>المنتج</S.Th>
-                <S.Th $align="center">الحالة</S.Th>
-                <S.Th $align="center">مميز</S.Th>
-                <S.Th>المخزون</S.Th>
-                <S.Th>المجموعة</S.Th>
-                <S.Th>السعر</S.Th>
-
-                {rows.length === 0 ? (
-                  <S.TableMessage>
-                    لا توجد منتجات تطابق البحث أو التصفية.
-                  </S.TableMessage>
-                ) : (
-                  rows.map((p) => {
-                    const st = productStatus(p);
-                    const stock = stockState(p);
-                    return (
-                      <S.Tr key={p._id} onClick={() => setEditing(p._id)}>
-                        <S.Td>
-                          <ProductCell p={p} />
-                        </S.Td>
-                        <S.Td $align="center">
-                          <S.StatusBadge $tone={st.tone}>
-                            {st.label}
-                          </S.StatusBadge>
-                        </S.Td>
-                        <S.Td $align="center">
-                          <S.StarToggle
-                            type="button"
-                            $on={p.featured}
-                            aria-pressed={p.featured}
-                            aria-label={
-                              p.featured ? "إلغاء التمييز" : "تمييز المنتج"
-                            }
-                            disabled={busyId === p._id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFeatured(p);
-                            }}
-                          >
-                            <Star
-                              size={17}
-                              fill={p.featured ? "currentColor" : "none"}
-                            />
-                          </S.StarToggle>
-                        </S.Td>
-                        <S.Td>
-                          <S.Row $gap="0.375rem">
-                            <S.StatusBadge $tone={stock.tone}>
-                              {stock.label}
-                            </S.StatusBadge>
-                            {p.trackInventory && (
-                              <S.Text $muted $size="0.8125rem">
-                                {p.stock}
-                              </S.Text>
-                            )}
-                          </S.Row>
-                        </S.Td>
-                        <S.Td>
-                          <S.Ellipsis>{p.productCollection || "—"}</S.Ellipsis>
-                        </S.Td>
-                        <S.Td $weight={600}>{formatSAR(p.price)}</S.Td>
-                      </S.Tr>
-                    );
-                  })
-                )}
-              </S.GridTable>
-            </S.TableScroll>
-
-            <S.TableFooter>
+          </S.EmptyState>
+        ) : (
+          <>
+            <S.Notice>
+              <Star size={16} fill="currentColor" />
               <span>
-                {rows.length.toLocaleString("ar-SA")} من{" "}
-                {pk.items.length.toLocaleString("ar-SA")} منتج
+                المنتجات المميزة النشطة تظهر في صفحة قائمة الانتظار —{" "}
+                <strong>
+                  {featuredCount} من {MAX_FEATURED}
+                </strong>{" "}
+                مميزة. اضغط على النجمة للتمييز أو الإلغاء.
               </span>
-            </S.TableFooter>
-          </S.Card>
-        </>
-      )}
-    </S.Page>
-  );
-});
+            </S.Notice>
+
+            <S.Card $flush $overflow>
+              <S.ViewTabs role="tablist">
+                {PRODUCT_VIEWS.map((v) => (
+                  <S.ViewTab
+                    key={v.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === v.id}
+                    $active={view === v.id}
+                    onClick={() => setView(v.id)}
+                  >
+                    {v.label}
+                    <S.MenuCount>{pk.items.filter(v.test).length}</S.MenuCount>
+                  </S.ViewTab>
+                ))}
+              </S.ViewTabs>
+
+              <S.FilterBar>
+                <S.Row $gap="0.5rem" $wrap style={{ flex: 1, minWidth: 0 }}>
+                  <S.SearchField style={{ maxWidth: "20rem" }}>
+                    <Search size={15} />
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="ابحث في المنتجات"
+                    />
+                  </S.SearchField>
+                  <MultiFilter
+                    label="المجموعة"
+                    options={collectionFacet}
+                    value={collections}
+                    onChange={setCollections}
+                  />
+                </S.Row>
+                <Popover
+                  align="end"
+                  trigger={({ toggle }) => (
+                    <S.Button type="button" $size="sm" onClick={toggle}>
+                      <ArrowUpDown size={14} />
+                      {activeSort.label}
+                    </S.Button>
+                  )}
+                >
+                  {({ close }) =>
+                    PRODUCT_SORTS.map((s) => (
+                      <S.MenuItem
+                        key={s.id}
+                        type="button"
+                        $active={sortId === s.id}
+                        onClick={() => {
+                          setSortId(s.id);
+                          close();
+                        }}
+                      >
+                        {s.label}
+                        {sortId === s.id && (
+                          <Check
+                            size={14}
+                            style={{ marginInlineStart: "auto" }}
+                          />
+                        )}
+                      </S.MenuItem>
+                    ))
+                  }
+                </Popover>
+              </S.FilterBar>
+
+              <S.TableScroll $minH="320px">
+                <S.GridTable $columns={PRODUCT_GRID} $minWidth="860px">
+                  <S.Th>المنتج</S.Th>
+                  <S.Th $align="center">الحالة</S.Th>
+                  <S.Th $align="center">مميز</S.Th>
+                  <S.Th>المخزون</S.Th>
+                  <S.Th>المجموعة</S.Th>
+                  <S.Th>السعر</S.Th>
+
+                  {rows.length === 0 ? (
+                    <S.TableMessage>
+                      لا توجد منتجات تطابق البحث أو التصفية.
+                    </S.TableMessage>
+                  ) : (
+                    rows.map((p) => {
+                      const st = productStatus(p);
+                      const stock = stockState(p);
+                      return (
+                        <S.Tr key={p._id} onClick={() => setEditing(p._id)}>
+                          <S.Td>
+                            <ProductCell p={p} />
+                          </S.Td>
+                          <S.Td $align="center">
+                            <S.StatusBadge $tone={st.tone}>
+                              {st.label}
+                            </S.StatusBadge>
+                          </S.Td>
+                          <S.Td $align="center">
+                            <S.StarToggle
+                              type="button"
+                              $on={p.featured}
+                              aria-pressed={p.featured}
+                              aria-label={
+                                p.featured ? "إلغاء التمييز" : "تمييز المنتج"
+                              }
+                              disabled={busyId === p._id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFeatured(p);
+                              }}
+                            >
+                              <Star
+                                size={17}
+                                fill={p.featured ? "currentColor" : "none"}
+                              />
+                            </S.StarToggle>
+                          </S.Td>
+                          <S.Td>
+                            <S.Row $gap="0.375rem">
+                              <S.StatusBadge $tone={stock.tone}>
+                                {stock.label}
+                              </S.StatusBadge>
+                              {p.trackInventory && (
+                                <S.Text $muted $size="0.8125rem">
+                                  {p.stock}
+                                </S.Text>
+                              )}
+                            </S.Row>
+                          </S.Td>
+                          <S.Td>
+                            <S.Ellipsis>
+                              {p.productCollection || "—"}
+                            </S.Ellipsis>
+                          </S.Td>
+                          <S.Td $weight={600}>{formatSAR(p.price)}</S.Td>
+                        </S.Tr>
+                      );
+                    })
+                  )}
+                </S.GridTable>
+              </S.TableScroll>
+
+              <S.TableFooter>
+                <span>
+                  {rows.length.toLocaleString("ar-SA")} من{" "}
+                  {pk.items.length.toLocaleString("ar-SA")} منتج
+                </span>
+              </S.TableFooter>
+            </S.Card>
+          </>
+        )}
+      </S.Page>
+    );
+  },
+);
 
 /* ---------- المجموعة ---------- */
 
@@ -5013,6 +5000,9 @@ const AppsTab = memo(() => (
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const startNewProduct =
+    new URLSearchParams(location.search).get("new") === "1";
   const activeTab = useSelector((state) => state.tab.activeTab);
   const storeName = useSelector((state) => state.tab.storeName);
   const { currentUser } = useSelector(userSelector);
@@ -5044,9 +5034,25 @@ const Dashboard = () => {
     [dispatch, navigate],
   );
 
+  const openNewProduct = useCallback(() => {
+    dispatch(setActiveTab("المنتجات"));
+    navigate(`/control?tab=${encodeURIComponent("المنتجات")}&new=1`);
+  }, [dispatch, navigate]);
+
+  const closeNewProduct = useCallback(
+    () =>
+      navigate(`/control?tab=${encodeURIComponent("المنتجات")}`, {
+        replace: true,
+      }),
+    [navigate],
+  );
+
   const handleHeroAction = useCallback(
-    ({ type, value }) => (type === "page" ? goToTab(value) : goTo(value)),
-    [goTo, goToTab],
+    ({ type, value }) => {
+      if (type === "newProduct") return openNewProduct();
+      return type === "page" ? goToTab(value) : goTo(value);
+    },
+    [goTo, goToTab, openNewProduct],
   );
 
   const openOrder = useCallback(
@@ -5097,7 +5103,12 @@ const Dashboard = () => {
   const renderContent = () => {
     if (activeTab === "المنتجات") {
       return (
-        <ProductsTab accessToken={accessToken} onAuthError={handleAuthError} />
+        <ProductsTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          startNew={startNewProduct}
+          onCloseNew={closeNewProduct}
+        />
       );
     }
     if (activeTab === "المجموعة") {

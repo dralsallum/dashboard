@@ -984,148 +984,9 @@ const infoBreaks = [
   },
 ];
 
-// ─── FALLBACK PACKAGES ────────────────────────────────────────────────────────
-// The real packages come from the backend (GET /api/packages?featured=true —
-// mark a product as "مميز" in the dashboard). These are only used if that
-// request fails or returns nothing.
-const STATIC_PRODUCTS = [
-  {
-    _id: "pkg-basic",
-    tier: "basic",
-    name: "الأساسية",
-    analysisCount: 37,
-    price: 720,
-    img: "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png",
-    inStock: true,
-    category: "annual-checkup",
-    mostPopular: false,
-  },
-  {
-    _id: "pkg-plus",
-    tier: "plus",
-    name: "الشاملة",
-    analysisCount: 43,
-    price: 1200,
-    img: "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png",
-    inStock: true,
-    category: "annual-checkup",
-    mostPopular: true,
-  },
-  {
-    _id: "pkg-premium",
-    tier: "premium",
-    name: "المتقدمة",
-    analysisCount: 51,
-    price: 2700,
-    img: "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png",
-    inStock: true,
-    category: "annual-checkup",
-    mostPopular: false,
-  },
-];
-
-// ─── COMPARE TIERS ────────────────────────────────────────────────────────────
-const COMPARE_TIERS = [
-  {
-    id: "basic",
-    name: "الأساسية",
-    count: 37,
-    mostPopular: false,
-    intro: null,
-    categories: [
-      {
-        title: "صحة القلب والأوعية",
-        items: [
-          "الكوليسترول الكلي",
-          "LDL",
-          "HDL",
-          "الدهون الثلاثية",
-          "ضغط الدم",
-        ],
-      },
-      {
-        title: "صحة الكبد",
-        items: ["AST", "ALT", "GGT", "البيليروبين الكلي"],
-      },
-      {
-        title: "صحة الكلى",
-        items: [
-          "الكرياتينين",
-          "اليوريا",
-          "حمض اليوريك",
-          "الصوديوم",
-          "البوتاسيوم",
-        ],
-      },
-      {
-        title: "صورة الدم الكاملة",
-        items: [
-          "خلايا الدم الحمراء",
-          "خلايا الدم البيضاء",
-          "الهيموغلوبين",
-          "الصفائح الدموية",
-        ],
-      },
-    ],
-  },
-  {
-    id: "plus",
-    name: "الشاملة",
-    count: 43,
-    mostPopular: true,
-    intro: "إضافةً إلى كل مؤشرات الباقة الأساسية:",
-    categories: [
-      {
-        title: "الغدة الدرقية",
-        items: ["TSH", "T3 الحر", "T4 الحر"],
-      },
-      {
-        title: "الفيتامينات والمعادن",
-        items: [
-          "فيتامين د",
-          "فيتامين ب12",
-          "الحديد",
-          "الفيريتين",
-          "المغنيسيوم",
-        ],
-      },
-      {
-        title: "السكري والأيض",
-        items: ["الجلوكوز الصائم", "HbA1c", "الأنسولين"],
-      },
-    ],
-  },
-  {
-    id: "premium",
-    name: "المتقدمة",
-    count: 51,
-    mostPopular: false,
-    intro: "إضافةً إلى كل مؤشرات الباقة الشاملة:",
-    categories: [
-      {
-        title: "صحة القلب المتقدمة",
-        items: ["ليبوبروتين (أ)", "أبوليبوبروتين ب", "hsCRP"],
-      },
-      {
-        title: "المعادن الثقيلة",
-        items: ["الرصاص في الدم", "الزئبق في الدم"],
-      },
-      {
-        title: "هرمونات الغدة الدرقية",
-        items: [
-          "الأجسام المضادة للبيروكسيداز الدرقي",
-          "الأجسام المضادة للثيروغلوبولين",
-        ],
-      },
-      {
-        title: "الهرمونات",
-        items: ["الهرمون اللوتيني", "الهرمون المنبه للجريب", "التستوستيرون"],
-      },
-    ],
-  },
-];
-
-// ─── BACKEND → QUIZ SHAPE ─────────────────────────────────────────────────────
+// ─── PACKAGES ─────────────────────────────────────────────────────────────────
+// Loaded from the backend: GET /api/packages?featured=true
+// (dashboard → المنتجات → mark up to 3 active products as "مميز").
 const PLACEHOLDER_IMG = "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png";
 
 const toQuizProduct = (p) => ({
@@ -1196,12 +1057,12 @@ const Waitlist = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // Featured packages from the backend; the static ones show until (or if) that fails
-  const [products, setProducts] = useState(STATIC_PRODUCTS);
-  const [compareTiers, setCompareTiers] = useState(COMPARE_TIERS);
-  const [selectedProductId, setSelectedProductId] = useState(
-    STATIC_PRODUCTS.find((p) => p.mostPopular)?._id ?? null,
-  );
+  // Featured packages from the backend
+  const [products, setProducts] = useState([]);
+  const [compareTiers, setCompareTiers] = useState([]);
+  const [packagesStatus, setPackagesStatus] = useState("loading"); // loading | ready | error
+  const [packagesReload, setPackagesReload] = useState(0);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   const [sliderActiveIdx, setSliderActiveIdx] = useState(1); // updated once packages load
   const [showCompare, setShowCompare] = useState(false);
@@ -1222,11 +1083,12 @@ const Waitlist = () => {
   // Load the featured packages (dashboard → المنتجات → مميز)
   useEffect(() => {
     let cancelled = false;
+    setPackagesStatus("loading");
     publicRequest
       .get("/packages", { params: { featured: true } })
       .then(({ data }) => {
-        if (cancelled || !Array.isArray(data) || data.length === 0) return;
-        const list = data.map(toQuizProduct);
+        if (cancelled) return;
+        const list = (Array.isArray(data) ? data : []).map(toQuizProduct);
         const preferred =
           list.find((p) => p.mostPopular) ?? list[Math.floor(list.length / 2)];
         setProducts(list);
@@ -1235,14 +1097,17 @@ const Waitlist = () => {
         );
         setSelectedProductId(preferred?._id ?? null);
         setSliderActiveIdx(Math.max(0, list.indexOf(preferred)));
+        setPackagesStatus("ready");
       })
       .catch((err) => {
-        console.warn("[waitlist] using built-in packages:", err.message);
+        if (cancelled) return;
+        console.error("[waitlist] could not load packages:", err.message);
+        setPackagesStatus("error");
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [packagesReload]);
 
   // Scroll the mobile slider so the selected package is centred when results show
   useEffect(() => {
@@ -1719,6 +1584,41 @@ const Waitlist = () => {
                 باقات الفحص السنوي ستُطلق قريباً — اختر الباقة التي تهمك وانضم
                 لقائمة الانتظار لنُعلمك أولاً بأول
               </StepSub>
+
+              {packagesStatus === "loading" && (
+                <ConfirmWrap style={{ padding: "2rem 0" }}>
+                  <Spinner style={{ margin: "0 auto 0.75rem" }} />
+                  <StepSub style={{ marginBottom: 0 }}>
+                    جارٍ تحميل الباقات...
+                  </StepSub>
+                </ConfirmWrap>
+              )}
+
+              {packagesStatus === "error" && (
+                <InfoCard>
+                  <ConfirmWrap>
+                    <StepSub style={{ marginBottom: "1rem" }}>
+                      تعذّر تحميل الباقات حالياً. تحقق من اتصالك وحاول مرة أخرى.
+                    </StepSub>
+                    <SubmitBtn
+                      style={{ marginTop: 0 }}
+                      onClick={() => setPackagesReload((n) => n + 1)}
+                    >
+                      إعادة المحاولة
+                    </SubmitBtn>
+                  </ConfirmWrap>
+                </InfoCard>
+              )}
+
+              {packagesStatus === "ready" && products.length === 0 && (
+                <InfoCard>
+                  <ConfirmWrap>
+                    <StepSub style={{ marginBottom: 0 }}>
+                      لا توجد باقات متاحة حالياً، يرجى العودة لاحقاً.
+                    </StepSub>
+                  </ConfirmWrap>
+                </InfoCard>
+              )}
 
               {/* Desktop grid */}
               <PackagesGrid>
