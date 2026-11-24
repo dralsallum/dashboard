@@ -296,12 +296,12 @@ export const Card = styled.section`
   border-radius: ${t.radius};
   box-shadow: ${t.shadow};
 
-  ${({ $flush }) =>
+  ${({ $flush, $overflow }) =>
     $flush &&
     css`
       padding: 0;
       gap: 0;
-      overflow: hidden;
+      overflow: ${$overflow ? "visible" : "hidden"};
     `}
 `;
 
@@ -915,6 +915,7 @@ export const TableFooter = styled.div`
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-top: 1px solid ${t.divider};
+  border-radius: 0 0 ${t.radius} ${t.radius};
   background: ${t.surfaceAlt};
   color: ${t.textMuted};
   font-size: 0.8125rem;
@@ -992,6 +993,15 @@ export const DetailList = styled.dl`
     font-size: 0.875rem;
     font-weight: 600;
     overflow-wrap: anywhere;
+  }
+
+  a {
+    color: ${t.primary};
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -1391,4 +1401,367 @@ export const Slot = styled.button`
   }
 
   ${focusRing}
+`;
+
+/* ============================================================
+   Customers list (filters, popovers, bulk actions, export)
+   ============================================================ */
+
+export const ViewTabs = styled.div`
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem 0;
+  border-bottom: 1px solid ${t.divider};
+  overflow-x: auto;
+  scrollbar-width: none;
+`;
+
+export const ViewTab = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: -1px;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-bottom: 2px solid
+    ${({ $active }) => ($active ? t.primary : "transparent")};
+  background: none;
+  color: ${({ $active }) => ($active ? t.text : t.textMuted)};
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    color: ${t.text};
+  }
+
+  ${focusRing}
+`;
+
+export const FilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${t.divider};
+`;
+
+export const BulkBar = styled(FilterBar)`
+  min-height: 3.5rem;
+  background: ${t.primaryTint};
+  font-size: 0.875rem;
+`;
+
+export const FilterPill = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px ${({ $active }) => ($active ? "solid" : "dashed")}
+    ${({ $active }) => ($active ? t.primary : t.border)};
+  border-radius: 999px;
+  background: ${({ $active }) => ($active ? t.primaryTint : t.surface)};
+  color: ${({ $active }) => ($active ? t.primary : t.textMuted)};
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    border-color: ${t.primary};
+    color: ${t.primary};
+  }
+
+  ${focusRing}
+`;
+
+export const PopoverWrap = styled.div`
+  position: relative;
+  display: inline-flex;
+`;
+
+export const PopoverPanel = styled.div`
+  position: absolute;
+  top: calc(100% + 6px);
+  ${({ $align }) =>
+    $align === "end" ? "inset-inline-end: 0;" : "inset-inline-start: 0;"}
+  z-index: 60;
+  min-width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.375rem;
+  border-radius: ${t.radius};
+  background: ${t.surface};
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+  animation: ${popIn} 0.15s ease-out;
+`;
+
+export const MenuLabel = styled.div`
+  padding: 0.5rem 0.625rem 0.25rem;
+  color: ${t.textSubtle};
+  font-size: 0.75rem;
+  font-weight: 600;
+`;
+
+export const MenuItem = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: none;
+  border-radius: 6px;
+  background: ${({ $active }) => ($active ? t.primaryTint : "transparent")};
+  color: ${t.text};
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: ${({ $active }) => ($active ? 600 : 400)};
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: ${t.primaryTint};
+  }
+
+  ${focusRing}
+`;
+
+export const MenuCheck = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: ${t.primaryTint};
+  }
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: ${t.primary};
+    cursor: pointer;
+  }
+`;
+
+export const MenuCount = styled.span`
+  margin-inline-start: auto;
+  padding-inline-start: 0.5rem;
+  color: ${t.textSubtle};
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+`;
+
+export const MenuEmpty = styled.div`
+  padding: 0.75rem;
+  color: ${t.textMuted};
+  font-size: 0.8125rem;
+  text-align: center;
+`;
+
+export const MenuFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.625rem 0.25rem;
+  border-top: 1px solid ${t.divider};
+  font-size: 0.8125rem;
+`;
+
+export const SortHeader = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: ${({ $active }) => ($active ? t.text : "inherit")};
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: ${t.text};
+  }
+
+  ${focusRing}
+`;
+
+export const InitialAvatar = styled.span`
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: ${t.primaryTint};
+  color: ${t.primary};
+  font-size: 0.75rem;
+  font-weight: 700;
+`;
+
+export const RadioRow = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid ${t.border};
+  border-radius: ${t.radiusSm};
+  font-size: 0.875rem;
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:has(input:checked) {
+    border-color: ${t.primary};
+    background: ${t.primaryTint};
+  }
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: ${t.primary};
+  }
+`;
+
+export const PageSizeSelect = styled.select`
+  height: 1.75rem;
+  padding: 0 0.5rem;
+  border: 1px solid ${t.border};
+  border-radius: 6px;
+  background: ${t.surface};
+  color: ${t.text};
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+`;
+
+/* ============================================================
+   Products (list, editor, collections, inventory)
+   ============================================================ */
+
+export const Notice = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${t.primaryBorder};
+  border-radius: ${t.radius};
+  background: ${t.surface};
+  color: ${t.text};
+  font-size: 0.875rem;
+
+  svg {
+    flex-shrink: 0;
+    color: #f59e0b;
+  }
+`;
+
+export const Thumb = styled.img`
+  width: ${({ $size = 40 }) => $size}px;
+  height: ${({ $size = 40 }) => $size}px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: cover;
+  background: ${t.surfaceAlt};
+  box-shadow: 0 0 0 1px ${t.border};
+`;
+
+export const ThumbPlaceholder = styled.span`
+  width: ${({ $size = 40 }) => $size}px;
+  height: ${({ $size = 40 }) => $size}px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: ${t.surfaceAlt};
+  box-shadow: 0 0 0 1px ${t.border};
+  color: ${t.textSubtle};
+`;
+
+export const StarToggle = styled.button`
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: ${({ $on }) => ($on ? "#f59e0b" : t.textSubtle)};
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.9);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
+
+  ${focusRing}
+`;
+
+export const EditorGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 1rem;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const SubCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid ${t.border};
+  border-radius: ${t.radiusSm};
+  background: ${t.surfaceAlt};
+`;
+
+export const Textarea = styled.textarea`
+  ${control}
+  height: auto;
+  min-height: 5rem;
+  padding: 0.625rem 0.75rem;
+  line-height: 1.6;
+  resize: vertical;
 `;

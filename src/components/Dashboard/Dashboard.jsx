@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,15 +14,19 @@ import {
   ArrowUpDown,
   BookOpen,
   Calendar,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Copy,
+  Download,
   Filter,
   Globe,
   LayoutGrid,
   Maximize2,
   Minus,
+  Package,
   Pencil,
   Plus,
   RefreshCw,
@@ -58,7 +63,6 @@ import draftImage from "../../assets/draft.svg";
 import customersImage from "../../assets/customerImage.svg";
 import contentImage from "../../assets/content.svg";
 import abandonImage from "../../assets/abandon.svg";
-import inventoryImage from "../../assets/inventory.svg";
 import historyImage from "../../assets/historyPur.svg";
 import giftImage from "../../assets/gift.svg";
 import transferImage from "../../assets/transfer.svg";
@@ -291,15 +295,6 @@ const EMPTY_TABS = {
     cta: "انشاء مسودة طلب",
     topic: "الطلبات المسودة",
   },
-  المخزون: {
-    icon: ordersIcon,
-    image: inventoryImage,
-    title: "المخزون",
-    heading: "تتبّع مخزونك في مكان واحد",
-    text: "اعرف الكميات المتوفرة من كل منتج، وعدّلها يدويًا أو استوردها دفعة واحدة.",
-    cta: "إدارة المخزون",
-    topic: "المخزون",
-  },
   "تاريخ الشراء": {
     icon: ordersIcon,
     image: historyImage,
@@ -405,7 +400,6 @@ const LIST_TABS = {
 const MARKET_TABS = {
   الأسواق: { title: "الأسواق" },
   جزء: { title: "جزء" },
-  المجموعة: { title: "المجموعة", action: "اصنع مجموعة" },
 };
 
 const MARKETING_METRICS = [
@@ -1019,6 +1013,8 @@ const normalizeWaitlistEntry = (w) => ({
   _id: w._id,
   source: "waitlist",
   createdAt: w.createdAt,
+  firstName: w.firstName ?? "",
+  lastName: w.lastName ?? "",
   name: [w.firstName, w.lastName].filter(Boolean).join(" "),
   phone: w.phone ?? "",
   email: w.email ?? "",
@@ -1589,6 +1585,2767 @@ const OrdersTab = memo(
     );
   },
 );
+
+/* ============================================================
+   Tab: العملاء  (customer data — who they are, not what they bought)
+   ============================================================ */
+
+const CUSTOMER_PAGE_SIZES = [25, 50, 100];
+const COLUMN_STORE_KEY = "dashboard.customers.columns.v2";
+const DEFAULT_HIDDEN_COLUMNS = [
+  "idNumber",
+  "dob",
+  "activity",
+  "sleep",
+  "smoke",
+  "allergies",
+];
+
+const DATE_RANGES = [
+  { id: "all", label: "كل الأوقات" },
+  { id: "today", label: "اليوم" },
+  { id: "7", label: "آخر 7 أيام" },
+  { id: "30", label: "آخر 30 يوماً" },
+  { id: "90", label: "آخر 90 يوماً" },
+];
+
+const AGE_GROUPS = [
+  { label: "أقل من 25", max: 24 },
+  { label: "25 – 34", max: 34 },
+  { label: "35 – 44", max: 44 },
+  { label: "45 – 54", max: 54 },
+  { label: "55 فأكثر", max: Infinity },
+];
+
+const SORT_OPTIONS = [
+  { key: "date", dir: "desc", label: "الأحدث تسجيلاً" },
+  { key: "date", dir: "asc", label: "الأقدم تسجيلاً" },
+  { key: "name", dir: "asc", label: "الاسم (أ - ي)" },
+  { key: "name", dir: "desc", label: "الاسم (ي - أ)" },
+  { key: "age", dir: "asc", label: "العمر: الأصغر أولاً" },
+  { key: "age", dir: "desc", label: "العمر: الأكبر أولاً" },
+  { key: "city", dir: "asc", label: "المدينة (أ - ي)" },
+];
+
+/* ---------- Helpers ---------- */
+
+const ageOf = (dob) => {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
+  return age >= 0 && age < 130 ? age : null;
+};
+
+const ageGroupOf = (r) => {
+  const age = ageOf(r.dob);
+  return age === null ? "—" : AGE_GROUPS.find((g) => age <= g.max).label;
+};
+
+const answerText = (r, key) => {
+  const v = r.answers?.[key];
+  if (v === undefined || v === null || v === "") return "";
+  return Array.isArray(v) ? v.join("، ") : String(v);
+};
+
+// Fields we expect for every customer (used by the "بيانات ناقصة" view)
+const isIncomplete = (r) =>
+  !r.email || !r.phone || !r.city || !r.idNumber || !r.dob;
+
+const SORTERS = {
+  date: (r) => new Date(r.createdAt).getTime() || 0,
+  name: (r) => r.name || "",
+  age: (r) => ageOf(r.dob),
+  city: (r) => r.city || "",
+};
+
+const sortRows = (rows, { key, dir }) => {
+  const get = SORTERS[key];
+  return [...rows].sort((a, b) => {
+    const va = get(a);
+    const vb = get(b);
+    // Missing values always go last, whichever direction
+    if (va === null || va === "") return vb === null || vb === "" ? 0 : 1;
+    if (vb === null || vb === "") return -1;
+    const c = typeof va === "string" ? va.localeCompare(vb, "ar") : va - vb;
+    return dir === "asc" ? c : -c;
+  });
+};
+
+// Arabic-aware search: أ/إ/آ → ا, ة → ه, ى → ي, strip diacritics
+const normalizeAr = (v) =>
+  String(v ?? "")
+    .toLowerCase()
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .replace(/[ً-ْ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Arabic letters join into one shape, so Arabic names get a single letter
+const initialsOf = (name) => {
+  const words = (name || "؟").trim().split(/\s+/);
+  if (/[؀-ۿ]/.test(words[0])) return words[0].replace(/^ال/, "")[0] || "؟";
+  return words
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+};
+
+const inDateRange = (date, rangeId) => {
+  if (rangeId === "all") return true;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return false;
+  if (rangeId === "today") return toDateKey(d) === toDateKey(new Date());
+  return Date.now() - d.getTime() <= Number(rangeId) * 864e5;
+};
+
+const facetOf = (rows, get, order) => {
+  const counts = new Map();
+  rows.forEach((r) => {
+    const v = get(r) || "—";
+    counts.set(v, (counts.get(v) || 0) + 1);
+  });
+  const entries = [...counts.entries()];
+  entries.sort(
+    order
+      ? (a, b) => order.indexOf(a[0]) - order.indexOf(b[0])
+      : (a, b) => b[1] - a[1],
+  );
+  return entries.map(([value, count]) => ({
+    value,
+    count,
+    label: value === "—" ? "غير محدد" : value,
+  }));
+};
+
+const loadHiddenColumns = () => {
+  try {
+    const v = JSON.parse(localStorage.getItem(COLUMN_STORE_KEY));
+    return Array.isArray(v) ? v : DEFAULT_HIDDEN_COLUMNS;
+  } catch {
+    return DEFAULT_HIDDEN_COLUMNS;
+  }
+};
+
+/* ---------- CSV export ---------- */
+
+const exportPhone = (p) => {
+  if (!p) return "";
+  const digits = String(p).replace(/\D/g, "");
+  return digits.startsWith("966") ? digits : `966${digits.replace(/^0/, "")}`;
+};
+
+const exportDateTime = (d) => {
+  if (!d) return "";
+  const x = new Date(d);
+  if (Number.isNaN(x.getTime())) return "";
+  return `${toDateKey(x)} ${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`;
+};
+
+const CSV_COLUMNS = [
+  ["الاسم الأول", (r) => r.firstName],
+  ["اسم العائلة", (r) => r.lastName],
+  ["البريد الإلكتروني", (r) => r.email],
+  ["الجوال", (r) => exportPhone(r.phone)],
+  ["المدينة", (r) => r.city],
+  ["رقم الهوية / الإقامة", (r) => r.idNumber],
+  ["تاريخ الميلاد", (r) => r.dob],
+  ["العمر", (r) => ageOf(r.dob)],
+  ["الجنس", (r) => answerText(r, "sex")],
+  ["تاريخ التسجيل", (r) => exportDateTime(r.createdAt)],
+];
+
+// Quote when needed; neutralise spreadsheet formulas (= + - @) to block CSV injection
+const csvCell = (value) => {
+  let s = value === null || value === undefined ? "" : String(value);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+const buildCustomersCsv = (rows, { excel, withAnswers }) => {
+  const columns = [
+    ...CSV_COLUMNS,
+    ...(withAnswers
+      ? Object.entries(ANSWER_LABELS)
+          .filter(([key]) => key !== "sex") // already its own column
+          .map(([key, label]) => [label, (r) => answerText(r, key)])
+      : []),
+  ];
+  const eol = excel ? "\r\n" : "\n";
+  const lines = [
+    columns.map(([label]) => csvCell(label)).join(","),
+    ...rows.map((r) => columns.map(([, get]) => csvCell(get(r))).join(",")),
+  ];
+  // BOM so Excel opens Arabic text as UTF-8
+  return (excel ? "﻿" : "") + lines.join(eol) + eol;
+};
+
+const downloadFile = (content, filename, type) => {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+/* ---------- Data ---------- */
+
+const useWaitlist = (accessToken, onAuthError) => {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await userRequest.get("/waitlist", {
+          params: { limit: 1000 },
+          signal: controller.signal,
+        });
+        const list = data?.entries ?? (Array.isArray(data) ? data : []);
+        setEntries(list.map(normalizeWaitlistEntry));
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        const status = err.response?.status;
+        if (status === 401) onAuthError();
+        setError(amanapiError(status, "تعذّر جلب قائمة العملاء"));
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    })();
+    return () => controller.abort();
+  }, [accessToken, onAuthError, reloadKey]);
+
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+
+  return { entries, loading, error, reload };
+};
+
+/* ---------- Small UI pieces ---------- */
+
+const Popover = ({ trigger, children, align }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDown = (e) =>
+      ref.current && !ref.current.contains(e.target) && setOpen(false);
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const close = () => setOpen(false);
+
+  return (
+    <S.PopoverWrap ref={ref}>
+      {trigger({ open, toggle: () => setOpen((o) => !o) })}
+      {open && (
+        <S.PopoverPanel $align={align} role="menu">
+          {typeof children === "function" ? children({ close }) : children}
+        </S.PopoverPanel>
+      )}
+    </S.PopoverWrap>
+  );
+};
+
+const MultiFilter = memo(({ label, options, value, onChange }) => (
+  <Popover
+    trigger={({ toggle, open }) => (
+      <S.FilterPill
+        type="button"
+        $active={value.length > 0}
+        aria-expanded={open}
+        onClick={toggle}
+      >
+        {label}
+        {value.length === 1 &&
+          `: ${options.find((o) => o.value === value[0])?.label ?? value[0]}`}
+        {value.length > 1 && `: ${value.length} محدد`}
+        <ChevronDown size={13} />
+      </S.FilterPill>
+    )}
+  >
+    {options.length === 0 ? (
+      <S.MenuEmpty>لا توجد خيارات</S.MenuEmpty>
+    ) : (
+      options.map((o) => {
+        const checked = value.includes(o.value);
+        return (
+          <S.MenuCheck key={o.value}>
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() =>
+                onChange(
+                  checked
+                    ? value.filter((v) => v !== o.value)
+                    : [...value, o.value],
+                )
+              }
+            />
+            {o.label}
+            <S.MenuCount>{o.count}</S.MenuCount>
+          </S.MenuCheck>
+        );
+      })
+    )}
+    {value.length > 0 && (
+      <S.MenuFooter>
+        <S.LinkButton type="button" onClick={() => onChange([])}>
+          مسح
+        </S.LinkButton>
+      </S.MenuFooter>
+    )}
+  </Popover>
+));
+
+const StatCard = memo(({ label, value, hint }) => (
+  <S.Card $gap="0.375rem">
+    <S.CardLabel>{label}</S.CardLabel>
+    <S.MetricValue>{value}</S.MetricValue>
+    {hint && (
+      <S.Text $muted $size="0.75rem">
+        {hint}
+      </S.Text>
+    )}
+  </S.Card>
+));
+
+const CustomerCell = ({ row }) => (
+  <S.Row $gap="0.625rem" style={{ minWidth: 0 }}>
+    <S.InitialAvatar aria-hidden="true">{initialsOf(row.name)}</S.InitialAvatar>
+    <S.Stack $gap="0" style={{ minWidth: 0 }}>
+      <S.Ellipsis style={{ fontWeight: 600 }}>{row.name || "—"}</S.Ellipsis>
+      {row.email && (
+        <S.Ellipsis
+          style={{
+            fontSize: "0.75rem",
+            color: T.textMuted,
+            direction: "ltr",
+            textAlign: "right",
+          }}
+        >
+          {row.email}
+        </S.Ellipsis>
+      )}
+    </S.Stack>
+  </S.Row>
+);
+
+const Dash = ({ children }) => children || "—";
+
+// `always` = can't be hidden; `sort` = header is clickable
+const CUSTOMER_COLUMNS = [
+  {
+    id: "name",
+    label: "العميل",
+    w: "minmax(220px, 1.8fr)",
+    sort: "name",
+    always: true,
+    render: (r) => <CustomerCell row={r} />,
+  },
+  {
+    id: "phone",
+    label: "الجوال",
+    w: "1.1fr",
+    ltr: true,
+    render: (r) => formatPhone(r.phone),
+  },
+  {
+    id: "city",
+    label: "المدينة",
+    w: "0.9fr",
+    sort: "city",
+    render: (r) => <Dash>{r.city}</Dash>,
+  },
+  {
+    id: "gender",
+    label: "الجنس",
+    w: "0.7fr",
+    align: "center",
+    render: (r) => <Dash>{answerText(r, "sex")}</Dash>,
+  },
+  {
+    id: "age",
+    label: "العمر",
+    w: "0.6fr",
+    sort: "age",
+    align: "center",
+    render: (r) => ageOf(r.dob) ?? "—",
+  },
+  {
+    id: "idNumber",
+    label: "رقم الهوية",
+    w: "1fr",
+    ltr: true,
+    render: (r) => <Dash>{r.idNumber}</Dash>,
+  },
+  {
+    id: "dob",
+    label: "تاريخ الميلاد",
+    w: "1fr",
+    ltr: true,
+    render: (r) => <Dash>{r.dob}</Dash>,
+  },
+  {
+    id: "activity",
+    label: "مستوى النشاط",
+    w: "1.1fr",
+    ellipsis: true,
+    render: (r) => <Dash>{answerText(r, "pastVitamins")}</Dash>,
+  },
+  {
+    id: "sleep",
+    label: "ساعات النوم",
+    w: "0.9fr",
+    render: (r) => <Dash>{answerText(r, "sleepHours")}</Dash>,
+  },
+  {
+    id: "smoke",
+    label: "التدخين",
+    w: "0.7fr",
+    align: "center",
+    render: (r) => <Dash>{answerText(r, "smoke")}</Dash>,
+  },
+  {
+    id: "allergies",
+    label: "الحساسية",
+    w: "1.1fr",
+    ellipsis: true,
+    render: (r) => <Dash>{answerText(r, "allergies")}</Dash>,
+  },
+  {
+    id: "date",
+    label: "تاريخ التسجيل",
+    w: "1fr",
+    sort: "date",
+    render: (r) => formatDate(r.createdAt),
+  },
+];
+
+/* ---------- Customer profile ---------- */
+
+const CustomerProfileModal = memo(({ row, onClose }) => {
+  const age = ageOf(row.dob);
+  const phoneDigits = exportPhone(row.phone);
+  const answers = Object.entries(row.answers || {}).filter(
+    ([, v]) => v !== "" && v !== null && v !== undefined,
+  );
+  const ltr = { direction: "ltr", textAlign: "right" };
+
+  return (
+    <S.Overlay onClick={onClose}>
+      <S.ModalBox
+        $max="560px"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <S.Row $between $align="flex-start">
+          <S.Row $gap="0.75rem">
+            <S.InitialAvatar
+              aria-hidden="true"
+              style={{ width: 44, height: 44, fontSize: "1rem" }}
+            >
+              {initialsOf(row.name)}
+            </S.InitialAvatar>
+            <S.Stack $gap="0.125rem">
+              <S.Heading $size="1.125rem">{row.name || "—"}</S.Heading>
+              <S.Text $muted $size="0.8125rem">
+                عميل منذ {formatDate(row.createdAt)}
+                {row.city ? ` · ${row.city}` : ""}
+              </S.Text>
+            </S.Stack>
+          </S.Row>
+          <S.PlainIconButton type="button" aria-label="إغلاق" onClick={onClose}>
+            <X size={18} />
+          </S.PlainIconButton>
+        </S.Row>
+
+        <S.Stack $gap="0.5rem">
+          <S.Heading $size="0.9375rem">بيانات التواصل</S.Heading>
+          <S.DetailList>
+            <dt>الجوال</dt>
+            <dd style={ltr}>
+              {row.phone ? (
+                <a href={`tel:+${phoneDigits}`}>{formatPhone(row.phone)}</a>
+              ) : (
+                "—"
+              )}
+            </dd>
+            <dt>البريد الإلكتروني</dt>
+            <dd style={ltr}>
+              {row.email ? (
+                <a href={`mailto:${row.email}`}>{row.email}</a>
+              ) : (
+                "—"
+              )}
+            </dd>
+            <dt>المدينة</dt>
+            <dd>{row.city || "—"}</dd>
+          </S.DetailList>
+        </S.Stack>
+
+        <S.Stack $gap="0.5rem">
+          <S.Heading $size="0.9375rem">البيانات الشخصية</S.Heading>
+          <S.DetailList>
+            <dt>رقم الهوية / الإقامة</dt>
+            <dd style={ltr}>{row.idNumber || "—"}</dd>
+            <dt>تاريخ الميلاد</dt>
+            <dd style={ltr}>{row.dob || "—"}</dd>
+            <dt>العمر</dt>
+            <dd>{age !== null ? `${age} سنة` : "—"}</dd>
+            <dt>الجنس</dt>
+            <dd>{answerText(row, "sex") || "—"}</dd>
+          </S.DetailList>
+        </S.Stack>
+
+        {answers.length > 0 && (
+          <S.Stack $gap="0.5rem">
+            <S.Heading $size="0.9375rem">الملف الصحي (من الاستبيان)</S.Heading>
+            <S.DetailList>
+              {answers
+                .filter(([key]) => key !== "sex")
+                .map(([key]) => (
+                  <Fragment key={key}>
+                    <dt>{ANSWER_LABELS[key] || key}</dt>
+                    <dd>{answerText(row, key)}</dd>
+                  </Fragment>
+                ))}
+            </S.DetailList>
+          </S.Stack>
+        )}
+      </S.ModalBox>
+    </S.Overlay>
+  );
+});
+
+/* ---------- Export dialog ---------- */
+
+const ExportModal = memo(({ counts, onClose, onExport }) => {
+  const scopes = [
+    { id: "page", label: "الصفحة الحالية", count: counts.page },
+    { id: "all", label: "كل العملاء", count: counts.all },
+    { id: "selected", label: "العملاء المحددون", count: counts.selected },
+    {
+      id: "filtered",
+      label: "نتائج البحث والتصفية الحالية",
+      count: counts.filtered,
+    },
+  ];
+  const [scope, setScope] = useState(
+    counts.selected > 0
+      ? "selected"
+      : counts.filtered !== counts.all
+        ? "filtered"
+        : "all",
+  );
+  const [format, setFormat] = useState("excel");
+  const [withAnswers, setWithAnswers] = useState(false);
+  const chosen = scopes.find((s) => s.id === scope);
+
+  return (
+    <S.Overlay onClick={onClose}>
+      <S.ModalBox
+        $max="480px"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <S.Row $between>
+          <S.Heading $size="1.125rem">تصدير بيانات العملاء</S.Heading>
+          <S.PlainIconButton type="button" aria-label="إغلاق" onClick={onClose}>
+            <X size={18} />
+          </S.PlainIconButton>
+        </S.Row>
+
+        <S.Stack $gap="0.5rem">
+          <S.FieldLabel>ماذا تريد أن تصدّر؟</S.FieldLabel>
+          {scopes.map((s) => (
+            <S.RadioRow key={s.id} $disabled={!s.count}>
+              <input
+                type="radio"
+                name="export-scope"
+                checked={scope === s.id}
+                disabled={!s.count}
+                onChange={() => setScope(s.id)}
+              />
+              {s.label}
+              <S.MenuCount>{s.count}</S.MenuCount>
+            </S.RadioRow>
+          ))}
+        </S.Stack>
+
+        <S.Stack $gap="0.5rem">
+          <S.FieldLabel>صيغة الملف</S.FieldLabel>
+          <S.RadioRow>
+            <input
+              type="radio"
+              name="export-format"
+              checked={format === "excel"}
+              onChange={() => setFormat("excel")}
+            />
+            CSV لبرنامج Excel أو Numbers
+          </S.RadioRow>
+          <S.RadioRow>
+            <input
+              type="radio"
+              name="export-format"
+              checked={format === "plain"}
+              onChange={() => setFormat("plain")}
+            />
+            ملف CSV عادي
+          </S.RadioRow>
+        </S.Stack>
+
+        <S.Check>
+          <input
+            type="checkbox"
+            checked={withAnswers}
+            onChange={(e) => setWithAnswers(e.target.checked)}
+          />
+          تضمين الملف الصحي (إجابات الاستبيان)
+        </S.Check>
+
+        <S.Row $gap="0.5rem" style={{ justifyContent: "flex-end" }}>
+          <S.Button type="button" onClick={onClose}>
+            إلغاء
+          </S.Button>
+          <S.Button
+            type="button"
+            $variant="primary"
+            disabled={!chosen?.count}
+            onClick={() => onExport(scope, format, withAnswers)}
+          >
+            <Download size={15} />
+            تصدير {chosen?.count ?? 0} عميل
+          </S.Button>
+        </S.Row>
+      </S.ModalBox>
+    </S.Overlay>
+  );
+});
+
+/* ---------- The tab ---------- */
+
+const CUSTOMER_VIEWS = [
+  { id: "all", label: "كل العملاء", test: () => true },
+  {
+    id: "new",
+    label: "جدد (آخر 30 يوماً)",
+    test: (r) => inDateRange(r.createdAt, "30"),
+  },
+  { id: "incomplete", label: "بيانات ناقصة", test: isIncomplete },
+];
+
+const CustomersTab = memo(({ accessToken, onAuthError, onNavigate }) => {
+  const { entries, loading, error, reload } = useWaitlist(
+    accessToken,
+    onAuthError,
+  );
+
+  const [view, setView] = useState("all");
+  const [query, setQuery] = useState("");
+  const [cities, setCities] = useState([]);
+  const [genders, setGenders] = useState([]);
+  const [ageGroups, setAgeGroups] = useState([]);
+  const [activity, setActivity] = useState([]);
+  const [smoke, setSmoke] = useState([]);
+  const [range, setRange] = useState("all");
+  const [sort, setSort] = useState({ key: "date", dir: "desc" });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [selected, setSelected] = useState(() => new Set());
+  const [hidden, setHidden] = useState(loadHiddenColumns);
+  const [profileId, setProfileId] = useState(null);
+  const [exportOpen, setExportOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COLUMN_STORE_KEY, JSON.stringify(hidden));
+    } catch {
+      /* storage unavailable — column choice just won't persist */
+    }
+  }, [hidden]);
+
+  // Back to page 1 whenever the result set changes
+  useEffect(
+    () => setPage(1),
+    [
+      view,
+      query,
+      cities,
+      genders,
+      ageGroups,
+      activity,
+      smoke,
+      range,
+      sort,
+      pageSize,
+    ],
+  );
+
+  /* ---------- Facets & stats (from all customers) ---------- */
+  const facets = useMemo(
+    () => ({
+      cities: facetOf(entries, (r) => r.city),
+      genders: facetOf(entries, (r) => answerText(r, "sex")),
+      ageGroups: facetOf(entries, ageGroupOf, [
+        ...AGE_GROUPS.map((g) => g.label),
+        "—",
+      ]),
+      activity: facetOf(entries, (r) => answerText(r, "pastVitamins")),
+      smoke: facetOf(entries, (r) => answerText(r, "smoke")),
+    }),
+    [entries],
+  );
+
+  const stats = useMemo(() => {
+    const weekAgo = Date.now() - 7 * 864e5;
+    const ages = entries.map((r) => ageOf(r.dob)).filter((a) => a !== null);
+    const genderTotal = facets.genders
+      .filter((g) => g.value !== "—")
+      .reduce((s, g) => s + g.count, 0);
+    const genderSplit = facets.genders
+      .filter((g) => g.value !== "—")
+      .map((g) => `${g.label} ${Math.round((g.count / genderTotal) * 100)}٪`)
+      .join(" · ");
+    return {
+      total: entries.length,
+      newWeek: entries.filter((r) => new Date(r.createdAt).getTime() >= weekAgo)
+        .length,
+      avgAge: ages.length
+        ? Math.round(ages.reduce((s, a) => s + a, 0) / ages.length)
+        : null,
+      topCity: facets.cities.find((c) => c.value !== "—"),
+      genderSplit,
+      incomplete: entries.filter(isIncomplete).length,
+    };
+  }, [entries, facets]);
+
+  /* ---------- Filter → sort → paginate ---------- */
+  const filtered = useMemo(() => {
+    const viewTest = CUSTOMER_VIEWS.find((v) => v.id === view).test;
+    const q = normalizeAr(query);
+    const qDigits = query
+      .replace(/\D/g, "")
+      .replace(/^966/, "")
+      .replace(/^0/, "");
+    const has = (list, v) => !list.length || list.includes(v || "—");
+
+    return entries.filter((r) => {
+      if (!viewTest(r)) return false;
+      if (!has(cities, r.city)) return false;
+      if (!has(genders, answerText(r, "sex"))) return false;
+      if (!has(ageGroups, ageGroupOf(r))) return false;
+      if (!has(activity, answerText(r, "pastVitamins"))) return false;
+      if (!has(smoke, answerText(r, "smoke"))) return false;
+      if (!inDateRange(r.createdAt, range)) return false;
+      if (q) {
+        const hay = normalizeAr(
+          [r.name, r.email, r.city, r.idNumber].join(" "),
+        );
+        const phoneHit =
+          qDigits.length >= 3 &&
+          String(r.phone || "")
+            .replace(/\D/g, "")
+            .includes(qDigits);
+        if (!hay.includes(q) && !phoneHit) return false;
+      }
+      return true;
+    });
+  }, [
+    entries,
+    view,
+    query,
+    cities,
+    genders,
+    ageGroups,
+    activity,
+    smoke,
+    range,
+  ]);
+
+  const sorted = useMemo(() => sortRows(filtered, sort), [filtered, sort]);
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * pageSize;
+  const pageRows = useMemo(
+    () => sorted.slice(pageStart, pageStart + pageSize),
+    [sorted, pageStart, pageSize],
+  );
+
+  const visibleColumns = CUSTOMER_COLUMNS.filter(
+    (c) => c.always || !hidden.includes(c.id),
+  );
+  const gridColumns = `48px ${visibleColumns.map((c) => c.w).join(" ")}`;
+  const activeSort = SORT_OPTIONS.find(
+    (o) => o.key === sort.key && o.dir === sort.dir,
+  );
+  const activeRange = DATE_RANGES.find((r) => r.id === range);
+  const activeFilterCount =
+    cities.length +
+    genders.length +
+    ageGroups.length +
+    activity.length +
+    smoke.length +
+    (range !== "all" ? 1 : 0) +
+    (query ? 1 : 0);
+
+  const clearFilters = () => {
+    setQuery("");
+    setCities([]);
+    setGenders([]);
+    setAgeGroups([]);
+    setActivity([]);
+    setSmoke([]);
+    setRange("all");
+  };
+
+  /* ---------- Selection ---------- */
+  const pageAllSelected =
+    pageRows.length > 0 && pageRows.every((r) => selected.has(r._id));
+
+  const togglePage = () =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      pageRows.forEach((r) =>
+        pageAllSelected ? next.delete(r._id) : next.add(r._id),
+      );
+      return next;
+    });
+
+  const toggleOne = (id) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const selectAllResults = () => setSelected(new Set(sorted.map((r) => r._id)));
+  const clearSelection = () => setSelected(new Set());
+
+  /* ---------- Actions ---------- */
+  const onHeaderSort = (col) =>
+    setSort((prev) =>
+      prev.key === col.sort
+        ? { key: col.sort, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : { key: col.sort, dir: col.sort === "date" ? "desc" : "asc" },
+    );
+
+  const handleExport = (scope, format, withAnswers) => {
+    const rows =
+      scope === "page"
+        ? pageRows
+        : scope === "selected"
+          ? sortRows(
+              entries.filter((r) => selected.has(r._id)),
+              sort,
+            )
+          : scope === "filtered"
+            ? sorted
+            : sortRows(entries, sort);
+    const csv = buildCustomersCsv(rows, {
+      excel: format === "excel",
+      withAnswers,
+    });
+    downloadFile(
+      csv,
+      `customers-${toDateKey(new Date())}.csv`,
+      "text/csv;charset=utf-8",
+    );
+    setExportOpen(false);
+  };
+
+  /* ---------- No customers yet → original empty page ---------- */
+  if (!loading && !error && entries.length === 0) {
+    return <ListTab {...LIST_TABS["العملاء"]} onNavigate={onNavigate} />;
+  }
+
+  const profileRow = profileId
+    ? entries.find((r) => r._id === profileId)
+    : null;
+  const viewCounts = {
+    all: entries.length,
+    new: entries.filter(CUSTOMER_VIEWS[1].test).length,
+    incomplete: stats.incomplete,
+  };
+
+  return (
+    <S.Page $max="1400px">
+      <PageHeader icon={tagIcon} title="العملاء">
+        <S.Button
+          type="button"
+          $icon
+          aria-label="تحديث"
+          disabled={loading}
+          onClick={reload}
+        >
+          <RefreshCw size={15} />
+        </S.Button>
+        <S.Button
+          type="button"
+          disabled={!entries.length}
+          onClick={() => setExportOpen(true)}
+        >
+          <Download size={15} />
+          تصدير
+        </S.Button>
+      </PageHeader>
+
+      <S.Grid $cols={4}>
+        <StatCard
+          label="إجمالي العملاء"
+          value={stats.total.toLocaleString("ar-SA")}
+          hint={stats.genderSplit}
+        />
+        <StatCard
+          label="جدد خلال آخر 7 أيام"
+          value={stats.newWeek.toLocaleString("ar-SA")}
+        />
+        <StatCard
+          label="متوسط العمر"
+          value={stats.avgAge !== null ? `${stats.avgAge} سنة` : "—"}
+        />
+        <StatCard
+          label="المدينة الأكثر تسجيلاً"
+          value={stats.topCity?.label || "—"}
+          hint={
+            stats.topCity
+              ? `${stats.topCity.count.toLocaleString("ar-SA")} عميل`
+              : ""
+          }
+        />
+      </S.Grid>
+
+      <S.Card $flush $overflow>
+        {/* Saved views */}
+        <S.ViewTabs role="tablist">
+          {CUSTOMER_VIEWS.map((v) => (
+            <S.ViewTab
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={view === v.id}
+              $active={view === v.id}
+              onClick={() => setView(v.id)}
+            >
+              {v.label}
+              <S.MenuCount>{viewCounts[v.id]}</S.MenuCount>
+            </S.ViewTab>
+          ))}
+        </S.ViewTabs>
+
+        {/* Selection bar or search + filters */}
+        {selected.size > 0 ? (
+          <S.BulkBar>
+            <S.Row $gap="0.75rem" $wrap>
+              <strong>تم تحديد {selected.size.toLocaleString("ar-SA")}</strong>
+              {selected.size < sorted.length && (
+                <S.LinkButton type="button" onClick={selectAllResults}>
+                  تحديد كل النتائج ({sorted.length.toLocaleString("ar-SA")})
+                </S.LinkButton>
+              )}
+            </S.Row>
+            <S.Row $gap="0.5rem" $wrap>
+              <S.Button
+                type="button"
+                $size="sm"
+                onClick={() => setExportOpen(true)}
+              >
+                <Download size={14} />
+                تصدير المحدد
+              </S.Button>
+              <S.Button
+                type="button"
+                $size="sm"
+                $variant="ghost"
+                onClick={clearSelection}
+              >
+                إلغاء التحديد
+              </S.Button>
+            </S.Row>
+          </S.BulkBar>
+        ) : (
+          <S.FilterBar>
+            <S.Row $gap="0.5rem" $wrap style={{ flex: 1, minWidth: 0 }}>
+              <S.SearchField style={{ maxWidth: "22rem" }}>
+                <Search size={15} />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="ابحث بالاسم أو الجوال أو البريد أو الهوية"
+                />
+              </S.SearchField>
+              <MultiFilter
+                label="المدينة"
+                options={facets.cities}
+                value={cities}
+                onChange={setCities}
+              />
+              <MultiFilter
+                label="الجنس"
+                options={facets.genders}
+                value={genders}
+                onChange={setGenders}
+              />
+              <MultiFilter
+                label="الفئة العمرية"
+                options={facets.ageGroups}
+                value={ageGroups}
+                onChange={setAgeGroups}
+              />
+              <MultiFilter
+                label="مستوى النشاط"
+                options={facets.activity}
+                value={activity}
+                onChange={setActivity}
+              />
+              <MultiFilter
+                label="التدخين"
+                options={facets.smoke}
+                value={smoke}
+                onChange={setSmoke}
+              />
+              <Popover
+                trigger={({ toggle, open }) => (
+                  <S.FilterPill
+                    type="button"
+                    $active={range !== "all"}
+                    aria-expanded={open}
+                    onClick={toggle}
+                  >
+                    تاريخ التسجيل{range !== "all" && `: ${activeRange.label}`}
+                    <ChevronDown size={13} />
+                  </S.FilterPill>
+                )}
+              >
+                {({ close }) =>
+                  DATE_RANGES.map((r) => (
+                    <S.MenuItem
+                      key={r.id}
+                      type="button"
+                      $active={range === r.id}
+                      onClick={() => {
+                        setRange(r.id);
+                        close();
+                      }}
+                    >
+                      {r.label}
+                      {range === r.id && (
+                        <Check
+                          size={14}
+                          style={{ marginInlineStart: "auto" }}
+                        />
+                      )}
+                    </S.MenuItem>
+                  ))
+                }
+              </Popover>
+              {activeFilterCount > 0 && (
+                <S.LinkButton
+                  type="button"
+                  onClick={clearFilters}
+                  style={{ fontSize: "0.8125rem" }}
+                >
+                  مسح الكل
+                </S.LinkButton>
+              )}
+            </S.Row>
+
+            <S.Row $gap="0.375rem">
+              <Popover
+                align="end"
+                trigger={({ toggle }) => (
+                  <S.Button
+                    type="button"
+                    $size="sm"
+                    onClick={toggle}
+                    aria-label="ترتيب"
+                  >
+                    <ArrowUpDown size={14} />
+                    {activeSort?.label}
+                  </S.Button>
+                )}
+              >
+                {({ close }) => (
+                  <>
+                    <S.MenuLabel>ترتيب حسب</S.MenuLabel>
+                    {SORT_OPTIONS.map((o) => {
+                      const active = o.key === sort.key && o.dir === sort.dir;
+                      return (
+                        <S.MenuItem
+                          key={o.label}
+                          type="button"
+                          $active={active}
+                          onClick={() => {
+                            setSort({ key: o.key, dir: o.dir });
+                            close();
+                          }}
+                        >
+                          {o.label}
+                          {active && (
+                            <Check
+                              size={14}
+                              style={{ marginInlineStart: "auto" }}
+                            />
+                          )}
+                        </S.MenuItem>
+                      );
+                    })}
+                  </>
+                )}
+              </Popover>
+              <Popover
+                align="end"
+                trigger={({ toggle }) => (
+                  <S.Button
+                    type="button"
+                    $size="sm"
+                    $icon
+                    aria-label="الأعمدة"
+                    onClick={toggle}
+                  >
+                    <SlidersHorizontal size={14} />
+                  </S.Button>
+                )}
+              >
+                <S.MenuLabel>الأعمدة الظاهرة</S.MenuLabel>
+                {CUSTOMER_COLUMNS.filter((c) => !c.always).map((c) => {
+                  const shown = !hidden.includes(c.id);
+                  return (
+                    <S.MenuCheck key={c.id}>
+                      <input
+                        type="checkbox"
+                        checked={shown}
+                        onChange={() =>
+                          setHidden((prev) =>
+                            shown
+                              ? [...prev, c.id]
+                              : prev.filter((id) => id !== c.id),
+                          )
+                        }
+                      />
+                      {c.label}
+                    </S.MenuCheck>
+                  );
+                })}
+              </Popover>
+            </S.Row>
+          </S.FilterBar>
+        )}
+
+        {/* Table */}
+        <S.TableScroll $minH="420px">
+          <S.GridTable $columns={gridColumns} $minWidth="900px">
+            <S.Th $align="center">
+              <S.Checkbox
+                checked={pageAllSelected}
+                onChange={togglePage}
+                aria-label="تحديد الصفحة"
+              />
+            </S.Th>
+            {visibleColumns.map((c) => (
+              <S.Th key={c.id} $align={c.align}>
+                {c.sort ? (
+                  <S.SortHeader
+                    type="button"
+                    $active={sort.key === c.sort}
+                    onClick={() => onHeaderSort(c)}
+                  >
+                    {c.label}
+                    {sort.key === c.sort &&
+                      (sort.dir === "asc" ? (
+                        <ChevronUp size={13} />
+                      ) : (
+                        <ChevronDown size={13} />
+                      ))}
+                  </S.SortHeader>
+                ) : (
+                  c.label
+                )}
+              </S.Th>
+            ))}
+
+            {loading ? (
+              <S.TableMessage>جاري التحميل...</S.TableMessage>
+            ) : error ? (
+              <S.TableMessage $error>
+                {error}{" "}
+                <S.LinkButton type="button" onClick={reload}>
+                  إعادة المحاولة
+                </S.LinkButton>
+              </S.TableMessage>
+            ) : pageRows.length === 0 ? (
+              <S.TableMessage>
+                لا يوجد عملاء يطابقون البحث أو التصفية.{" "}
+                <S.LinkButton
+                  type="button"
+                  onClick={() => {
+                    clearFilters();
+                    setView("all");
+                  }}
+                >
+                  مسح عوامل التصفية
+                </S.LinkButton>
+              </S.TableMessage>
+            ) : (
+              pageRows.map((row) => (
+                <S.Tr key={row._id} onClick={() => setProfileId(row._id)}>
+                  <S.Td $align="center" onClick={(e) => e.stopPropagation()}>
+                    <S.Checkbox
+                      checked={selected.has(row._id)}
+                      onChange={() => toggleOne(row._id)}
+                      aria-label="تحديد"
+                    />
+                  </S.Td>
+                  {visibleColumns.map((c) => {
+                    const content = c.render(row);
+                    return (
+                      <S.Td
+                        key={c.id}
+                        $align={c.align}
+                        style={
+                          c.ltr
+                            ? { direction: "ltr", justifyContent: "flex-end" }
+                            : undefined
+                        }
+                      >
+                        {c.ellipsis ? (
+                          <S.Ellipsis>{content}</S.Ellipsis>
+                        ) : (
+                          content
+                        )}
+                      </S.Td>
+                    );
+                  })}
+                </S.Tr>
+              ))
+            )}
+          </S.GridTable>
+        </S.TableScroll>
+
+        <S.TableFooter>
+          <span>
+            {sorted.length
+              ? `عرض ${(pageStart + 1).toLocaleString("ar-SA")}–${(
+                  pageStart + pageRows.length
+                ).toLocaleString(
+                  "ar-SA",
+                )} من ${sorted.length.toLocaleString("ar-SA")}`
+              : "لا توجد نتائج"}
+          </span>
+          <S.Row $gap="0.5rem">
+            <S.PageSizeSelect
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+            >
+              {CUSTOMER_PAGE_SIZES.map((n) => (
+                <option key={n} value={n}>
+                  {n} لكل صفحة
+                </option>
+              ))}
+            </S.PageSizeSelect>
+            <S.Button
+              type="button"
+              $size="sm"
+              $icon
+              aria-label="السابق"
+              disabled={currentPage <= 1}
+              onClick={() => setPage(currentPage - 1)}
+            >
+              <ChevronRight size={16} />
+            </S.Button>
+            <S.Button
+              type="button"
+              $size="sm"
+              $icon
+              aria-label="التالي"
+              disabled={currentPage >= pageCount}
+              onClick={() => setPage(currentPage + 1)}
+            >
+              <ChevronLeft size={16} />
+            </S.Button>
+          </S.Row>
+        </S.TableFooter>
+      </S.Card>
+
+      {profileRow && (
+        <CustomerProfileModal
+          row={profileRow}
+          onClose={() => setProfileId(null)}
+        />
+      )}
+
+      {exportOpen && (
+        <ExportModal
+          counts={{
+            page: pageRows.length,
+            all: entries.length,
+            selected: selected.size,
+            filtered: sorted.length,
+          }}
+          onClose={() => setExportOpen(false)}
+          onExport={handleExport}
+        />
+      )}
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Tabs: المنتجات + المجموعة + المخزون  (packages from /api/packages)
+   ============================================================ */
+
+const MAX_FEATURED = 3;
+const LOW_STOCK = 5;
+
+const EMPTY_PRODUCT = {
+  name: "",
+  description: "",
+  images: [""],
+  price: "",
+  analysisCount: "",
+  compareIntro: "",
+  categories: [],
+  productCollection: "",
+  status: "draft",
+  featured: false,
+  mostPopular: false,
+  sortOrder: 0,
+  trackInventory: false,
+  stock: 0,
+};
+
+const apiMessage = (err, fallback) => err?.response?.data?.message || fallback;
+
+const productStatus = (p) =>
+  p.status === "active"
+    ? { label: "نشط", tone: "success" }
+    : { label: "مسودة", tone: "neutral" };
+
+const stockState = (p) => {
+  if (!p.trackInventory) return { label: "غير متتبع", tone: "neutral" };
+  if (p.stock <= 0) return { label: "نفد", tone: "danger" };
+  if (p.stock <= LOW_STOCK) return { label: "منخفض", tone: "warning" };
+  return { label: "متوفر", tone: "success" };
+};
+
+/* ---------- Data ---------- */
+
+const usePackages = (accessToken, onAuthError) => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await userRequest.get("/packages/admin", {
+          signal: controller.signal,
+        });
+        setItems(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        const status = err.response?.status;
+        if (status === 401) onAuthError();
+        setError(
+          status === 404
+            ? "مسار المنتجات غير موجود على الخادم بعد (/api/packages)"
+            : amanapiError(status, "تعذّر جلب المنتجات"),
+        );
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    })();
+    return () => controller.abort();
+  }, [accessToken, onAuthError, reloadKey]);
+
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+
+  const guard = useCallback(
+    async (fn) => {
+      try {
+        return await fn();
+      } catch (err) {
+        if (err.response?.status === 401) onAuthError();
+        throw err;
+      }
+    },
+    [onAuthError],
+  );
+
+  // Keeps "most popular" unique locally, same as the server does
+  const merge = (saved) =>
+    setItems((prev) => {
+      const exists = prev.some((p) => p._id === saved._id);
+      let next = exists
+        ? prev.map((p) => (p._id === saved._id ? saved : p))
+        : [saved, ...prev];
+      if (saved.mostPopular)
+        next = next.map((p) =>
+          p._id === saved._id ? p : { ...p, mostPopular: false },
+        );
+      return next;
+    });
+
+  const save = useCallback(
+    (id, payload) =>
+      guard(async () => {
+        const { data } = id
+          ? await userRequest.put(`/packages/${id}`, payload)
+          : await userRequest.post("/packages", payload);
+        merge(data);
+        return data;
+      }),
+    [guard],
+  );
+
+  const updateStock = useCallback(
+    (id, patch) =>
+      guard(async () => {
+        const { data } = await userRequest.patch(
+          `/packages/${id}/stock`,
+          patch,
+        );
+        merge(data);
+        return data;
+      }),
+    [guard],
+  );
+
+  const remove = useCallback(
+    (id) =>
+      guard(async () => {
+        await userRequest.delete(`/packages/${id}`);
+        setItems((prev) => prev.filter((p) => p._id !== id));
+      }),
+    [guard],
+  );
+
+  const seed = useCallback(
+    () =>
+      guard(async () => {
+        const { data } = await userRequest.post("/packages/seed");
+        setItems(Array.isArray(data) ? data : []);
+      }),
+    [guard],
+  );
+
+  return { items, loading, error, reload, save, updateStock, remove, seed };
+};
+
+/* ---------- Shared bits ---------- */
+
+const ProductThumb = ({ src, size = 40 }) => {
+  const [broken, setBroken] = useState(false);
+  return src && !broken ? (
+    <S.Thumb src={src} alt="" $size={size} onError={() => setBroken(true)} />
+  ) : (
+    <S.ThumbPlaceholder $size={size}>
+      <Package size={size * 0.4} />
+    </S.ThumbPlaceholder>
+  );
+};
+
+const ProductCell = ({ p }) => (
+  <S.Row $gap="0.75rem" style={{ minWidth: 0 }}>
+    <ProductThumb src={p.images?.[0]} />
+    <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+      <S.Row $gap="0.375rem" style={{ minWidth: 0 }}>
+        <S.Ellipsis style={{ fontWeight: 600 }}>{p.name}</S.Ellipsis>
+        {p.mostPopular && (
+          <S.StatusBadge $tone="success">الأكثر اختياراً</S.StatusBadge>
+        )}
+      </S.Row>
+      <S.Text $muted $size="0.75rem">
+        {(p.analysisCount || 0).toLocaleString("ar-SA")} تحليلاً
+      </S.Text>
+    </S.Stack>
+  </S.Row>
+);
+
+const NeedProducts = ({ loading, error, onRetry, onGoProducts }) =>
+  loading ? (
+    <S.Card $padding="3rem">
+      <S.Text $muted $center>
+        جاري التحميل...
+      </S.Text>
+    </S.Card>
+  ) : error ? (
+    <S.Card $padding="3rem">
+      <S.Text $center style={{ color: T.danger }}>
+        {error}{" "}
+        <S.LinkButton type="button" onClick={onRetry}>
+          إعادة المحاولة
+        </S.LinkButton>
+      </S.Text>
+    </S.Card>
+  ) : (
+    <S.EmptyState>
+      <S.Heading $size="1.125rem">لا توجد منتجات بعد</S.Heading>
+      <S.Text $muted>
+        أضف منتجاتك أولاً من صفحة المنتجات، وستظهر هنا تلقائياً.
+      </S.Text>
+      <S.Button type="button" $variant="primary" onClick={onGoProducts}>
+        الذهاب إلى المنتجات
+      </S.Button>
+    </S.EmptyState>
+  );
+
+/* ---------- Product editor (add / edit) ---------- */
+
+const toForm = (p) =>
+  p
+    ? {
+        ...EMPTY_PRODUCT,
+        ...p,
+        images: p.images?.length ? p.images : [""],
+        categories: (p.categories || []).map((c) => ({
+          title: c.title,
+          itemsText: (c.items || []).join("\n"),
+        })),
+      }
+    : { ...EMPTY_PRODUCT };
+
+const linesOf = (text) =>
+  String(text || "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+const ProductEditor = memo(
+  ({ product, collections, featuredCount, onBack, onSave, onDelete }) => {
+    const isNew = !product;
+    const [form, setForm] = useState(() => toForm(product));
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState("");
+
+    const featuredLocked =
+      !form.featured && !product?.featured && featuredCount >= MAX_FEATURED;
+    const testsListed = form.categories.reduce(
+      (n, c) => n + linesOf(c.itemsText).length,
+      0,
+    );
+    const priceWithVat =
+      Number(form.price) > 0 ? Number(form.price) * 1.15 : null;
+
+    const setImage = (i, value) =>
+      setForm((f) => ({
+        ...f,
+        images: f.images.map((u, idx) => (idx === i ? value : u)),
+      }));
+    const addImage = () =>
+      setForm((f) => ({ ...f, images: [...f.images, ""] }));
+    const removeImage = (i) =>
+      setForm((f) => ({
+        ...f,
+        images:
+          f.images.length > 1 ? f.images.filter((_, idx) => idx !== i) : [""],
+      }));
+
+    const setCategory = (i, key, value) =>
+      setForm((f) => ({
+        ...f,
+        categories: f.categories.map((c, idx) =>
+          idx === i ? { ...c, [key]: value } : c,
+        ),
+      }));
+    const addCategory = () =>
+      setForm((f) => ({
+        ...f,
+        categories: [...f.categories, { title: "", itemsText: "" }],
+      }));
+    const removeCategory = (i) =>
+      setForm((f) => ({
+        ...f,
+        categories: f.categories.filter((_, idx) => idx !== i),
+      }));
+
+    const handleSave = async () => {
+      if (!form.name.trim()) return setError("اسم المنتج مطلوب");
+      if (form.price === "" || !(Number(form.price) >= 0))
+        return setError("أدخل سعراً صحيحاً");
+
+      const payload = {
+        name: form.name.trim(),
+        description: form.description,
+        images: form.images.map((u) => u.trim()).filter(Boolean),
+        price: Number(form.price),
+        analysisCount: Number(form.analysisCount) || 0,
+        compareIntro: form.compareIntro,
+        categories: form.categories
+          .map((c) => ({ title: c.title.trim(), items: linesOf(c.itemsText) }))
+          .filter((c) => c.title),
+        productCollection: form.productCollection.trim(),
+        status: form.status,
+        featured: form.featured,
+        mostPopular: form.mostPopular,
+        sortOrder: Number(form.sortOrder) || 0,
+        trackInventory: form.trackInventory,
+        stock: Number(form.stock) || 0,
+      };
+
+      setSaving(true);
+      setError("");
+      try {
+        await onSave(product?._id, payload);
+        onBack();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حفظ المنتج. يرجى المحاولة مرة أخرى."));
+        setSaving(false);
+      }
+    };
+
+    const handleDelete = async () => {
+      if (
+        !window.confirm(
+          `حذف "${product.name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+        )
+      )
+        return;
+      setDeleting(true);
+      try {
+        await onDelete(product._id);
+        onBack();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حذف المنتج."));
+        setDeleting(false);
+      }
+    };
+
+    const status = productStatus(form);
+
+    return (
+      <S.Page $max="1100px">
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="رجوع إلى المنتجات"
+              onClick={onBack}
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.PageTitle>
+              {isNew ? "إضافة منتج" : form.name || "تعديل المنتج"}
+            </S.PageTitle>
+            {!isNew && (
+              <S.StatusBadge $tone={status.tone}>{status.label}</S.StatusBadge>
+            )}
+          </S.Row>
+          <S.Row>
+            <S.Button type="button" onClick={onBack}>
+              إلغاء
+            </S.Button>
+            <S.Button
+              type="button"
+              $variant="primary"
+              disabled={saving}
+              onClick={handleSave}
+            >
+              {saving ? "جارٍ الحفظ..." : "حفظ"}
+            </S.Button>
+          </S.Row>
+        </S.Row>
+
+        {error && <S.Alert>{error}</S.Alert>}
+
+        <S.EditorGrid>
+          {/* ---------- Main column ---------- */}
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="1rem">
+              <S.Field>
+                <S.FieldLabel>اسم المنتج</S.FieldLabel>
+                <S.Input
+                  value={form.name}
+                  onChange={bind(setForm, "name")}
+                  placeholder="مثال: الباقة الشاملة"
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel>الوصف</S.FieldLabel>
+                <S.Textarea
+                  rows={4}
+                  value={form.description}
+                  onChange={bind(setForm, "description")}
+                  placeholder="وصف مختصر يظهر للعميل"
+                />
+              </S.Field>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">الصور</S.Heading>
+              {form.images.map((url, i) => (
+                <S.Row key={i} $gap="0.5rem">
+                  <ProductThumb src={url.trim()} size={40} />
+                  <S.Input
+                    value={url}
+                    onChange={(e) => setImage(i, e.target.value)}
+                    placeholder="https://..."
+                    style={{ direction: "ltr" }}
+                  />
+                  <S.Button
+                    type="button"
+                    $variant="ghost"
+                    $icon
+                    aria-label="حذف الصورة"
+                    onClick={() => removeImage(i)}
+                  >
+                    <Trash2 size={15} />
+                  </S.Button>
+                </S.Row>
+              ))}
+              <div>
+                <S.Button type="button" $size="sm" onClick={addImage}>
+                  <Plus size={14} />
+                  إضافة رابط صورة
+                </S.Button>
+              </div>
+              <S.Text $muted $size="0.75rem">
+                الصورة الأولى هي التي تظهر في بطاقة الباقة.
+              </S.Text>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="1rem">
+              <S.Heading $size="0.9375rem">السعر</S.Heading>
+              <S.FormGrid>
+                <S.Field>
+                  <S.FieldLabel>السعر قبل الضريبة (ر.س)</S.FieldLabel>
+                  <S.Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.price}
+                    onChange={bind(setForm, "price")}
+                  />
+                  <S.Text $muted $size="0.75rem">
+                    {priceWithVat !== null
+                      ? `يدفع العميل ${formatSAR(priceWithVat)} شامل الضريبة 15٪`
+                      : " "}
+                  </S.Text>
+                </S.Field>
+                <S.Field>
+                  <S.FieldLabel>عدد التحاليل</S.FieldLabel>
+                  <S.Input
+                    type="number"
+                    min="0"
+                    value={form.analysisCount}
+                    onChange={bind(setForm, "analysisCount")}
+                  />
+                  <S.Text $muted $size="0.75rem">
+                    يظهر في البطاقة كـ "{Number(form.analysisCount) || 0}{" "}
+                    تحليلاً"
+                  </S.Text>
+                </S.Field>
+              </S.FormGrid>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">
+                  التحاليل المشمولة (مقارنة الباقات)
+                </S.Heading>
+                <S.Text $muted $size="0.75rem">
+                  {testsListed} مؤشر مُدرج
+                </S.Text>
+              </S.Row>
+              <S.Field>
+                <S.FieldLabel $small>جملة تمهيدية (اختياري)</S.FieldLabel>
+                <S.Input
+                  value={form.compareIntro}
+                  onChange={bind(setForm, "compareIntro")}
+                  placeholder="مثال: إضافةً إلى كل مؤشرات الباقة الأساسية:"
+                />
+              </S.Field>
+              {form.categories.map((c, i) => (
+                <S.SubCard key={i}>
+                  <S.Row $gap="0.5rem">
+                    <S.Input
+                      value={c.title}
+                      onChange={(e) => setCategory(i, "title", e.target.value)}
+                      placeholder="اسم الفئة، مثال: صحة الكبد"
+                    />
+                    <S.Button
+                      type="button"
+                      $variant="ghost"
+                      $icon
+                      aria-label="حذف الفئة"
+                      onClick={() => removeCategory(i)}
+                    >
+                      <Trash2 size={15} />
+                    </S.Button>
+                  </S.Row>
+                  <S.Textarea
+                    rows={4}
+                    value={c.itemsText}
+                    onChange={(e) =>
+                      setCategory(i, "itemsText", e.target.value)
+                    }
+                    placeholder={"تحليل في كل سطر\nAST\nALT"}
+                  />
+                </S.SubCard>
+              ))}
+              <div>
+                <S.Button type="button" $size="sm" onClick={addCategory}>
+                  <Plus size={14} />
+                  إضافة فئة
+                </S.Button>
+              </div>
+            </S.Card>
+          </S.Stack>
+
+          {/* ---------- Side column ---------- */}
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">الحالة</S.Heading>
+              <S.Select value={form.status} onChange={bind(setForm, "status")}>
+                <option value="active">نشط</option>
+                <option value="draft">مسودة</option>
+              </S.Select>
+              <S.Text $muted $size="0.75rem">
+                المسودة لا تظهر للعملاء حتى لو كانت مميزة.
+              </S.Text>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">الظهور في قائمة الانتظار</S.Heading>
+              <S.Check
+                $bold
+                style={featuredLocked ? { opacity: 0.55 } : undefined}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.featured}
+                  disabled={featuredLocked}
+                  onChange={bind(setForm, "featured")}
+                />
+                منتج مميز
+              </S.Check>
+              <S.Text $muted $size="0.75rem">
+                {featuredLocked
+                  ? `يوجد ${MAX_FEATURED} منتجات مميزة بالفعل. ألغِ تمييز أحدها أولاً.`
+                  : `المنتجات المميزة (حتى ${MAX_FEATURED}) هي التي تظهر في صفحة قائمة الانتظار.`}
+              </S.Text>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={form.mostPopular}
+                  onChange={bind(setForm, "mostPopular")}
+                />
+                شارة "الأكثر اختياراً"
+              </S.Check>
+              <S.Field>
+                <S.FieldLabel $small>ترتيب الظهور (الأصغر أولاً)</S.FieldLabel>
+                <S.Input
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={bind(setForm, "sortOrder")}
+                />
+              </S.Field>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">المجموعة</S.Heading>
+              <S.Input
+                list="product-collections"
+                value={form.productCollection}
+                onChange={bind(setForm, "productCollection")}
+                placeholder="مثال: الفحص السنوي"
+              />
+              <datalist id="product-collections">
+                {collections.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">المخزون</S.Heading>
+              <S.Check>
+                <input
+                  type="checkbox"
+                  checked={form.trackInventory}
+                  onChange={bind(setForm, "trackInventory")}
+                />
+                تتبع الكمية
+              </S.Check>
+              {form.trackInventory && (
+                <S.Field>
+                  <S.FieldLabel $small>الكمية المتوفرة</S.FieldLabel>
+                  <S.Input
+                    type="number"
+                    min="0"
+                    value={form.stock}
+                    onChange={bind(setForm, "stock")}
+                  />
+                </S.Field>
+              )}
+            </S.Card>
+          </S.Stack>
+        </S.EditorGrid>
+
+        {!isNew && (
+          <S.Row style={{ justifyContent: "flex-end" }}>
+            <S.Button
+              type="button"
+              $variant="danger"
+              disabled={deleting}
+              onClick={handleDelete}
+            >
+              <Trash2 size={15} />
+              {deleting ? "جارٍ الحذف..." : "حذف المنتج"}
+            </S.Button>
+          </S.Row>
+        )}
+      </S.Page>
+    );
+  },
+);
+
+/* ---------- المنتجات ---------- */
+
+const PRODUCT_VIEWS = [
+  { id: "all", label: "الكل", test: () => true },
+  { id: "active", label: "نشط", test: (p) => p.status === "active" },
+  { id: "draft", label: "مسودة", test: (p) => p.status !== "active" },
+  { id: "featured", label: "مميز", test: (p) => p.featured },
+];
+
+const PRODUCT_SORTS = [
+  {
+    id: "order",
+    label: "ترتيب الظهور",
+    fn: (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
+  },
+  {
+    id: "newest",
+    label: "الأحدث",
+    fn: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  },
+  {
+    id: "name",
+    label: "الاسم (أ - ي)",
+    fn: (a, b) => (a.name || "").localeCompare(b.name || "", "ar"),
+  },
+  {
+    id: "priceDesc",
+    label: "السعر: الأعلى",
+    fn: (a, b) => (b.price || 0) - (a.price || 0),
+  },
+  {
+    id: "priceAsc",
+    label: "السعر: الأقل",
+    fn: (a, b) => (a.price || 0) - (b.price || 0),
+  },
+];
+
+const PRODUCT_GRID = "minmax(260px, 2.2fr) 0.8fr 0.6fr 1fr 1fr 1fr";
+
+const ProductsTab = memo(({ accessToken, onAuthError }) => {
+  const pk = usePackages(accessToken, onAuthError);
+  const [editing, setEditing] = useState(null); // null | "new" | product id
+  const [view, setView] = useState("all");
+  const [query, setQuery] = useState("");
+  const [collections, setCollections] = useState([]);
+  const [sortId, setSortId] = useState("order");
+  const [busyId, setBusyId] = useState(null);
+  const [seeding, setSeeding] = useState(false);
+
+  const featuredCount = pk.items.filter((p) => p.featured).length;
+  const collectionFacet = useMemo(
+    () => facetOf(pk.items, (p) => p.productCollection),
+    [pk.items],
+  );
+  const collectionNames = collectionFacet
+    .filter((c) => c.value !== "—")
+    .map((c) => c.value);
+
+  const rows = useMemo(() => {
+    const viewTest = PRODUCT_VIEWS.find((v) => v.id === view).test;
+    const q = normalizeAr(query);
+    const sorter = PRODUCT_SORTS.find((s) => s.id === sortId).fn;
+    return pk.items
+      .filter(
+        (p) =>
+          viewTest(p) &&
+          (!collections.length ||
+            collections.includes(p.productCollection || "—")) &&
+          (!q ||
+            normalizeAr(
+              `${p.name} ${p.description} ${p.productCollection}`,
+            ).includes(q)),
+      )
+      .sort(sorter);
+  }, [pk.items, view, query, collections, sortId]);
+
+  const toggleFeatured = async (p) => {
+    if (!p.featured && featuredCount >= MAX_FEATURED) {
+      alert(
+        `يمكن تمييز ${MAX_FEATURED} منتجات فقط. ألغِ تمييز منتج آخر أولاً.`,
+      );
+      return;
+    }
+    setBusyId(p._id);
+    try {
+      await pk.save(p._id, { featured: !p.featured });
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر تحديث المنتج"));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const seed = async () => {
+    setSeeding(true);
+    try {
+      await pk.seed();
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر استيراد الباقات"));
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  if (editing) {
+    const product =
+      editing === "new" ? null : pk.items.find((p) => p._id === editing);
+    return (
+      <ProductEditor
+        key={editing}
+        product={product}
+        collections={collectionNames}
+        featuredCount={featuredCount}
+        onBack={() => setEditing(null)}
+        onSave={pk.save}
+        onDelete={pk.remove}
+      />
+    );
+  }
+
+  const activeSort = PRODUCT_SORTS.find((s) => s.id === sortId);
+
+  return (
+    <S.Page>
+      <PageHeader icon={ordersIcon} title="المنتجات">
+        <S.Button
+          type="button"
+          $icon
+          aria-label="تحديث"
+          disabled={pk.loading}
+          onClick={pk.reload}
+        >
+          <RefreshCw size={15} />
+        </S.Button>
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setEditing("new")}
+        >
+          <Plus size={15} />
+          إضافة منتج
+        </S.Button>
+      </PageHeader>
+
+      {pk.loading || pk.error ? (
+        <NeedProducts
+          loading={pk.loading}
+          error={pk.error}
+          onRetry={pk.reload}
+        />
+      ) : pk.items.length === 0 ? (
+        <S.EmptyState>
+          <S.Illustration src={productsImage} alt="" $w="200px" />
+          <S.Heading $size="1.125rem">أضف منتجاتك</S.Heading>
+          <S.Text $muted>
+            ابدأ بإضافة باقاتك، أو استورد الباقات الثلاث الحالية (الأساسية،
+            الشاملة، المتقدمة) بنقرة واحدة.
+          </S.Text>
+          <S.Row $wrap style={{ justifyContent: "center" }}>
+            <S.Button
+              type="button"
+              $variant="primary"
+              disabled={seeding}
+              onClick={seed}
+            >
+              {seeding ? "جارٍ الاستيراد..." : "استيراد الباقات الحالية"}
+            </S.Button>
+            <S.Button type="button" onClick={() => setEditing("new")}>
+              <Plus size={15} />
+              إضافة منتج
+            </S.Button>
+          </S.Row>
+        </S.EmptyState>
+      ) : (
+        <>
+          <S.Notice>
+            <Star size={16} fill="currentColor" />
+            <span>
+              المنتجات المميزة النشطة تظهر في صفحة قائمة الانتظار —{" "}
+              <strong>
+                {featuredCount} من {MAX_FEATURED}
+              </strong>{" "}
+              مميزة. اضغط على النجمة للتمييز أو الإلغاء.
+            </span>
+          </S.Notice>
+
+          <S.Card $flush $overflow>
+            <S.ViewTabs role="tablist">
+              {PRODUCT_VIEWS.map((v) => (
+                <S.ViewTab
+                  key={v.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={view === v.id}
+                  $active={view === v.id}
+                  onClick={() => setView(v.id)}
+                >
+                  {v.label}
+                  <S.MenuCount>{pk.items.filter(v.test).length}</S.MenuCount>
+                </S.ViewTab>
+              ))}
+            </S.ViewTabs>
+
+            <S.FilterBar>
+              <S.Row $gap="0.5rem" $wrap style={{ flex: 1, minWidth: 0 }}>
+                <S.SearchField style={{ maxWidth: "20rem" }}>
+                  <Search size={15} />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="ابحث في المنتجات"
+                  />
+                </S.SearchField>
+                <MultiFilter
+                  label="المجموعة"
+                  options={collectionFacet}
+                  value={collections}
+                  onChange={setCollections}
+                />
+              </S.Row>
+              <Popover
+                align="end"
+                trigger={({ toggle }) => (
+                  <S.Button type="button" $size="sm" onClick={toggle}>
+                    <ArrowUpDown size={14} />
+                    {activeSort.label}
+                  </S.Button>
+                )}
+              >
+                {({ close }) =>
+                  PRODUCT_SORTS.map((s) => (
+                    <S.MenuItem
+                      key={s.id}
+                      type="button"
+                      $active={sortId === s.id}
+                      onClick={() => {
+                        setSortId(s.id);
+                        close();
+                      }}
+                    >
+                      {s.label}
+                      {sortId === s.id && (
+                        <Check
+                          size={14}
+                          style={{ marginInlineStart: "auto" }}
+                        />
+                      )}
+                    </S.MenuItem>
+                  ))
+                }
+              </Popover>
+            </S.FilterBar>
+
+            <S.TableScroll $minH="320px">
+              <S.GridTable $columns={PRODUCT_GRID} $minWidth="860px">
+                <S.Th>المنتج</S.Th>
+                <S.Th $align="center">الحالة</S.Th>
+                <S.Th $align="center">مميز</S.Th>
+                <S.Th>المخزون</S.Th>
+                <S.Th>المجموعة</S.Th>
+                <S.Th>السعر</S.Th>
+
+                {rows.length === 0 ? (
+                  <S.TableMessage>
+                    لا توجد منتجات تطابق البحث أو التصفية.
+                  </S.TableMessage>
+                ) : (
+                  rows.map((p) => {
+                    const st = productStatus(p);
+                    const stock = stockState(p);
+                    return (
+                      <S.Tr key={p._id} onClick={() => setEditing(p._id)}>
+                        <S.Td>
+                          <ProductCell p={p} />
+                        </S.Td>
+                        <S.Td $align="center">
+                          <S.StatusBadge $tone={st.tone}>
+                            {st.label}
+                          </S.StatusBadge>
+                        </S.Td>
+                        <S.Td $align="center">
+                          <S.StarToggle
+                            type="button"
+                            $on={p.featured}
+                            aria-pressed={p.featured}
+                            aria-label={
+                              p.featured ? "إلغاء التمييز" : "تمييز المنتج"
+                            }
+                            disabled={busyId === p._id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFeatured(p);
+                            }}
+                          >
+                            <Star
+                              size={17}
+                              fill={p.featured ? "currentColor" : "none"}
+                            />
+                          </S.StarToggle>
+                        </S.Td>
+                        <S.Td>
+                          <S.Row $gap="0.375rem">
+                            <S.StatusBadge $tone={stock.tone}>
+                              {stock.label}
+                            </S.StatusBadge>
+                            {p.trackInventory && (
+                              <S.Text $muted $size="0.8125rem">
+                                {p.stock}
+                              </S.Text>
+                            )}
+                          </S.Row>
+                        </S.Td>
+                        <S.Td>
+                          <S.Ellipsis>{p.productCollection || "—"}</S.Ellipsis>
+                        </S.Td>
+                        <S.Td $weight={600}>{formatSAR(p.price)}</S.Td>
+                      </S.Tr>
+                    );
+                  })
+                )}
+              </S.GridTable>
+            </S.TableScroll>
+
+            <S.TableFooter>
+              <span>
+                {rows.length.toLocaleString("ar-SA")} من{" "}
+                {pk.items.length.toLocaleString("ar-SA")} منتج
+              </span>
+            </S.TableFooter>
+          </S.Card>
+        </>
+      )}
+    </S.Page>
+  );
+});
+
+/* ---------- المجموعة ---------- */
+
+const CollectionsTab = memo(({ accessToken, onAuthError, onGoProducts }) => {
+  const pk = usePackages(accessToken, onAuthError);
+  const [created, setCreated] = useState([]); // new, still-empty collections
+  const [openName, setOpenName] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const groups = useMemo(() => {
+    const map = new Map();
+    created.forEach((n) => map.set(n, []));
+    pk.items.forEach((p) => {
+      const k = p.productCollection || "";
+      if (!map.has(k)) map.set(k, []);
+      map.get(k).push(p);
+    });
+    return [...map.entries()]
+      .map(([name, products]) => ({ name, products }))
+      .sort((a, b) =>
+        a.name === ""
+          ? 1
+          : b.name === ""
+            ? -1
+            : a.name.localeCompare(b.name, "ar"),
+      );
+  }, [pk.items, created]);
+
+  const assign = async (ids, name) => {
+    setBusy(true);
+    try {
+      await Promise.all(
+        ids.map((id) => pk.save(id, { productCollection: name })),
+      );
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر تحديث المجموعة"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createCollection = () => {
+    const name = newName.trim();
+    if (!name) return;
+    if (!groups.some((g) => g.name === name))
+      setCreated((prev) => [...prev, name]);
+    setCreating(false);
+    setNewName("");
+    setOpenName(name);
+  };
+
+  if (pk.loading || pk.error || pk.items.length === 0) {
+    return (
+      <S.Page>
+        <PageHeader icon={marketsIcon} title="المجموعة" />
+        <NeedProducts
+          loading={pk.loading}
+          error={pk.error}
+          onRetry={pk.reload}
+          onGoProducts={onGoProducts}
+        />
+      </S.Page>
+    );
+  }
+
+  /* ----- one collection ----- */
+  if (openName !== null) {
+    const group = groups.find((g) => g.name === openName) || {
+      name: openName,
+      products: [],
+    };
+    const others = pk.items.filter(
+      (p) => (p.productCollection || "") !== openName,
+    );
+    const unassigned = openName === "";
+
+    return (
+      <S.Page>
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="رجوع"
+              onClick={() => setOpenName(null)}
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.PageTitle>{unassigned ? "بدون مجموعة" : openName}</S.PageTitle>
+            <S.StatusBadge $tone="neutral">
+              {group.products.length} منتج
+            </S.StatusBadge>
+          </S.Row>
+          {!unassigned && (
+            <Popover
+              align="end"
+              trigger={({ toggle }) => (
+                <S.Button
+                  type="button"
+                  $variant="primary"
+                  disabled={busy || !others.length}
+                  onClick={toggle}
+                >
+                  <Plus size={15} />
+                  إضافة منتجات
+                </S.Button>
+              )}
+            >
+              {({ close }) => (
+                <>
+                  <S.MenuLabel>انقل منتجاً إلى هذه المجموعة</S.MenuLabel>
+                  {others.map((p) => (
+                    <S.MenuItem
+                      key={p._id}
+                      type="button"
+                      onClick={() => {
+                        close();
+                        assign([p._id], openName);
+                      }}
+                    >
+                      <ProductThumb src={p.images?.[0]} size={28} />
+                      {p.name}
+                      <S.MenuCount>
+                        {p.productCollection || "بدون مجموعة"}
+                      </S.MenuCount>
+                    </S.MenuItem>
+                  ))}
+                </>
+              )}
+            </Popover>
+          )}
+        </S.Row>
+
+        <S.Card $flush>
+          {group.products.length === 0 ? (
+            <S.Text $muted $center style={{ padding: "3rem 1rem" }}>
+              لا توجد منتجات في هذه المجموعة بعد. استخدم "إضافة منتجات".
+            </S.Text>
+          ) : (
+            <S.DataTable>
+              <thead>
+                <tr>
+                  <th>المنتج</th>
+                  <th>الحالة</th>
+                  <th>السعر</th>
+                  {!unassigned && <th style={{ width: "1%" }} />}
+                </tr>
+              </thead>
+              <tbody>
+                {group.products.map((p) => {
+                  const st = productStatus(p);
+                  return (
+                    <tr key={p._id}>
+                      <td>
+                        <ProductCell p={p} />
+                      </td>
+                      <td>
+                        <S.StatusBadge $tone={st.tone}>
+                          {st.label}
+                        </S.StatusBadge>
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{formatSAR(p.price)}</td>
+                      {!unassigned && (
+                        <td>
+                          <S.LinkButton
+                            type="button"
+                            disabled={busy}
+                            style={{ color: T.danger }}
+                            onClick={() => assign([p._id], "")}
+                          >
+                            إزالة
+                          </S.LinkButton>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </S.DataTable>
+          )}
+        </S.Card>
+      </S.Page>
+    );
+  }
+
+  /* ----- all collections ----- */
+  return (
+    <S.Page>
+      <PageHeader icon={marketsIcon} title="المجموعة">
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setCreating(true)}
+        >
+          <Plus size={15} />
+          اصنع مجموعة
+        </S.Button>
+      </PageHeader>
+
+      <S.Card $flush>
+        <S.DataTable>
+          <thead>
+            <tr>
+              <th>المجموعة</th>
+              <th>المنتجات</th>
+              <th>النشطة</th>
+              <th>المميزة</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((g) => (
+              <tr
+                key={g.name || "__none"}
+                style={{ cursor: "pointer" }}
+                onClick={() => setOpenName(g.name)}
+              >
+                <td>
+                  <S.Row $gap="0.75rem">
+                    <S.Row $gap="0">
+                      {g.products.slice(0, 3).map((p, i) => (
+                        <span
+                          key={p._id}
+                          style={{ marginInlineStart: i ? -10 : 0 }}
+                        >
+                          <ProductThumb src={p.images?.[0]} size={32} />
+                        </span>
+                      ))}
+                      {g.products.length === 0 && <ProductThumb size={32} />}
+                    </S.Row>
+                    <strong>{g.name || "بدون مجموعة"}</strong>
+                  </S.Row>
+                </td>
+                <td>{g.products.length}</td>
+                <td>
+                  {g.products.filter((p) => p.status === "active").length}
+                </td>
+                <td>{g.products.filter((p) => p.featured).length}</td>
+              </tr>
+            ))}
+          </tbody>
+        </S.DataTable>
+      </S.Card>
+
+      {creating && (
+        <S.Overlay onClick={() => setCreating(false)}>
+          <S.ModalBox
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <S.Row $between>
+              <S.Heading $size="1.125rem">مجموعة جديدة</S.Heading>
+              <S.PlainIconButton
+                type="button"
+                aria-label="إغلاق"
+                onClick={() => setCreating(false)}
+              >
+                <X size={18} />
+              </S.PlainIconButton>
+            </S.Row>
+            <S.Input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && createCollection()}
+              placeholder="مثال: باقات النساء"
+            />
+            <S.Row $gap="0.5rem" style={{ justifyContent: "flex-end" }}>
+              <S.Button type="button" onClick={() => setCreating(false)}>
+                إلغاء
+              </S.Button>
+              <S.Button
+                type="button"
+                $variant="primary"
+                disabled={!newName.trim()}
+                onClick={createCollection}
+              >
+                إنشاء
+              </S.Button>
+            </S.Row>
+          </S.ModalBox>
+        </S.Overlay>
+      )}
+    </S.Page>
+  );
+});
+
+/* ---------- المخزون ---------- */
+
+const INVENTORY_VIEWS = [
+  { id: "all", label: "الكل", test: () => true },
+  { id: "tracked", label: "متتبع", test: (p) => p.trackInventory },
+  {
+    id: "low",
+    label: "منخفض",
+    test: (p) => p.trackInventory && p.stock > 0 && p.stock <= LOW_STOCK,
+  },
+  { id: "out", label: "نفد", test: (p) => p.trackInventory && p.stock <= 0 },
+];
+
+const INVENTORY_GRID = "minmax(260px, 2fr) 0.9fr 0.9fr 1.5fr";
+
+const InventoryTab = memo(({ accessToken, onAuthError, onGoProducts }) => {
+  const pk = usePackages(accessToken, onAuthError);
+  const [view, setView] = useState("all");
+  const [query, setQuery] = useState("");
+  const [drafts, setDrafts] = useState({}); // id -> typed quantity
+  const [savingId, setSavingId] = useState(null);
+
+  const rows = useMemo(() => {
+    const test = INVENTORY_VIEWS.find((v) => v.id === view).test;
+    const q = normalizeAr(query);
+    return pk.items
+      .filter((p) => test(p) && (!q || normalizeAr(p.name).includes(q)))
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }, [pk.items, view, query]);
+
+  const saveRow = async (p, patch) => {
+    setSavingId(p._id);
+    try {
+      await pk.updateStock(p._id, patch);
+      setDrafts((d) => {
+        const next = { ...d };
+        delete next[p._id];
+        return next;
+      });
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر تحديث المخزون"));
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  if (pk.loading || pk.error || pk.items.length === 0) {
+    return (
+      <S.Page>
+        <PageHeader icon={ordersIcon} title="المخزون" />
+        <NeedProducts
+          loading={pk.loading}
+          error={pk.error}
+          onRetry={pk.reload}
+          onGoProducts={onGoProducts}
+        />
+      </S.Page>
+    );
+  }
+
+  return (
+    <S.Page>
+      <PageHeader icon={ordersIcon} title="المخزون">
+        <S.Button type="button" $icon aria-label="تحديث" onClick={pk.reload}>
+          <RefreshCw size={15} />
+        </S.Button>
+      </PageHeader>
+
+      <S.Card $flush $overflow>
+        <S.ViewTabs role="tablist">
+          {INVENTORY_VIEWS.map((v) => (
+            <S.ViewTab
+              key={v.id}
+              type="button"
+              role="tab"
+              aria-selected={view === v.id}
+              $active={view === v.id}
+              onClick={() => setView(v.id)}
+            >
+              {v.label}
+              <S.MenuCount>{pk.items.filter(v.test).length}</S.MenuCount>
+            </S.ViewTab>
+          ))}
+        </S.ViewTabs>
+
+        <S.FilterBar>
+          <S.SearchField style={{ maxWidth: "20rem" }}>
+            <Search size={15} />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="ابحث عن منتج"
+            />
+          </S.SearchField>
+        </S.FilterBar>
+
+        <S.TableScroll $minH="320px">
+          <S.GridTable $columns={INVENTORY_GRID} $minWidth="760px">
+            <S.Th>المنتج</S.Th>
+            <S.Th>الحالة</S.Th>
+            <S.Th $align="center">تتبع الكمية</S.Th>
+            <S.Th>الكمية المتوفرة</S.Th>
+
+            {rows.length === 0 ? (
+              <S.TableMessage>لا توجد منتجات في هذا العرض.</S.TableMessage>
+            ) : (
+              rows.map((p) => {
+                const st = stockState(p);
+                const draft = drafts[p._id];
+                const changed =
+                  draft !== undefined && Number(draft) !== p.stock;
+                const busy = savingId === p._id;
+                return (
+                  <Fragment key={p._id}>
+                    <S.Td>
+                      <ProductCell p={p} />
+                    </S.Td>
+                    <S.Td>
+                      <S.StatusBadge $tone={st.tone}>{st.label}</S.StatusBadge>
+                    </S.Td>
+                    <S.Td $align="center">
+                      <S.Checkbox
+                        checked={p.trackInventory}
+                        disabled={busy}
+                        aria-label="تتبع الكمية"
+                        onChange={() =>
+                          saveRow(p, { trackInventory: !p.trackInventory })
+                        }
+                      />
+                    </S.Td>
+                    <S.Td>
+                      <S.Row $gap="0.5rem">
+                        <S.Input
+                          type="number"
+                          min="0"
+                          disabled={!p.trackInventory || busy}
+                          value={draft ?? p.stock}
+                          onChange={(e) =>
+                            setDrafts((d) => ({
+                              ...d,
+                              [p._id]: e.target.value,
+                            }))
+                          }
+                          onKeyDown={(e) =>
+                            e.key === "Enter" &&
+                            changed &&
+                            saveRow(p, { stock: Number(draft) })
+                          }
+                          style={{ width: "6.5rem", height: "2rem" }}
+                        />
+                        {changed && (
+                          <S.Button
+                            type="button"
+                            $size="sm"
+                            $variant="primary"
+                            disabled={busy}
+                            onClick={() => saveRow(p, { stock: Number(draft) })}
+                          >
+                            {busy ? "..." : "حفظ"}
+                          </S.Button>
+                        )}
+                      </S.Row>
+                    </S.Td>
+                  </Fragment>
+                );
+              })
+            )}
+          </S.GridTable>
+        </S.TableScroll>
+
+        <S.TableFooter>
+          <span>
+            المخزون المنخفض: {LOW_STOCK} قطع أو أقل · المسودات والمنتجات غير
+            المتتبعة لا تتأثر بالكمية
+          </span>
+        </S.TableFooter>
+      </S.Card>
+    </S.Page>
+  );
+});
 
 /* ============================================================
    Tab: التسويق
@@ -2338,6 +5095,38 @@ const Dashboard = () => {
   /* ---------- Content ---------- */
 
   const renderContent = () => {
+    if (activeTab === "المنتجات") {
+      return (
+        <ProductsTab accessToken={accessToken} onAuthError={handleAuthError} />
+      );
+    }
+    if (activeTab === "المجموعة") {
+      return (
+        <CollectionsTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          onGoProducts={() => goToTab("المنتجات")}
+        />
+      );
+    }
+    if (activeTab === "المخزون") {
+      return (
+        <InventoryTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          onGoProducts={() => goToTab("المنتجات")}
+        />
+      );
+    }
+    if (activeTab === "العملاء") {
+      return (
+        <CustomersTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          onNavigate={goTo}
+        />
+      );
+    }
     if (EMPTY_TABS[activeTab])
       return <EmptyTab {...EMPTY_TABS[activeTab]} onNavigate={goTo} />;
     if (LIST_TABS[activeTab])

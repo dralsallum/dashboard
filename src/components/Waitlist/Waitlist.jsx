@@ -984,7 +984,10 @@ const infoBreaks = [
   },
 ];
 
-// ─── STATIC PACKAGES — always shown regardless of quiz answers ────────────────
+// ─── FALLBACK PACKAGES ────────────────────────────────────────────────────────
+// The real packages come from the backend (GET /api/packages?featured=true —
+// mark a product as "مميز" in the dashboard). These are only used if that
+// request fails or returns nothing.
 const STATIC_PRODUCTS = [
   {
     _id: "pkg-basic",
@@ -1122,6 +1125,32 @@ const COMPARE_TIERS = [
   },
 ];
 
+// ─── BACKEND → QUIZ SHAPE ─────────────────────────────────────────────────────
+const PLACEHOLDER_IMG = "https://alsallum.s3.eu-north-1.amazonaws.com/labs.png";
+
+const toQuizProduct = (p) => ({
+  _id: p._id,
+  name: p.name,
+  analysisCount: p.analysisCount ?? 0,
+  price: Number(p.price) || 0,
+  img: p.images?.[0] || PLACEHOLDER_IMG,
+  inStock: true,
+  category: "annual-checkup",
+  mostPopular: Boolean(p.mostPopular),
+  compareIntro: p.compareIntro || null,
+  categories: Array.isArray(p.categories) ? p.categories : [],
+});
+
+const tiersFromProducts = (list) =>
+  list.map((p) => ({
+    id: p._id,
+    name: p.name,
+    count: p.analysisCount,
+    mostPopular: p.mostPopular,
+    intro: p.compareIntro,
+    categories: p.categories,
+  }));
+
 // ─── PACKAGE CARD CONTENT (shared between grid & slider) ─────────────────────
 const PackageCardContent = ({ product, isSelected }) => (
   <>
@@ -1167,13 +1196,14 @@ const Waitlist = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // Products are always the same 3 static tiers — no dynamic fetching
-  const products = STATIC_PRODUCTS;
+  // Featured packages from the backend; the static ones show until (or if) that fails
+  const [products, setProducts] = useState(STATIC_PRODUCTS);
+  const [compareTiers, setCompareTiers] = useState(COMPARE_TIERS);
   const [selectedProductId, setSelectedProductId] = useState(
     STATIC_PRODUCTS.find((p) => p.mostPopular)?._id ?? null,
   );
 
-  const [sliderActiveIdx, setSliderActiveIdx] = useState(1); // default: middle = "الشاملة"
+  const [sliderActiveIdx, setSliderActiveIdx] = useState(1); // updated once packages load
   const [showCompare, setShowCompare] = useState(false);
   const [openTiers, setOpenTiers] = useState({});
   const [orderSubmitting, setOrderSubmitting] = useState(false);
@@ -1189,21 +1219,51 @@ const Waitlist = () => {
     dispatch(clearCart());
   }, [dispatch]);
 
-  // Scroll slider to centre card (index 1 = "الشاملة") when result screen mounts
+  // Load the featured packages (dashboard → المنتجات → مميز)
+  useEffect(() => {
+    let cancelled = false;
+    publicRequest
+      .get("/packages", { params: { featured: true } })
+      .then(({ data }) => {
+        if (cancelled || !Array.isArray(data) || data.length === 0) return;
+        const list = data.map(toQuizProduct);
+        const preferred =
+          list.find((p) => p.mostPopular) ?? list[Math.floor(list.length / 2)];
+        setProducts(list);
+        setCompareTiers(
+          list.some((p) => p.categories.length) ? tiersFromProducts(list) : [],
+        );
+        setSelectedProductId(preferred?._id ?? null);
+        setSliderActiveIdx(Math.max(0, list.indexOf(preferred)));
+      })
+      .catch((err) => {
+        console.warn("[waitlist] using built-in packages:", err.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Scroll the mobile slider so the selected package is centred when results show
   useEffect(() => {
     if (flowStep === "result" && sliderRef.current) {
       requestAnimationFrame(() => {
         const track = sliderRef.current;
         if (!track) return;
         const cards = track.querySelectorAll("[data-slider-card]");
-        if (cards[1]) {
-          const cardLeft = cards[1].offsetLeft;
-          const cardWidth = cards[1].offsetWidth;
-          const trackWidth = track.offsetWidth;
-          track.scrollLeft = cardLeft - (trackWidth - cardWidth) / 2;
+        const idx = Math.max(
+          0,
+          products.findIndex((p) => p._id === selectedProductId),
+        );
+        const card = cards[idx];
+        if (card) {
+          track.scrollLeft =
+            card.offsetLeft - (track.offsetWidth - card.offsetWidth) / 2;
         }
       });
     }
+    // only when the results screen opens — not on every selection
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flowStep]);
 
   const handleSliderScroll = () => {
@@ -1648,9 +1708,11 @@ const Waitlist = () => {
             <StepWrap key="result">
               <ResultTopRow>
                 <ResultLabel>أي باقة تهمك أكثر؟</ResultLabel>
-                <CompareBtn onClick={() => setShowCompare((v) => !v)}>
-                  {showCompare ? "اخفاء المقارنات" : "قارن الباقات"}
-                </CompareBtn>
+                {compareTiers.length > 0 && (
+                  <CompareBtn onClick={() => setShowCompare((v) => !v)}>
+                    {showCompare ? "اخفاء المقارنات" : "قارن الباقات"}
+                  </CompareBtn>
+                )}
               </ResultTopRow>
 
               <StepSub style={{ marginBottom: "1rem" }}>
@@ -1705,12 +1767,12 @@ const Waitlist = () => {
               </SliderOuter>
 
               {/* Compare accordion */}
-              {showCompare && (
+              {showCompare && compareTiers.length > 0 && (
                 <CompareSection>
                   <CompareSub>
                     كل باقة تشمل كل مؤشرات الباقة قبلها وتزيد عليها
                   </CompareSub>
-                  {COMPARE_TIERS.map((tier) => {
+                  {compareTiers.map((tier) => {
                     const isOpen = !!openTiers[tier.id];
                     return (
                       <AccordionItem key={tier.id} $open={isOpen}>
