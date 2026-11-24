@@ -85,7 +85,7 @@ import logo from "../../assets/logoWhite.png";
    Constants & helpers
    ============================================================ */
 
-const BASE_URL = "https://theknot-30278e2ff419.herokuapp.com/api";
+const BASE_URL = "https://amanapi-f8ce9693a253.herokuapp.com/api";
 const T = S.theme;
 
 const DAY_KEYS = [
