@@ -46,12 +46,105 @@ import { setActiveTab } from "../../redux/tabRedux";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const Sales = [
+  {
+    text: "قنوات البيع",
+    subText: "المتجر الإلكتروني",
+    icon: storeIcon,
+    destination: "المتجر",
+  },
+  {
+    text: "التطبيقات",
+    subText: "إضافة",
+    icon: plusIcon,
+    destination: "التطبيقات",
+  },
+];
+
+const Pages = [
+  {
+    text: "الرئيسية",
+    icon: homeIcon,
+  },
+  {
+    text: "الطلبات",
+    icon: ordersIcon,
+    products: [{ text: "السلات المتروكة" }, { text: "مسودة" }],
+  },
+  {
+    text: "المنتجات",
+    icon: tagIcon,
+    products: [
+      { text: "المجموعة" },
+      { text: "المخزون" },
+      { text: "تاريخ الشراء" },
+      { text: "التحويل" },
+      { text: "الهدايا" },
+    ],
+  },
+  {
+    text: "العملاء",
+    icon: customersIcon,
+    products: [{ text: "جزء" }],
+  },
+  {
+    text: "التسويق",
+    icon: marketingIcon,
+    products: [{ text: "الحملات" }, { text: "الاتمته" }],
+  },
+  {
+    text: "الخصومات",
+    icon: discountsIcon,
+    products: [],
+  },
+  {
+    text: "المحتوى",
+    icon: contentIcon,
+    // The main المحتوى page is the blog. Names must match Dashboard.jsx.
+    products: [
+      { text: "الاقتباسات" },
+      { text: "الكتيب الصحي" },
+      { text: "سجل الكتيبات" },
+    ],
+  },
+  {
+    text: "الأسواق",
+    icon: marketsIcon,
+    products: [{ text: "الكتلوق" }],
+  },
+  {
+    text: "التحليلات",
+    icon: analyticsIcon,
+    products: [{ text: "الربورت" }, { text: "لايف" }],
+  },
+];
+
+// Which main page each sub-page belongs to
+const PARENT_OF = Object.fromEntries(
+  Pages.flatMap((page) =>
+    (page.products ?? []).map((sub) => [sub.text, page.text]),
+  ),
+);
+
 const NavSide = () => {
   const [activeToggle, setActiveToggle] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
+  const activeTab = useSelector((state) => state.tab.activeTab);
+
+  // Follow the dashboard when it switches tab by itself (e.g. "new booklet for this
+  // patient" opens الكتيب الصحي): open the parent and highlight the sub-page.
+  useEffect(() => {
+    const parent = PARENT_OF[activeTab];
+    if (parent) {
+      setActiveToggle(parent);
+      setSelectedSubcategory(activeTab);
+    } else {
+      setSelectedSubcategory(null);
+    }
+  }, [activeTab]);
 
   const handleTab = (item) => {
     dispatch(setActiveTab(item));
@@ -66,10 +159,12 @@ const NavSide = () => {
     // Keep the parent toggle open
     setActiveToggle(parentCategory);
 
-    // Navigate to subcategory destination if provided
-    if (subcategory.destination) {
-      navigate(subcategory.destination);
-    }
+    // Navigate to subcategory destination if provided; otherwise keep the URL in
+    // step with the open page, like the main tabs do
+    navigate(
+      subcategory.destination ||
+        `/control?tab=${encodeURIComponent(subcategory.text)}`,
+    );
 
     // Dispatch the subcategory as active tab
     dispatch(setActiveTab(subcategory.text));
@@ -78,74 +173,6 @@ const NavSide = () => {
   const handleDestination = (des) => {
     navigate(des);
   };
-
-  const Sales = [
-    {
-      text: "قنوات البيع",
-      subText: "المتجر الإلكتروني",
-      icon: storeIcon,
-      destination: "المتجر",
-    },
-    {
-      text: "التطبيقات",
-      subText: "إضافة",
-      icon: plusIcon,
-      destination: "التطبيقات",
-    },
-  ];
-
-  const Pages = [
-    {
-      text: "الرئيسية",
-      icon: homeIcon,
-    },
-    {
-      text: "الطلبات",
-      icon: ordersIcon,
-      products: [{ text: "السلات المتروكة" }, { text: "مسودة" }],
-    },
-    {
-      text: "المنتجات",
-      icon: tagIcon,
-      products: [
-        { text: "المجموعة" },
-        { text: "المخزون" },
-        { text: "تاريخ الشراء" },
-        { text: "التحويل" },
-        { text: "الهدايا" },
-      ],
-    },
-    {
-      text: "العملاء",
-      icon: customersIcon,
-      products: [{ text: "جزء" }],
-    },
-    {
-      text: "التسويق",
-      icon: marketingIcon,
-      products: [{ text: "الحملات" }, { text: "الاتمته" }],
-    },
-    {
-      text: "الخصومات",
-      icon: discountsIcon,
-      products: [],
-    },
-    {
-      text: "المحتوى",
-      icon: contentIcon,
-      products: [{ text: "الملفات" }, { text: "المنيو" }, { text: "البلوقز" }],
-    },
-    {
-      text: "الأسواق",
-      icon: marketsIcon,
-      products: [{ text: "الكتلوق" }],
-    },
-    {
-      text: "التحليلات",
-      icon: analyticsIcon,
-      products: [{ text: "الربورت" }, { text: "لايف" }],
-    },
-  ];
 
   return (
     <NavLeft>
@@ -179,7 +206,7 @@ const NavSide = () => {
                                                 onClick={() =>
                                                   handleSubcategory(
                                                     subcategory,
-                                                    item.text
+                                                    item.text,
                                                   )
                                                 }
                                                 $isSelected={
@@ -192,7 +219,7 @@ const NavSide = () => {
                                                 </TogBtnSp>
                                               </TogBtn>
                                             );
-                                          }
+                                          },
                                         )}
                                       </TogBtnDiv>
                                     </TogStart>

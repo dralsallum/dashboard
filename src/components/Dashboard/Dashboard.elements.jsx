@@ -2152,3 +2152,31 @@ export const DailyQuote = styled.blockquote`
   font-weight: 600;
   line-height: 1.9;
 `;
+
+/* ============================================================
+   Health booklet
+   ============================================================ */
+
+export const BookletFields = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+`;
+
+// On-screen preview of the printed sheets, scaled down to fit the card
+export const BookletPreview = styled.div`
+  max-height: 80vh;
+  overflow: auto;
+  border-top: 1px solid ${t.divider};
+  background: #d9dee5;
+
+  .hb-root {
+    zoom: 0.62;
+  }
+
+  @media (max-width: 700px) {
+    .hb-root {
+      zoom: 0.4;
+    }
+  }
+`;

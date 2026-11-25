@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -23,10 +24,12 @@ import {
   Copy,
   Download,
   ExternalLink,
+  Eye,
   FileText,
   Filter,
   Flame,
   Globe,
+  History,
   LayoutGrid,
   Link,
   LogOut,
@@ -35,6 +38,7 @@ import {
   Package,
   Pencil,
   Plus,
+  Printer,
   Quote,
   RefreshCw,
   Search,
@@ -62,6 +66,7 @@ import {
   signOut,
 } from "../../redux/userRedux";
 import * as S from "./Dashboard.elements";
+import HealthBookletPrint from "./HealthBookletPrint";
 
 // Tab icons
 import ordersIcon from "../../assets/orders.png";
@@ -8982,6 +8987,1380 @@ const QuotesTab = memo(({ accessToken, onAuthError }) => {
 });
 
 /* ============================================================
+   Health booklet (الكتيب الصحي + سجل الكتيبات)
+   ============================================================ */
+
+// Side-menu names. Keep NavSide.jsx in sync with these (aliases are accepted too).
+const BOOKLET_TAB = "الكتيب الصحي";
+const BOOKLET_HISTORY_TAB = "سجل الكتيبات";
+const BOOKLET_TAB_NAMES = [
+  BOOKLET_TAB,
+  "الكتيب",
+  "كتيب صحي",
+  "الكتيبات الصحية",
+];
+const BOOKLET_HISTORY_TAB_NAMES = [
+  BOOKLET_HISTORY_TAB,
+  "الكتيبات",
+  "سجل الكتيب",
+];
+
+const BOOKLET_CONDITIONS = [
+  ["diabetes", "السكري"],
+  ["hypertension", "ارتفاع الضغط"],
+  ["dyslipidemia", "ارتفاع الدهون"],
+  ["ckd", "مرض الكلى المزمن"],
+  ["cad", "أمراض القلب"],
+  ["fatty_liver", "الكبد الدهني"],
+  ["asthma", "الربو"],
+  ["copd", "الانسداد الرئوي"],
+  ["hypothyroid", "قصور الغدة"],
+];
+const CONDITION_LABEL = Object.fromEntries(BOOKLET_CONDITIONS);
+
+// [key, label, min, max] — same plausible ranges the server uses
+const BOOKLET_FIELDS = [
+  ["weightKg", "الوزن (كغ)", 20, 350],
+  ["heightCm", "الطول (سم)", 100, 250],
+  ["waistCm", "محيط الخصر (سم)", 40, 250],
+  ["systolic", "الضغط الانقباضي", 60, 260],
+  ["diastolic", "الضغط الانبساطي", 30, 160],
+  ["activityMinPerWeek", "دقائق النشاط أسبوعياً", 0, 5000],
+  ["sittingHours", "ساعات الجلوس يومياً", 0, 24],
+  ["sleepHours", "ساعات النوم", 0, 24],
+  ["sugaryDrinksPerDay", "مشروبات محلاة يومياً", 0, 50],
+  ["vegFruitServings", "حصص خضار وفاكهة يومياً", 0, 30],
+  ["stress", "التوتر (0–10)", 0, 10],
+];
+
+const BOOKLET_SMOKING = [
+  ["never", "لا يدخن"],
+  ["former", "مدخن سابق"],
+  ["cigarettes", "سجائر"],
+  ["shisha", "شيشة"],
+  ["vape", "إلكتروني"],
+  ["mixed", "أكثر من نوع"],
+];
+
+const BOOKLET_CATEGORIES = [
+  ["summary", "ملخص"],
+  ["followup", "متابعة طبية"],
+  ["diet", "الغذاء"],
+  ["activity", "الحركة"],
+  ["sleep", "النوم والراحة"],
+  ["lifestyle", "نمط الحياة"],
+];
+const BOOKLET_CATEGORY_LABEL = Object.fromEntries(BOOKLET_CATEGORIES);
+
+const LAB_STATUS = {
+  normal: { label: "طبيعي", tone: "success" },
+  borderline: { label: "حدّي", tone: "warning" },
+  high: { label: "مرتفع", tone: "danger" },
+  low: { label: "منخفض", tone: "danger" },
+};
+
+const PRINT_MODES = [
+  {
+    id: "booklet",
+    label: "كتيب مطوي",
+    hint: "A4 أفقي، وجهين، القلب من الحافة القصيرة، ثم اطوِ الأوراق ودبّسها من المنتصف.",
+  },
+  {
+    id: "pages",
+    label: "صفحات A5",
+    hint: 'صفحة A5 لكل ورقة، أو اختر "Booklet" من إعدادات الطابعة.',
+  },
+];
+
+const BOOKLET_PREFS_KEY = "dashboard.booklet.prefs";
+const loadBookletPrefs = () => {
+  try {
+    return {
+      doctorName: "",
+      clinicName: "",
+      clinicPhone: "",
+      mode: "booklet",
+      ...JSON.parse(localStorage.getItem(BOOKLET_PREFS_KEY) || "{}"),
+    };
+  } catch {
+    return { doctorName: "", clinicName: "", clinicPhone: "", mode: "booklet" };
+  }
+};
+const saveBookletPrefs = (prefs) => {
+  try {
+    localStorage.setItem(BOOKLET_PREFS_KEY, JSON.stringify(prefs));
+  } catch {
+    /* ignore */
+  }
+};
+
+const intakeOutOfRange = (key, value) => {
+  if (value === "" || value == null) return false;
+  const f = BOOKLET_FIELDS.find(([k]) => k === key);
+  const n = Number(value);
+  return !Number.isFinite(n) || n < f[2] || n > f[3];
+};
+
+const bmiPreview = (intake) => {
+  const w = Number(intake.weightKg);
+  const h = Number(intake.heightCm) / 100;
+  return w > 0 && h > 0 ? Math.round((w / (h * h)) * 10) / 10 : null;
+};
+
+const ageGapLabel = (bio) => {
+  if (!bio) return "";
+  const gap = Math.round((bio.biologicalAge - bio.actualAge) * 10) / 10;
+  if (gap > 0) return `أكبر بـ ${num(gap)} سنة`;
+  if (gap < 0) return `أصغر بـ ${num(Math.abs(gap))} سنة`;
+  return "مطابق للعمر الفعلي";
+};
+
+/* ---------- Printing ---------- */
+
+// Renders the booklet on its own under <body> and prints only that.
+// Everything else on the page (sidebar, top bar, the editor) is hidden while printing.
+const BOOKLET_PRINT_CSS = `
+@media screen { .hb-print-portal { display: none !important; } }
+@media print {
+  body > *:not(.hb-print-portal) { display: none !important; }
+  .hb-print-portal { display: block !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+}`;
+
+const BookletPrintPortal = ({ job, onDone }) => {
+  const [host] = useState(() => {
+    const el = document.createElement("div");
+    el.className = "hb-print-portal";
+    return el;
+  });
+
+  useEffect(() => {
+    document.body.appendChild(host);
+    return () => host.remove();
+  }, [host]);
+
+  useEffect(() => {
+    if (!job) return undefined;
+    let cancelled = false;
+    const finish = () => onDone?.();
+    window.addEventListener("afterprint", finish, { once: true });
+    // wait for the Arabic font, so the first print is not in a fallback font
+    const ready = document.fonts?.ready ?? Promise.resolve();
+    const timer = setTimeout(() => {
+      Promise.race([ready, new Promise((r) => setTimeout(r, 1500))]).then(
+        () => {
+          if (!cancelled) window.print();
+        },
+      );
+    }, 150);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      window.removeEventListener("afterprint", finish);
+    };
+  }, [job, onDone]);
+
+  return createPortal(
+    <>
+      <style>{BOOKLET_PRINT_CSS}</style>
+      {job && (
+        <HealthBookletPrint key={job.key} data={job.data} mode={job.mode} />
+      )}
+    </>,
+    host,
+  );
+};
+
+/* ---------- Data ---------- */
+
+const callBooklet = (fn, onAuthError) =>
+  callApi(fn, onAuthError).then((r) => r.data);
+
+const usePatientSearch = (accessToken, onAuthError, query) => {
+  const [debounced, setDebounced] = useState(query);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query.trim()), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+  return useAdminGet(
+    accessToken,
+    onAuthError,
+    `/health-booklet/patients?limit=20${debounced ? `&q=${encodeURIComponent(debounced)}` : ""}`,
+  );
+};
+
+/* ---------- Pieces ---------- */
+
+const PatientPicker = memo(({ accessToken, onAuthError, onPick }) => {
+  const [query, setQuery] = useState("");
+  const search = usePatientSearch(accessToken, onAuthError, query);
+  const list = Array.isArray(search.data) ? search.data : [];
+
+  return (
+    <S.Card $flush $overflow>
+      <S.FilterBar>
+        <S.SearchField style={{ flex: 1 }}>
+          <Search size={15} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ابحث بالاسم أو الجوال أو رقم الملف"
+            autoFocus
+          />
+        </S.SearchField>
+      </S.FilterBar>
+      {search.error ? (
+        <S.Text $center style={{ padding: "2rem 1rem", color: T.danger }}>
+          {search.error}{" "}
+          <S.LinkButton type="button" onClick={search.reload}>
+            إعادة المحاولة
+          </S.LinkButton>
+        </S.Text>
+      ) : search.loading && !list.length ? (
+        <S.Text $muted $center style={{ padding: "2rem 1rem" }}>
+          جاري البحث...
+        </S.Text>
+      ) : list.length === 0 ? (
+        <S.Text $muted $center style={{ padding: "2rem 1rem" }}>
+          لا يوجد مريض بهذا البحث.
+        </S.Text>
+      ) : (
+        <S.TableScroll>
+          <S.DataTable>
+            <thead>
+              <tr>
+                <th>المريض</th>
+                <th>رقم الملف</th>
+                <th>الجوال</th>
+                <th>العمر</th>
+                <th>آخر كتيب</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((p) => (
+                <tr
+                  key={p._id}
+                  onClick={() => onPick(p)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <td>
+                    <S.Row $gap="0.625rem" style={{ minWidth: 0 }}>
+                      <S.InitialAvatar aria-hidden="true">
+                        {initialsOf(p.name)}
+                      </S.InitialAvatar>
+                      <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+                        <S.Ellipsis style={{ fontWeight: 600 }}>
+                          {p.name || "بدون اسم"}
+                        </S.Ellipsis>
+                        {!p.hasEmr && (
+                          <S.Text
+                            as="span"
+                            $size="0.6875rem"
+                            style={{ color: T.warning }}
+                          >
+                            غير مربوط بملف طبي (لا فحوصات)
+                          </S.Text>
+                        )}
+                      </S.Stack>
+                    </S.Row>
+                  </td>
+                  <td>{p.mrn || "—"}</td>
+                  <td style={{ direction: "ltr", textAlign: "right" }}>
+                    {p.phone || "—"}
+                  </td>
+                  <td>{p.age != null ? num(p.age) : "—"}</td>
+                  <td>{p.lastBookletAt ? formatDate(p.lastBookletAt) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </S.DataTable>
+        </S.TableScroll>
+      )}
+    </S.Card>
+  );
+});
+
+const AdviceEditorItem = memo(({ item, index, onChange, onRemove }) => (
+  <S.SubCard style={{ opacity: item.included ? 1 : 0.5 }}>
+    <S.Row $between $gap="0.5rem" $wrap>
+      <S.Row $gap="0.5rem">
+        <S.Check $bold>
+          <input
+            type="checkbox"
+            checked={item.included}
+            onChange={(e) => onChange(index, { included: e.target.checked })}
+          />
+          تضمين
+        </S.Check>
+        {item.ruleId === "custom" ? (
+          <S.Select
+            value={item.category}
+            onChange={(e) => onChange(index, { category: e.target.value })}
+            style={{ width: "auto", minHeight: "2rem", padding: "0 0.5rem" }}
+            aria-label="التصنيف"
+          >
+            {BOOKLET_CATEGORIES.map(([id, label]) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </S.Select>
+        ) : (
+          <S.StatusBadge $tone="neutral">
+            {BOOKLET_CATEGORY_LABEL[item.category] || item.category}
+          </S.StatusBadge>
+        )}
+        {item.priority === 1 && (
+          <S.StatusBadge $tone="danger">أولوية</S.StatusBadge>
+        )}
+        {item.ruleId === "custom" && (
+          <S.StatusBadge $tone="success">من الطبيب</S.StatusBadge>
+        )}
+      </S.Row>
+      {item.ruleId === "custom" && (
+        <S.Button
+          type="button"
+          $variant="ghost"
+          $size="sm"
+          $icon
+          aria-label="حذف النصيحة"
+          onClick={() => onRemove(index)}
+        >
+          <Trash2 size={14} />
+        </S.Button>
+      )}
+    </S.Row>
+    <S.Input
+      value={item.title}
+      onChange={(e) => onChange(index, { title: e.target.value })}
+      placeholder="العنوان"
+      style={{ fontWeight: 700 }}
+      disabled={!item.included}
+    />
+    <S.Textarea
+      rows={3}
+      value={item.body}
+      onChange={(e) => onChange(index, { body: e.target.value })}
+      placeholder="النص"
+      disabled={!item.included}
+    />
+    {item.because && (
+      <S.Text $muted $size="0.75rem">
+        السبب: {item.because}
+      </S.Text>
+    )}
+  </S.SubCard>
+));
+
+const LabsCard = ({ labs }) => (
+  <S.Card $padding="1.25rem" $gap="0.75rem">
+    <S.Row $between>
+      <S.Heading $size="0.9375rem">الفحوصات</S.Heading>
+      <S.Text as="span" $muted $size="0.75rem">
+        آخر سنة
+      </S.Text>
+    </S.Row>
+    {labs.length === 0 ? (
+      <S.Text $muted $size="0.8125rem">
+        لا توجد فحوصات مطابقة خلال آخر سنة. ستُبنى النصائح على نمط الحياة
+        والأمراض المزمنة فقط.
+      </S.Text>
+    ) : (
+      <S.Stack $gap="0">
+        {labs.map((l) => {
+          const st = LAB_STATUS[l.status] || LAB_STATUS.normal;
+          return (
+            <S.Row
+              key={l.key}
+              $between
+              $gap="0.5rem"
+              style={{
+                padding: "0.4rem 0",
+                borderBottom: `1px solid ${T.divider}`,
+              }}
+            >
+              <S.Ellipsis style={{ fontSize: "0.8125rem" }}>
+                {l.label}
+              </S.Ellipsis>
+              <S.Row $gap="0.5rem" style={{ flexShrink: 0 }}>
+                <span
+                  style={{
+                    direction: "ltr",
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {l.value}{" "}
+                  <small style={{ color: T.textSubtle }}>{l.unit}</small>
+                </span>
+                <S.StatusBadge $tone={st.tone}>{st.label}</S.StatusBadge>
+              </S.Row>
+            </S.Row>
+          );
+        })}
+      </S.Stack>
+    )}
+  </S.Card>
+);
+
+/* ============================================================
+   Tab: الكتيب الصحي
+   ============================================================ */
+
+const EMPTY_INTAKE = { smoking: "never" };
+
+const BookletTab = memo(
+  ({
+    accessToken,
+    onAuthError,
+    initialPatient,
+    onInitialPatientUsed,
+    onGoTab,
+  }) => {
+    const [patient, setPatient] = useState(null);
+    const [comorbidities, setComorbidities] = useState([]);
+    const [intake, setIntake] = useState(EMPTY_INTAKE);
+    const [draft, setDraft] = useState(null);
+    const [edited, setEdited] = useState(false);
+    const [latest, setLatest] = useState(null);
+    const [prefs, setPrefs] = useState(loadBookletPrefs);
+    const [busy, setBusy] = useState("");
+    const [error, setError] = useState("");
+    const [saved, setSaved] = useState(null);
+    const [printJob, setPrintJob] = useState(null);
+    const [showPreview, setShowPreview] = useState(false);
+
+    useEffect(() => saveBookletPrefs(prefs), [prefs]);
+
+    const pick = useCallback(
+      async (p) => {
+        setPatient(p);
+        setDraft(null);
+        setEdited(false);
+        setSaved(null);
+        setError("");
+        setLatest(null);
+        setComorbidities([]);
+        setIntake(EMPTY_INTAKE);
+        // Start from the last booklet's answers so the doctor only updates what changed
+        try {
+          const last = await callBooklet(
+            () => userRequest.get(`/health-booklet/${p._id}/latest`),
+            onAuthError,
+          );
+          setLatest(last);
+          setComorbidities(last.comorbidities || []);
+          setIntake({
+            ...EMPTY_INTAKE,
+            ...Object.fromEntries(
+              Object.entries(last.intake || {}).map(([k, v]) => [
+                k,
+                v == null ? "" : String(v),
+              ]),
+            ),
+          });
+        } catch {
+          /* no previous booklet */
+        }
+      },
+      [onAuthError],
+    );
+
+    // "كتيب جديد" from the history tab
+    useEffect(() => {
+      if (!initialPatient) return;
+      pick(initialPatient);
+      onInitialPatientUsed?.();
+    }, [initialPatient, onInitialPatientUsed, pick]);
+
+    const toggleCondition = (code) =>
+      setComorbidities((c) =>
+        c.includes(code) ? c.filter((x) => x !== code) : [...c, code],
+      );
+
+    const badFields = BOOKLET_FIELDS.filter(([k]) =>
+      intakeOutOfRange(k, intake[k]),
+    );
+
+    const generate = async () => {
+      if (
+        edited &&
+        !window.confirm("إعادة التوليد ستلغي تعديلاتك على النصائح. متابعة؟")
+      )
+        return;
+      setBusy("generate");
+      setError("");
+      setSaved(null);
+      try {
+        const d = await callBooklet(
+          () =>
+            userRequest.post(`/health-booklet/${patient._id}/draft`, {
+              comorbidities,
+              intake,
+            }),
+          onAuthError,
+        );
+        setDraft({
+          ...d,
+          goals: [...(d.goals || []), "", "", ""].slice(0, 3),
+          doctorNote: "",
+          followUpDate: "",
+          nextLabs: "",
+        });
+        setEdited(false);
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر توليد النصائح"));
+      } finally {
+        setBusy("");
+      }
+    };
+
+    const updateDraft = (patch) => {
+      setDraft((d) => ({ ...d, ...patch }));
+      setEdited(true);
+      setSaved(null);
+    };
+    const updateItem = useCallback((i, patch) => {
+      setDraft((d) => ({
+        ...d,
+        items: d.items.map((it, j) => (j === i ? { ...it, ...patch } : it)),
+      }));
+      setEdited(true);
+      setSaved(null);
+    }, []);
+    const removeItem = useCallback((i) => {
+      setDraft((d) => ({ ...d, items: d.items.filter((_, j) => j !== i) }));
+      setEdited(true);
+    }, []);
+    const addCustom = () =>
+      updateDraft({
+        items: [
+          ...draft.items,
+          {
+            ruleId: "custom",
+            category: "lifestyle",
+            priority: 2,
+            title: "",
+            body: "",
+            because: "",
+            included: true,
+          },
+        ],
+      });
+
+    // What the preview / print shows
+    const printable = useMemo(
+      () =>
+        draft && {
+          ...draft,
+          goals: draft.goals.filter((g) => g.trim()),
+          doctorName: prefs.doctorName,
+          clinic: { name: prefs.clinicName, phone: prefs.clinicPhone },
+          date: new Date(),
+        },
+      [draft, prefs.doctorName, prefs.clinicName, prefs.clinicPhone],
+    );
+
+    const included = draft ? draft.items.filter((i) => i.included).length : 0;
+
+    const saveAndPrint = async () => {
+      const bad = draft.items.find(
+        (i) => i.included && (!i.title.trim() || !i.body.trim()),
+      );
+      if (bad)
+        return setError(
+          "كل نصيحة مضمّنة تحتاج عنواناً ونصاً، أو أزل علامة التضمين.",
+        );
+      if (!included) return setError("اختر نصيحة واحدة على الأقل.");
+      setBusy("save");
+      setError("");
+      try {
+        const doc = await callBooklet(
+          () =>
+            userRequest.post(`/health-booklet/${patient._id}`, {
+              comorbidities: draft.comorbidities,
+              intake: draft.intake,
+              items: draft.items,
+              goals: draft.goals,
+              doctorNote: draft.doctorNote,
+              followUpDate: draft.followUpDate || null,
+              nextLabs: draft.nextLabs,
+              doctorName: prefs.doctorName,
+              clinic: { name: prefs.clinicName, phone: prefs.clinicPhone },
+            }),
+          onAuthError,
+        );
+        setSaved(doc);
+        setEdited(false);
+        // print exactly what was saved (lab values come from the server)
+        setPrintJob({ key: Date.now(), data: doc, mode: prefs.mode });
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حفظ الكتيب"));
+      } finally {
+        setBusy("");
+      }
+      return undefined;
+    };
+
+    const clearPrintJob = useCallback(() => setPrintJob(null), []);
+    const portal = <BookletPrintPortal job={printJob} onDone={clearPrintJob} />;
+
+    /* ----- Step 1: choose a patient ----- */
+    if (!patient) {
+      return (
+        <S.Page>
+          <PageHeader icon={contentIcon} title="الكتيب الصحي">
+            <S.Button
+              type="button"
+              onClick={() => onGoTab(BOOKLET_HISTORY_TAB)}
+            >
+              <History size={15} />
+              سجل الكتيبات
+            </S.Button>
+          </PageHeader>
+          <S.Notice>
+            <BookOpen size={16} />
+            <span>
+              اختر المريض، أكّد حالته ونمط حياته، ثم تُولَّد النصائح من فحوصاته
+              وعمره الحيوي. يراجعها الطبيب ويعدّلها قبل الطباعة.
+            </span>
+          </S.Notice>
+          <PatientPicker
+            accessToken={accessToken}
+            onAuthError={onAuthError}
+            onPick={pick}
+          />
+          {portal}
+        </S.Page>
+      );
+    }
+
+    const bmi = bmiPreview(intake);
+    const mode = PRINT_MODES.find((m) => m.id === prefs.mode) || PRINT_MODES[0];
+
+    /* ----- Step 2: intake, review, print ----- */
+    return (
+      <S.Page $max="1200px">
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row style={{ minWidth: 0 }}>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="تغيير المريض"
+              onClick={() =>
+                (!edited ||
+                  window.confirm("ستفقد التعديلات غير المحفوظة. متابعة؟")) &&
+                setPatient(null)
+              }
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+              <S.PageTitle style={{ minWidth: 0 }}>
+                <S.Ellipsis>الكتيب الصحي · {patient.name || "مريض"}</S.Ellipsis>
+              </S.PageTitle>
+              <S.Text $muted $size="0.8125rem">
+                {[
+                  patient.age != null && `${num(patient.age)} سنة`,
+                  patient.mrn && `ملف ${patient.mrn}`,
+                  patient.phone,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </S.Text>
+            </S.Stack>
+          </S.Row>
+          {latest && (
+            <S.Button
+              type="button"
+              onClick={() =>
+                setPrintJob({ key: Date.now(), data: latest, mode: prefs.mode })
+              }
+            >
+              <Printer size={15} />
+              طباعة آخر كتيب ({formatDate(latest.signedAt)})
+            </S.Button>
+          )}
+        </S.Row>
+
+        {error && <S.Alert>{error}</S.Alert>}
+        {saved && (
+          <S.Notice>
+            <Check size={16} style={{ color: T.success }} />
+            <span>تم حفظ الكتيب وفُتحت نافذة الطباعة.</span>
+            <S.LinkButton
+              type="button"
+              onClick={() =>
+                setPrintJob({ key: Date.now(), data: saved, mode: prefs.mode })
+              }
+            >
+              طباعة مرة أخرى
+            </S.LinkButton>
+          </S.Notice>
+        )}
+
+        <S.EditorGrid>
+          {/* ---------- Main column ---------- */}
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="0.875rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">الأمراض المزمنة</S.Heading>
+                {latest && (
+                  <S.Text as="span" $muted $size="0.75rem">
+                    من آخر كتيب
+                  </S.Text>
+                )}
+              </S.Row>
+              <S.Row $wrap $gap="0.5rem 1.25rem">
+                {BOOKLET_CONDITIONS.map(([code, label]) => (
+                  <S.Check key={code}>
+                    <input
+                      type="checkbox"
+                      checked={comorbidities.includes(code)}
+                      onChange={() => toggleCondition(code)}
+                    />
+                    {label}
+                  </S.Check>
+                ))}
+              </S.Row>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.875rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">نمط الحياة والقياسات</S.Heading>
+                <S.Text as="span" $muted $size="0.75rem">
+                  {bmi
+                    ? `مؤشر كتلة الجسم ${num(bmi)}`
+                    : "اترك الحقل فارغاً إن لم يُسأل"}
+                </S.Text>
+              </S.Row>
+              <S.BookletFields>
+                {BOOKLET_FIELDS.map(([k, label]) => (
+                  <S.Field key={k}>
+                    <S.FieldLabel $small>{label}</S.FieldLabel>
+                    <S.Input
+                      type="number"
+                      inputMode="decimal"
+                      value={intake[k] ?? ""}
+                      onChange={(e) =>
+                        setIntake((x) => ({ ...x, [k]: e.target.value }))
+                      }
+                      style={
+                        intakeOutOfRange(k, intake[k])
+                          ? { borderColor: T.danger }
+                          : undefined
+                      }
+                      aria-invalid={intakeOutOfRange(k, intake[k])}
+                    />
+                  </S.Field>
+                ))}
+                <S.Field>
+                  <S.FieldLabel $small>التدخين</S.FieldLabel>
+                  <S.Select
+                    value={intake.smoking}
+                    onChange={(e) =>
+                      setIntake((x) => ({ ...x, smoking: e.target.value }))
+                    }
+                  >
+                    {BOOKLET_SMOKING.map(([v, l]) => (
+                      <option key={v} value={v}>
+                        {l}
+                      </option>
+                    ))}
+                  </S.Select>
+                </S.Field>
+              </S.BookletFields>
+              {badFields.length > 0 && (
+                <S.Text $size="0.75rem" style={{ color: T.danger }}>
+                  قيم غير منطقية وسيتم تجاهلها:{" "}
+                  {badFields.map(([, l]) => l).join("، ")}
+                </S.Text>
+              )}
+              <S.Row style={{ justifyContent: "flex-end" }}>
+                <S.Button
+                  type="button"
+                  $variant={draft ? "secondary" : "primary"}
+                  disabled={busy === "generate"}
+                  onClick={generate}
+                >
+                  <Sparkles size={15} />
+                  {busy === "generate"
+                    ? "جارٍ التوليد..."
+                    : draft
+                      ? "إعادة التوليد"
+                      : "توليد النصائح"}
+                </S.Button>
+              </S.Row>
+            </S.Card>
+
+            {draft && (
+              <>
+                <S.Card $padding="1.25rem" $gap="0.75rem">
+                  <S.Row $between $wrap $gap="0.5rem">
+                    <S.Heading $size="0.9375rem">مراجعة النصائح</S.Heading>
+                    <S.Text as="span" $muted $size="0.75rem">
+                      {num(included)} من {num(draft.items.length)} ستُطبع
+                    </S.Text>
+                  </S.Row>
+                  {draft.items.length === 0 && (
+                    <S.Text $muted $size="0.8125rem">
+                      لم تنتج البيانات أي نصيحة تلقائية. أضف نصيحة من الطبيب.
+                    </S.Text>
+                  )}
+                  {draft.items.map((it, i) => (
+                    <AdviceEditorItem
+                      key={i}
+                      item={it}
+                      index={i}
+                      onChange={updateItem}
+                      onRemove={removeItem}
+                    />
+                  ))}
+                  <div>
+                    <S.Button type="button" $size="sm" onClick={addCustom}>
+                      <Plus size={14} />
+                      نصيحة من الطبيب
+                    </S.Button>
+                  </div>
+                </S.Card>
+
+                <S.Card $padding="1.25rem" $gap="0.75rem">
+                  <S.Heading $size="0.9375rem">
+                    أهداف المريض لـ 12 أسبوعاً
+                  </S.Heading>
+                  <S.Text $muted $size="0.75rem">
+                    تظهر في صفحة المتابعة الأسبوعية. اتركها فارغة ليكتبها المريض
+                    بيده.
+                  </S.Text>
+                  {[0, 1, 2].map((i) => (
+                    <S.Row key={i} $gap="0.5rem">
+                      <S.IconBubble
+                        style={{
+                          width: 28,
+                          height: 28,
+                          fontSize: "0.75rem",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {num(i + 1)}
+                      </S.IconBubble>
+                      <S.Input
+                        value={draft.goals[i] ?? ""}
+                        onChange={(e) => {
+                          const g = [...draft.goals];
+                          g[i] = e.target.value;
+                          updateDraft({ goals: g });
+                        }}
+                        placeholder="هدف قابل للقياس، مثال: مشي 30 دقيقة 5 أيام في الأسبوع"
+                      />
+                    </S.Row>
+                  ))}
+                </S.Card>
+
+                <S.Card $padding="1.25rem" $gap="0.875rem">
+                  <S.Heading $size="0.9375rem">
+                    المتابعة وملاحظة الطبيب
+                  </S.Heading>
+                  <S.FormGrid>
+                    <S.Field>
+                      <S.FieldLabel $small>موعد المراجعة القادم</S.FieldLabel>
+                      <S.Input
+                        type="date"
+                        value={draft.followUpDate}
+                        onChange={(e) =>
+                          updateDraft({ followUpDate: e.target.value })
+                        }
+                      />
+                    </S.Field>
+                    <S.Field>
+                      <S.FieldLabel $small>الفحوصات المطلوبة قبله</S.FieldLabel>
+                      <S.Input
+                        value={draft.nextLabs}
+                        onChange={(e) =>
+                          updateDraft({ nextLabs: e.target.value })
+                        }
+                        placeholder="إعادة فحوصات العمر الحيوي"
+                      />
+                    </S.Field>
+                  </S.FormGrid>
+                  <S.Field>
+                    <S.FieldLabel $small>ملاحظة الطبيب</S.FieldLabel>
+                    <S.Textarea
+                      rows={3}
+                      value={draft.doctorNote}
+                      onChange={(e) =>
+                        updateDraft({ doctorNote: e.target.value })
+                      }
+                    />
+                  </S.Field>
+                </S.Card>
+              </>
+            )}
+          </S.Stack>
+
+          {/* ---------- Side column ---------- */}
+          <S.Stack $gap="1rem">
+            {draft && (
+              <S.Card $padding="1.25rem" $gap="0.875rem">
+                <S.Heading $size="0.9375rem">الطباعة</S.Heading>
+                <S.Segmented role="tablist" style={{ alignSelf: "stretch" }}>
+                  {PRINT_MODES.map((m) => (
+                    <S.SegmentButton
+                      key={m.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={prefs.mode === m.id}
+                      $active={prefs.mode === m.id}
+                      onClick={() => setPrefs((p) => ({ ...p, mode: m.id }))}
+                      style={{ flex: 1 }}
+                    >
+                      {m.label}
+                    </S.SegmentButton>
+                  ))}
+                </S.Segmented>
+                <S.Text $muted $size="0.75rem">
+                  {mode.hint}
+                </S.Text>
+                <S.Button
+                  type="button"
+                  $variant="primary"
+                  disabled={busy === "save" || !included}
+                  onClick={saveAndPrint}
+                >
+                  <Printer size={15} />
+                  {busy === "save" ? "جارٍ الحفظ..." : "حفظ وطباعة"}
+                </S.Button>
+                <S.Button
+                  type="button"
+                  onClick={() => setShowPreview((v) => !v)}
+                >
+                  <Eye size={15} />
+                  {showPreview ? "إخفاء المعاينة" : "معاينة الكتيب"}
+                </S.Button>
+              </S.Card>
+            )}
+
+            {draft && (
+              <S.Card $padding="1.25rem" $gap="0.5rem">
+                <S.Heading $size="0.9375rem">العمر الحيوي</S.Heading>
+                {draft.bio ? (
+                  <>
+                    <S.Row $gap="1rem">
+                      <S.Stack $gap="0">
+                        <S.MetricValue>
+                          {num(draft.bio.biologicalAge)}
+                        </S.MetricValue>
+                        <S.Text $muted $size="0.75rem">
+                          الحيوي
+                        </S.Text>
+                      </S.Stack>
+                      <S.Stack $gap="0">
+                        <S.MetricValue style={{ color: T.textSubtle }}>
+                          {num(draft.bio.actualAge)}
+                        </S.MetricValue>
+                        <S.Text $muted $size="0.75rem">
+                          الفعلي
+                        </S.Text>
+                      </S.Stack>
+                    </S.Row>
+                    <S.Text
+                      $size="0.8125rem"
+                      style={{
+                        color:
+                          draft.bio.biologicalAge > draft.bio.actualAge
+                            ? T.danger
+                            : T.success,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {ageGapLabel(draft.bio)}
+                    </S.Text>
+                  </>
+                ) : (
+                  <S.Text $muted $size="0.8125rem">
+                    لم يُحسب بعد لعدم اكتمال الفحوصات المطلوبة.
+                  </S.Text>
+                )}
+              </S.Card>
+            )}
+
+            {draft && <LabsCard labs={draft.labs || []} />}
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">بيانات الطبيب والعيادة</S.Heading>
+              <S.Field>
+                <S.FieldLabel $small>اسم الطبيب</S.FieldLabel>
+                <S.Input
+                  value={prefs.doctorName}
+                  onChange={(e) =>
+                    setPrefs((p) => ({ ...p, doctorName: e.target.value }))
+                  }
+                  placeholder="د. ..."
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>اسم العيادة</S.FieldLabel>
+                <S.Input
+                  value={prefs.clinicName}
+                  onChange={(e) =>
+                    setPrefs((p) => ({ ...p, clinicName: e.target.value }))
+                  }
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>هاتف العيادة</S.FieldLabel>
+                <S.Input
+                  value={prefs.clinicPhone}
+                  onChange={(e) =>
+                    setPrefs((p) => ({ ...p, clinicPhone: e.target.value }))
+                  }
+                  style={{ direction: "ltr" }}
+                />
+              </S.Field>
+              <S.Text $muted $size="0.75rem">
+                تُحفظ في هذا المتصفح وتظهر على الغلاف الخلفي وصفحة المتابعة.
+              </S.Text>
+            </S.Card>
+          </S.Stack>
+        </S.EditorGrid>
+
+        {draft && showPreview && (
+          <S.Card $flush $overflow>
+            <S.Row $between style={{ padding: "0.875rem 1.25rem" }}>
+              <S.Heading $size="0.9375rem">معاينة ({mode.label})</S.Heading>
+              <S.Text as="span" $muted $size="0.75rem">
+                هكذا ستُطبع الأوراق
+              </S.Text>
+            </S.Row>
+            <S.BookletPreview>
+              <HealthBookletPrint data={printable} mode={prefs.mode} />
+            </S.BookletPreview>
+          </S.Card>
+        )}
+        {portal}
+      </S.Page>
+    );
+  },
+);
+
+/* ============================================================
+   Tab: سجل الكتيبات
+   ============================================================ */
+
+const BOOKLET_HISTORY_VIEWS = [
+  { id: "all", label: "الكل", test: () => true },
+  {
+    id: "due",
+    label: "مراجعة خلال 14 يوماً",
+    test: (b, now) =>
+      b.followUpDate &&
+      new Date(b.followUpDate) >= now &&
+      new Date(b.followUpDate) - now <= 14 * 864e5,
+  },
+  {
+    id: "overdue",
+    label: "تجاوزت موعد المراجعة",
+    test: (b, now) => b.followUpDate && new Date(b.followUpDate) < now,
+  },
+];
+
+const BookletHistoryTab = memo(
+  ({ accessToken, onAuthError, onNewForPatient }) => {
+    const history = useAdminGet(
+      accessToken,
+      onAuthError,
+      "/health-booklet?limit=500",
+    );
+    const [query, setQuery] = useState("");
+    const [view, setView] = useState("all");
+    const [printJob, setPrintJob] = useState(null);
+    const [busyId, setBusyId] = useState(null);
+    const [error, setError] = useState("");
+    const mode = loadBookletPrefs().mode;
+
+    const all = useMemo(
+      () => (Array.isArray(history.data) ? history.data : []),
+      [history.data],
+    );
+    const today = useMemo(() => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }, []);
+
+    // Only the latest booklet per patient decides "due / overdue"
+    const latestIds = useMemo(() => {
+      const seen = new Set();
+      const ids = new Set();
+      all.forEach((b) => {
+        const k = String(b.patientUser);
+        if (!seen.has(k)) {
+          seen.add(k);
+          ids.add(b._id);
+        }
+      });
+      return ids;
+    }, [all]);
+
+    const countFor = (v) =>
+      all.filter(
+        (b) => (v.id === "all" || latestIds.has(b._id)) && v.test(b, today),
+      ).length;
+
+    const rows = useMemo(() => {
+      const v = BOOKLET_HISTORY_VIEWS.find((x) => x.id === view);
+      const q = normalizeAr(query);
+      return all.filter(
+        (b) =>
+          (view === "all" || latestIds.has(b._id)) &&
+          v.test(b, today) &&
+          (!q ||
+            normalizeAr(`${b.patientName} ${b.mrn} ${b.doctorName}`).includes(
+              q,
+            )),
+      );
+    }, [all, view, query, latestIds, today]);
+
+    const reprint = async (b) => {
+      setBusyId(b._id);
+      setError("");
+      try {
+        const data = await callBooklet(
+          () => userRequest.get(`/health-booklet/booklet/${b._id}`),
+          onAuthError,
+        );
+        setPrintJob({ key: Date.now(), data, mode });
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر فتح الكتيب"));
+      } finally {
+        setBusyId(null);
+      }
+    };
+
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const thisMonth = all.filter(
+      (b) => new Date(b.signedAt) >= monthStart,
+    ).length;
+    const clearPrintJob = useCallback(() => setPrintJob(null), []);
+
+    return (
+      <S.Page>
+        <PageHeader icon={contentIcon} title="سجل الكتيبات">
+          <S.Button
+            type="button"
+            $variant="primary"
+            onClick={() => onNewForPatient(null)}
+          >
+            <Plus size={15} />
+            كتيب جديد
+          </S.Button>
+        </PageHeader>
+
+        {error && <S.Alert>{error}</S.Alert>}
+
+        <LoadState
+          loading={history.loading && !history.data}
+          error={history.error}
+          onRetry={history.reload}
+        >
+          {all.length === 0 ? (
+            <S.EmptyState>
+              <S.Illustration src={contentImage} alt="" $w="200px" />
+              <S.Heading $size="1.125rem">لم يُطبع أي كتيب بعد</S.Heading>
+              <S.Text $muted>
+                كل كتيب تحفظه وتطبعه يظهر هنا، مع موعد المراجعة وإمكانية إعادة
+                الطباعة.
+              </S.Text>
+              <S.Button
+                type="button"
+                $variant="primary"
+                onClick={() => onNewForPatient(null)}
+              >
+                <Plus size={15} />
+                كتيب جديد
+              </S.Button>
+            </S.EmptyState>
+          ) : (
+            <>
+              <S.Grid $cols={3}>
+                <StatCard label="كتيبات هذا الشهر" value={num(thisMonth)} />
+                <StatCard
+                  label="مراجعات خلال 14 يوماً"
+                  value={num(countFor(BOOKLET_HISTORY_VIEWS[1]))}
+                />
+                <StatCard
+                  label="تجاوزوا موعد المراجعة"
+                  value={num(countFor(BOOKLET_HISTORY_VIEWS[2]))}
+                />
+              </S.Grid>
+
+              <S.Card $flush $overflow>
+                <S.ViewTabs role="tablist">
+                  {BOOKLET_HISTORY_VIEWS.map((v) => (
+                    <S.ViewTab
+                      key={v.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={view === v.id}
+                      $active={view === v.id}
+                      onClick={() => setView(v.id)}
+                    >
+                      {v.label}
+                      <S.MenuCount>{num(countFor(v))}</S.MenuCount>
+                    </S.ViewTab>
+                  ))}
+                </S.ViewTabs>
+                <S.FilterBar>
+                  <S.SearchField style={{ maxWidth: "22rem", flex: 1 }}>
+                    <Search size={15} />
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="ابحث باسم المريض أو رقم الملف أو الطبيب"
+                    />
+                  </S.SearchField>
+                </S.FilterBar>
+                {rows.length === 0 ? (
+                  <S.Text $muted $center style={{ padding: "2.5rem 1rem" }}>
+                    لا توجد كتيبات هنا.
+                  </S.Text>
+                ) : (
+                  <S.TableScroll>
+                    <S.DataTable>
+                      <thead>
+                        <tr>
+                          <th>المريض</th>
+                          <th>العمر الحيوي</th>
+                          <th>الحالة الصحية</th>
+                          <th>النصائح</th>
+                          <th>المراجعة</th>
+                          <th>الطبيب</th>
+                          <th>تاريخ الطباعة</th>
+                          <th aria-label="إجراءات" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((b) => {
+                          const overdue =
+                            b.followUpDate &&
+                            new Date(b.followUpDate) < today &&
+                            latestIds.has(b._id);
+                          return (
+                            <tr key={b._id}>
+                              <td>
+                                <S.Stack $gap="0.125rem">
+                                  <strong>{b.patientName || "—"}</strong>
+                                  {b.mrn && (
+                                    <S.Text as="span" $muted $size="0.6875rem">
+                                      ملف {b.mrn}
+                                    </S.Text>
+                                  )}
+                                </S.Stack>
+                              </td>
+                              <td>
+                                {b.bio ? (
+                                  <span
+                                    style={{
+                                      color:
+                                        b.bio.biologicalAge > b.bio.actualAge
+                                          ? T.danger
+                                          : T.success,
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {num(b.bio.biologicalAge)}{" "}
+                                    <S.Text as="span" $muted $size="0.6875rem">
+                                      / {num(b.bio.actualAge)}
+                                    </S.Text>
+                                  </span>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                              <td style={{ maxWidth: "14rem" }}>
+                                <S.Ellipsis>
+                                  {b.comorbidities
+                                    .map((c) => CONDITION_LABEL[c] || c)
+                                    .join("، ") || "—"}
+                                </S.Ellipsis>
+                              </td>
+                              <td>{num(b.itemCount)}</td>
+                              <td>
+                                {b.followUpDate ? (
+                                  <S.StatusBadge
+                                    $tone={overdue ? "danger" : "neutral"}
+                                  >
+                                    {formatDate(b.followUpDate)}
+                                  </S.StatusBadge>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                              <td>{b.doctorName || "—"}</td>
+                              <td>{formatDate(b.signedAt)}</td>
+                              <td>
+                                <S.Row
+                                  $gap="0.25rem"
+                                  style={{ justifyContent: "flex-end" }}
+                                >
+                                  <S.Button
+                                    type="button"
+                                    $variant="ghost"
+                                    $size="sm"
+                                    $icon
+                                    aria-label="إعادة الطباعة"
+                                    title="إعادة الطباعة"
+                                    disabled={busyId === b._id}
+                                    onClick={() => reprint(b)}
+                                  >
+                                    <Printer size={14} />
+                                  </S.Button>
+                                  <S.Button
+                                    type="button"
+                                    $variant="ghost"
+                                    $size="sm"
+                                    $icon
+                                    aria-label="كتيب جديد لهذا المريض"
+                                    title="كتيب جديد لهذا المريض"
+                                    onClick={() =>
+                                      onNewForPatient({
+                                        _id: b.patientUser,
+                                        name: b.patientName,
+                                        mrn: b.mrn,
+                                        age: b.age,
+                                      })
+                                    }
+                                  >
+                                    <Plus size={14} />
+                                  </S.Button>
+                                </S.Row>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </S.DataTable>
+                  </S.TableScroll>
+                )}
+                <S.TableFooter>
+                  <span>
+                    {num(rows.length)} من {num(all.length)} كتيب
+                  </span>
+                </S.TableFooter>
+              </S.Card>
+            </>
+          )}
+        </LoadState>
+        <BookletPrintPortal job={printJob} onDone={clearPrintJob} />
+      </S.Page>
+    );
+  },
+);
+
+/* ============================================================
    Tab: المتجر (appointment settings)
    ============================================================ */
 
@@ -9565,6 +10944,17 @@ const Dashboard = () => {
     [goTo, goToTab, openNewProduct],
   );
 
+  // History → new booklet for a patient
+  const [bookletPatient, setBookletPatient] = useState(null);
+  const clearBookletPatient = useCallback(() => setBookletPatient(null), []);
+  const newBookletFor = useCallback(
+    (p) => {
+      setBookletPatient(p);
+      goToTab(BOOKLET_TAB);
+    },
+    [goToTab],
+  );
+
   // Content → email hand-off
   const [emailDraft, setEmailDraft] = useState(null);
   const clearEmailDraft = useCallback(() => setEmailDraft(null), []);
@@ -9711,6 +11101,26 @@ const Dashboard = () => {
           accessToken={accessToken}
           onAuthError={handleAuthError}
           onShareEmail={shareByEmail}
+        />
+      );
+    }
+    if (BOOKLET_TAB_NAMES.includes(activeTab)) {
+      return (
+        <BookletTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          initialPatient={bookletPatient}
+          onInitialPatientUsed={clearBookletPatient}
+          onGoTab={goToTab}
+        />
+      );
+    }
+    if (BOOKLET_HISTORY_TAB_NAMES.includes(activeTab)) {
+      return (
+        <BookletHistoryTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          onNewForPatient={newBookletFor}
         />
       );
     }
