@@ -2052,3 +2052,103 @@ export const IconBubble = styled.span`
   background: ${({ $on }) => ($on ? t.successTint : t.surfaceAlt)};
   color: ${({ $on }) => ($on ? t.success : t.textSubtle)};
 `;
+
+/* ============================================================
+   Content: articles, quotes
+   ============================================================ */
+
+export const ContentSplit = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ArticleCard = styled.div`
+  overflow: hidden;
+  border: 1px solid ${t.border};
+  border-radius: ${t.radiusSm};
+  background: ${t.surface};
+
+  img,
+  .ph {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: ${t.surfaceAlt};
+  }
+
+  .ph {
+    display: grid;
+    place-items: center;
+    color: ${t.textSubtle};
+  }
+
+  > div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.75rem 0.875rem 0.875rem;
+  }
+
+  strong {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  p {
+    margin: 0;
+    color: ${t.textMuted};
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+
+  small {
+    color: ${t.textSubtle};
+    font-size: 0.6875rem;
+  }
+`;
+
+export const QuoteItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-top: 1px solid ${t.divider};
+  opacity: ${({ $muted }) => ($muted ? 0.6 : 1)};
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: ${t.surfaceAlt};
+  }
+
+  .mark {
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+    color: ${t.textSubtle};
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    word-break: break-word;
+    cursor: text;
+  }
+`;
+
+export const DailyQuote = styled.blockquote`
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-inline-start: 3px solid #f59e0b;
+  border-radius: ${t.radiusSm};
+  background: ${t.surfaceAlt};
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.9;
+`;

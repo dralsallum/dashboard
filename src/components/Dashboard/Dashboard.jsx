@@ -23,7 +23,9 @@ import {
   Copy,
   Download,
   ExternalLink,
+  FileText,
   Filter,
+  Flame,
   Globe,
   LayoutGrid,
   Link,
@@ -32,11 +34,13 @@ import {
   Package,
   Pencil,
   Plus,
+  Quote,
   RefreshCw,
   Search,
   Send,
   SlidersHorizontal,
   Smartphone,
+  Sparkles,
   Star,
   Tablet,
   Trash2,
@@ -262,15 +266,6 @@ const SETUP_CARDS = [
 
 // Centered empty-state tabs
 const EMPTY_TABS = {
-  المحتوى: {
-    icon: contentIcon,
-    image: contentImage,
-    title: "المحتوى",
-    heading: "بسّط عملية إنشاء المحتوى باستخدام الكائنات الوصفية",
-    text: "تتيح لك الكائنات الوصفية تجميع الحقول وربطها بمختلف أجزاء متجرك. استخدمها لإنشاء محتوى مخصص أو هياكل بيانات خاصة بك.",
-    cta: "اضافة تعريف",
-    topic: "المحتوى",
-  },
   مسودة: {
     icon: ordersIcon,
     image: draftImage,
@@ -6132,10 +6127,19 @@ const MESSAGE_STATES = {
 };
 
 const BroadcastComposer = memo(
-  ({ accessToken, onAuthError, emailReady, onBack, onSent }) => {
+  ({
+    accessToken,
+    onAuthError,
+    emailReady,
+    initialContent,
+    onBack,
+    onSent,
+  }) => {
     const options = useSegmentOptions(accessToken, onAuthError);
     const [segment, setSegment] = useState(EMPTY_SEGMENT);
-    const [content, setContent] = useState({ subject: "", body: "" });
+    const [content, setContent] = useState(
+      () => initialContent || { subject: "", body: "" },
+    );
     const [audience, setAudience] = useState({
       count: undefined,
       counting: false,
@@ -6269,195 +6273,215 @@ const BroadcastComposer = memo(
   },
 );
 
-const MarketingTab = memo(({ accessToken, onAuthError, onGoTab }) => {
-  const [composing, setComposing] = useState(false);
-  const status = useAdminGet(
-    accessToken,
-    onAuthError,
-    "/broadcasts/status",
-  ).data;
-  const campaigns = useAdminGet(
-    accessToken,
-    onAuthError,
-    "/campaigns/admin?days=30",
-  );
-  const automations = useAdminGet(
-    accessToken,
-    onAuthError,
-    "/automations/admin",
-  );
-  const messages = useAdminGet(accessToken, onAuthError, "/broadcasts/admin");
-  const sendingNow = (messages.data || []).some((m) => m.status === "sending");
+const MarketingTab = memo(
+  ({ accessToken, onAuthError, onGoTab, draft, onDraftUsed }) => {
+    const [composing, setComposing] = useState(false);
+    const [initialContent, setInitialContent] = useState(null);
 
-  // Refresh every 5s while a broadcast is still going out
-  const { reload: reloadMessages } = messages;
-  useEffect(() => {
-    if (!sendingNow) return undefined;
-    const timer = setInterval(reloadMessages, 5000);
-    return () => clearInterval(timer);
-  }, [sendingNow, reloadMessages]);
+    // "إرسال بالبريد" on an article opens the composer pre-filled
+    useEffect(() => {
+      if (!draft) return;
+      setInitialContent(draft);
+      setComposing(true);
+      onDraftUsed?.();
+    }, [draft, onDraftUsed]);
 
-  if (composing) {
-    return (
-      <BroadcastComposer
-        accessToken={accessToken}
-        onAuthError={onAuthError}
-        emailReady={Boolean(status?.email)}
-        onBack={() => setComposing(false)}
-        onSent={() => {
-          setComposing(false);
-          messages.reload();
-        }}
-      />
+    const closeComposer = () => {
+      setComposing(false);
+      setInitialContent(null);
+    };
+    const status = useAdminGet(
+      accessToken,
+      onAuthError,
+      "/broadcasts/status",
+    ).data;
+    const campaigns = useAdminGet(
+      accessToken,
+      onAuthError,
+      "/campaigns/admin?days=30",
     );
-  }
+    const automations = useAdminGet(
+      accessToken,
+      onAuthError,
+      "/automations/admin",
+    );
+    const messages = useAdminGet(accessToken, onAuthError, "/broadcasts/admin");
+    const sendingNow = (messages.data || []).some(
+      (m) => m.status === "sending",
+    );
 
-  const list = campaigns.data?.campaigns || [];
-  const campaignJoins = list.reduce((n, c) => n + c.stats.joins, 0);
-  const sentTotal = (messages.data || []).reduce(
-    (n, m) => n + (m.sent || 0),
-    0,
-  );
-  const activeAutomations = (automations.data || []).filter(
-    (a) => a.enabled,
-  ).length;
+    // Refresh every 5s while a broadcast is still going out
+    const { reload: reloadMessages } = messages;
+    useEffect(() => {
+      if (!sendingNow) return undefined;
+      const timer = setInterval(reloadMessages, 5000);
+      return () => clearInterval(timer);
+    }, [sendingNow, reloadMessages]);
 
-  return (
-    <S.Page>
-      <PageHeader icon={contentIcon} title="التسويق">
-        <S.Button type="button" onClick={() => onGoTab("الحملات")}>
-          <Link size={15} />
-          حملة جديدة
-        </S.Button>
-        <S.Button
-          type="button"
-          $variant="primary"
-          onClick={() => setComposing(true)}
-        >
-          <Mail size={15} />
-          رسالة بريد جديدة
-        </S.Button>
-      </PageHeader>
-
-      <EmailSetupNotice status={status} />
-
-      <S.Grid $cols={4}>
-        <StatCard
-          label="الحملات النشطة"
-          value={num(list.filter((c) => c.status === "active").length)}
+    if (composing) {
+      return (
+        <BroadcastComposer
+          accessToken={accessToken}
+          onAuthError={onAuthError}
+          emailReady={Boolean(status?.email)}
+          initialContent={initialContent}
+          onBack={closeComposer}
+          onSent={() => {
+            closeComposer();
+            messages.reload();
+          }}
         />
-        <StatCard
-          label="تسجيلات من الحملات"
-          value={num(campaignJoins)}
-          hint="آخر 30 يوماً"
-        />
-        <StatCard label="رسائل بريد أُرسلت" value={num(sentTotal)} />
-        <StatCard label="أتمتة مفعّلة" value={num(activeAutomations)} />
-      </S.Grid>
+      );
+    }
 
-      <S.Card $flush>
-        <S.TableToolbar>
-          <S.Heading $size="0.9375rem">رسائل البريد</S.Heading>
+    const list = campaigns.data?.campaigns || [];
+    const campaignJoins = list.reduce((n, c) => n + c.stats.joins, 0);
+    const sentTotal = (messages.data || []).reduce(
+      (n, m) => n + (m.sent || 0),
+      0,
+    );
+    const activeAutomations = (automations.data || []).filter(
+      (a) => a.enabled,
+    ).length;
+
+    return (
+      <S.Page>
+        <PageHeader icon={contentIcon} title="التسويق">
+          <S.Button type="button" onClick={() => onGoTab("الحملات")}>
+            <Link size={15} />
+            حملة جديدة
+          </S.Button>
           <S.Button
             type="button"
-            $size="sm"
-            $icon
-            aria-label="تحديث"
-            onClick={messages.reload}
+            $variant="primary"
+            onClick={() => setComposing(true)}
           >
-            <RefreshCw size={14} />
+            <Mail size={15} />
+            رسالة بريد جديدة
           </S.Button>
-        </S.TableToolbar>
-        <LoadState
-          loading={messages.loading && !messages.data}
-          error={messages.error}
-          onRetry={messages.reload}
-        >
-          {(messages.data || []).length === 0 ? (
-            <S.Text $muted $center style={{ padding: "2.5rem 1rem" }}>
-              لم تُرسل أي رسالة بعد.{" "}
-              <S.LinkButton type="button" onClick={() => setComposing(true)}>
-                اكتب أول رسالة
-              </S.LinkButton>
-            </S.Text>
-          ) : (
-            <S.TableScroll>
-              <S.DataTable>
-                <thead>
-                  <tr>
-                    <th>العنوان</th>
-                    <th>المستلمون</th>
-                    <th>التسليم</th>
-                    <th>الحالة</th>
-                    <th>التاريخ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {messages.data.map((m) => {
-                    const st = MESSAGE_STATES[m.status] || MESSAGE_STATES.sent;
-                    return (
-                      <tr key={m._id}>
-                        <td>
-                          <S.Stack $gap="0.125rem">
-                            <strong>{m.subject}</strong>
-                            <S.Text as="span" $muted $size="0.75rem">
-                              {segmentSummary(m.segment)}
-                            </S.Text>
-                          </S.Stack>
-                        </td>
-                        <td>{num(m.recipients)}</td>
-                        <td>
-                          {num(m.sent)} أُرسلت
-                          {m.failed ? (
-                            <S.Text
-                              as="span"
-                              $size="0.75rem"
-                              style={{ color: T.danger }}
-                              title={m.error}
-                            >
-                              {" "}
-                              · {num(m.failed)} فشلت
-                            </S.Text>
-                          ) : null}
-                        </td>
-                        <td>
-                          <S.StatusBadge $tone={st.tone}>
-                            {st.label}
-                          </S.StatusBadge>
-                        </td>
-                        <td>{fmtDateTime(m.sentAt || m.createdAt)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </S.DataTable>
-            </S.TableScroll>
-          )}
-        </LoadState>
-      </S.Card>
+        </PageHeader>
 
-      <S.Card $padding="1.25rem" $gap="1rem">
-        <S.Row $between>
-          <S.CardLabel>أفضل الحملات (آخر 30 يوماً)</S.CardLabel>
-          <S.LinkButton
-            type="button"
-            style={{ fontSize: "0.8125rem" }}
-            onClick={() => onGoTab("الحملات")}
+        <EmailSetupNotice status={status} />
+
+        <S.Grid $cols={4}>
+          <StatCard
+            label="الحملات النشطة"
+            value={num(list.filter((c) => c.status === "active").length)}
+          />
+          <StatCard
+            label="تسجيلات من الحملات"
+            value={num(campaignJoins)}
+            hint="آخر 30 يوماً"
+          />
+          <StatCard label="رسائل بريد أُرسلت" value={num(sentTotal)} />
+          <StatCard label="أتمتة مفعّلة" value={num(activeAutomations)} />
+        </S.Grid>
+
+        <S.Card $flush>
+          <S.TableToolbar>
+            <S.Heading $size="0.9375rem">رسائل البريد</S.Heading>
+            <S.Button
+              type="button"
+              $size="sm"
+              $icon
+              aria-label="تحديث"
+              onClick={messages.reload}
+            >
+              <RefreshCw size={14} />
+            </S.Button>
+          </S.TableToolbar>
+          <LoadState
+            loading={messages.loading && !messages.data}
+            error={messages.error}
+            onRetry={messages.reload}
           >
-            كل الحملات
-          </S.LinkButton>
-        </S.Row>
-        <BarList
-          rows={[...list]
-            .sort((a, b) => b.stats.joins - a.stats.joins)
-            .slice(0, 5)
-            .map((c) => ({ label: c.name, count: c.stats.joins }))}
-          empty="أنشئ حملة لتتبع التسجيلات القادمة من كل قناة."
-        />
-      </S.Card>
-    </S.Page>
-  );
-});
+            {(messages.data || []).length === 0 ? (
+              <S.Text $muted $center style={{ padding: "2.5rem 1rem" }}>
+                لم تُرسل أي رسالة بعد.{" "}
+                <S.LinkButton type="button" onClick={() => setComposing(true)}>
+                  اكتب أول رسالة
+                </S.LinkButton>
+              </S.Text>
+            ) : (
+              <S.TableScroll>
+                <S.DataTable>
+                  <thead>
+                    <tr>
+                      <th>العنوان</th>
+                      <th>المستلمون</th>
+                      <th>التسليم</th>
+                      <th>الحالة</th>
+                      <th>التاريخ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {messages.data.map((m) => {
+                      const st =
+                        MESSAGE_STATES[m.status] || MESSAGE_STATES.sent;
+                      return (
+                        <tr key={m._id}>
+                          <td>
+                            <S.Stack $gap="0.125rem">
+                              <strong>{m.subject}</strong>
+                              <S.Text as="span" $muted $size="0.75rem">
+                                {segmentSummary(m.segment)}
+                              </S.Text>
+                            </S.Stack>
+                          </td>
+                          <td>{num(m.recipients)}</td>
+                          <td>
+                            {num(m.sent)} أُرسلت
+                            {m.failed ? (
+                              <S.Text
+                                as="span"
+                                $size="0.75rem"
+                                style={{ color: T.danger }}
+                                title={m.error}
+                              >
+                                {" "}
+                                · {num(m.failed)} فشلت
+                              </S.Text>
+                            ) : null}
+                          </td>
+                          <td>
+                            <S.StatusBadge $tone={st.tone}>
+                              {st.label}
+                            </S.StatusBadge>
+                          </td>
+                          <td>{fmtDateTime(m.sentAt || m.createdAt)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </S.DataTable>
+              </S.TableScroll>
+            )}
+          </LoadState>
+        </S.Card>
+
+        <S.Card $padding="1.25rem" $gap="1rem">
+          <S.Row $between>
+            <S.CardLabel>أفضل الحملات (آخر 30 يوماً)</S.CardLabel>
+            <S.LinkButton
+              type="button"
+              style={{ fontSize: "0.8125rem" }}
+              onClick={() => onGoTab("الحملات")}
+            >
+              كل الحملات
+            </S.LinkButton>
+          </S.Row>
+          <BarList
+            rows={[...list]
+              .sort((a, b) => b.stats.joins - a.stats.joins)
+              .slice(0, 5)
+              .map((c) => ({ label: c.name, count: c.stats.joins }))}
+            empty="أنشئ حملة لتتبع التسجيلات القادمة من كل قناة."
+          />
+        </S.Card>
+      </S.Page>
+    );
+  },
+);
 
 /* ============================================================
    Tab: الحملات  (tracked links)
@@ -7408,6 +7432,1491 @@ const AutomationsTab = memo(({ accessToken, onAuthError }) => {
 });
 
 /* ============================================================
+   Content: shared (articles, quotes)
+   ============================================================ */
+
+// Side-menu names. Keep NavSide.jsx in sync with these (aliases are accepted too).
+const CONTENT_TAB = "المحتوى";
+const QUOTES_TAB = "الاقتباسات";
+const CONTENT_TAB_NAMES = [CONTENT_TAB, "المدونة", "المقالات"];
+const QUOTES_TAB_NAMES = [
+  QUOTES_TAB,
+  "اقتباسات",
+  "الاقتباس",
+  "Quota",
+  "quota",
+  "Quotes",
+];
+
+const SECTION_KEYS = [
+  ["firstTitle", "firstText", "firstImg"],
+  ["secTitle", "secText", "secImg"],
+  ["thirdTitle", "thirdText", "thirdImg"],
+  ["fourthTitle", "fourthText", "fourthImg"],
+  ["fivthTitle", "fivthText", "fivthImg"], // spelled like the Newsletter model
+];
+
+// Article page address, e.g. https://yoursite.com/newsletter/{id} (saved in this browser)
+const ARTICLE_URL_KEY = "dashboard.content.articleUrl";
+const loadArticleUrl = () => {
+  try {
+    return localStorage.getItem(ARTICLE_URL_KEY) || "";
+  } catch {
+    return "";
+  }
+};
+
+const excerptOf = (a, max = 280) => {
+  const raw = String(a?.mainText || a?.firstText || "")
+    .replace(/\s+\n/g, "\n")
+    .trim();
+  return raw.length > max
+    ? `${raw.slice(0, max).replace(/\s+\S*$/, "")}…`
+    : raw;
+};
+
+const articleUrl = (template, id) =>
+  template && id ? template.replace(/\{id\}/g, id) : "";
+
+const toDateInput = (d) => {
+  if (!d) return "";
+  const x = new Date(d);
+  return Number.isNaN(x.getTime())
+    ? ""
+    : `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+};
+
+// Email draft for the marketing composer
+const emailFromArticle = (a, link) => ({
+  subject: `مقال جديد: ${a.title}`,
+  body: [
+    "مرحباً {{firstName}}،",
+    `نشرنا مقالاً جديداً بعنوان "${a.title}".`,
+    excerptOf(a, 400),
+    link ? `اقرأ المقال كاملاً:\n${link}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n"),
+});
+
+// Newsletter articles (existing /api/newsletter routes)
+const useArticles = (accessToken, onAuthError) => {
+  const { data, setData, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/newsletter?limit=1000",
+  );
+  const items = useMemo(
+    () => (Array.isArray(data) ? data : data?.data) || [],
+    [data],
+  );
+
+  const save = useCallback(
+    async (id, payload) => {
+      const { data: res } = await callApi(
+        () =>
+          id
+            ? userRequest.put(`/newsletter/${id}`, payload)
+            : userRequest.post("/newsletter", payload),
+        onAuthError,
+      );
+      const saved = res?.data || res;
+      setData((prev) => {
+        const list = (Array.isArray(prev) ? prev : prev?.data) || [];
+        return {
+          data: id
+            ? list.map((a) => (a._id === id ? saved : a))
+            : [saved, ...list],
+        };
+      });
+      return saved;
+    },
+    [onAuthError, setData],
+  );
+
+  const remove = useCallback(
+    async (id) => {
+      await callApi(() => userRequest.delete(`/newsletter/${id}`), onAuthError);
+      setData((prev) => ({
+        data: ((Array.isArray(prev) ? prev : prev?.data) || []).filter(
+          (a) => a._id !== id,
+        ),
+      }));
+    },
+    [onAuthError, setData],
+  );
+
+  return { items, loading, error, reload, save, remove };
+};
+
+// Quote bank (existing /api/quotes routes)
+const useQuotes = (accessToken, onAuthError) => {
+  const { data, setData, loading, error, reload } = useAdminGet(
+    accessToken,
+    onAuthError,
+    "/quotes",
+  );
+  const items = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+
+  const add = useCallback(
+    async (texts) => {
+      if (texts.length === 1) {
+        const { data: q } = await callApi(
+          () => userRequest.post("/quotes", { textAr: texts[0] }),
+          onAuthError,
+        );
+        setData((prev) => [q, ...(prev || [])]);
+        return 1;
+      }
+      const { data: res } = await callApi(
+        () => userRequest.post("/quotes/bulk", { quotes: texts }),
+        onAuthError,
+      );
+      setData((prev) => [
+        ...(res.quotes || []).slice().reverse(),
+        ...(prev || []),
+      ]);
+      return res.inserted || 0;
+    },
+    [onAuthError, setData],
+  );
+
+  const update = useCallback(
+    async (id, patch) => {
+      const { data: q } = await callApi(
+        () => userRequest.patch(`/quotes/${id}`, patch),
+        onAuthError,
+      );
+      setData((prev) => (prev || []).map((x) => (x._id === id ? q : x)));
+    },
+    [onAuthError, setData],
+  );
+
+  const remove = useCallback(
+    async (id) => {
+      await callApi(() => userRequest.delete(`/quotes/${id}`), onAuthError);
+      setData((prev) => (prev || []).filter((x) => x._id !== id));
+    },
+    [onAuthError, setData],
+  );
+
+  return { items, loading, error, reload, add, update, remove };
+};
+
+const ArticleThumb = ({ src, size = 40 }) => {
+  const [broken, setBroken] = useState(false);
+  return src && !broken ? (
+    <S.Thumb src={src} alt="" $size={size} onError={() => setBroken(true)} />
+  ) : (
+    <S.ThumbPlaceholder $size={size}>
+      <FileText size={size * 0.4} />
+    </S.ThumbPlaceholder>
+  );
+};
+
+/* ============================================================
+   Tab: المحتوى  (blog articles)
+   ============================================================ */
+
+const EMPTY_ARTICLE = {
+  title: "",
+  titleImg: "",
+  mainText: "",
+  mainImg: "",
+  ...Object.fromEntries(SECTION_KEYS.flat().map((k) => [k, ""])),
+  author: "الكاتب",
+  reviewedBy: "المراجع الطبي",
+  publishDate: toDateInput(new Date()),
+  isFeatured: false,
+  isPopular: false,
+  sources: [],
+};
+
+const articleToForm = (a) =>
+  a
+    ? {
+        ...EMPTY_ARTICLE,
+        ...Object.fromEntries(
+          Object.keys(EMPTY_ARTICLE).map((k) => [k, a[k] ?? EMPTY_ARTICLE[k]]),
+        ),
+        publishDate: toDateInput(a.publishDate || a.createdAt),
+        sources: (a.sources || []).map((s) => ({
+          publisher: s.publisher || "",
+          title: s.title || "",
+          url: s.url || "",
+        })),
+      }
+    : { ...EMPTY_ARTICLE, sources: [] };
+
+const sectionsUsed = (form) => {
+  let last = 0;
+  SECTION_KEYS.forEach((keys, i) => {
+    if (keys.some((k) => String(form[k] || "").trim())) last = i + 1;
+  });
+  return last;
+};
+
+const ImageField = ({ label, value, onChange, hint }) => (
+  <S.Field>
+    <S.FieldLabel $small>{label}</S.FieldLabel>
+    <S.Row $gap="0.5rem">
+      <ArticleThumb src={value.trim()} size={40} />
+      <S.Input
+        value={value}
+        onChange={onChange}
+        placeholder="https://..."
+        style={{ direction: "ltr" }}
+      />
+    </S.Row>
+    {hint && (
+      <S.Text $muted $size="0.75rem">
+        {hint}
+      </S.Text>
+    )}
+  </S.Field>
+);
+
+const ArticleEditor = memo(
+  ({
+    article,
+    articleLinkTemplate,
+    onBack,
+    onSave,
+    onDelete,
+    onSaved,
+    onShareEmail,
+  }) => {
+    const isNew = !article;
+    const initial = useMemo(() => articleToForm(article), [article]);
+    const [form, setForm] = useState(initial);
+    const [sectionCount, setSectionCount] = useState(() =>
+      Math.max(1, sectionsUsed(initial)),
+    );
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [error, setError] = useState("");
+    const [savedNote, setSavedNote] = useState("");
+    const dirty = JSON.stringify(form) !== JSON.stringify(initial);
+
+    // After a save the parent passes the saved article back: start clean from it
+    useEffect(() => {
+      setForm(initial);
+      setSectionCount((n) => Math.max(1, n, sectionsUsed(initial)));
+    }, [initial]);
+    const link = articleUrl(articleLinkTemplate, article?._id);
+
+    const removeSection = (i) => {
+      // Shift later sections up so there are no gaps
+      setForm((f) => {
+        const next = { ...f };
+        for (let j = i; j < SECTION_KEYS.length; j += 1) {
+          SECTION_KEYS[j].forEach((k, idx) => {
+            next[k] =
+              j + 1 < SECTION_KEYS.length ? f[SECTION_KEYS[j + 1][idx]] : "";
+          });
+        }
+        return next;
+      });
+      setSectionCount((n) => Math.max(0, n - 1));
+    };
+
+    const setSource = (i, key, value) =>
+      setForm((f) => ({
+        ...f,
+        sources: f.sources.map((s, idx) =>
+          idx === i ? { ...s, [key]: value } : s,
+        ),
+      }));
+
+    const handleSave = async () => {
+      const payload = { ...form };
+      Object.keys(payload).forEach((k) => {
+        if (typeof payload[k] === "string") payload[k] = payload[k].trim();
+      });
+      if (!payload.title) return setError("عنوان المقال مطلوب");
+      if (!payload.titleImg) return setError("صورة الغلاف مطلوبة");
+      const sources = form.sources
+        .map((s) => ({
+          publisher: s.publisher.trim(),
+          title: s.title.trim(),
+          url: s.url.trim(),
+        }))
+        .filter((s) => s.publisher || s.title || s.url);
+      if (sources.some((s) => !s.title || !s.url))
+        return setError("كل مصدر يحتاج عنواناً ورابطاً");
+      payload.sources = sources;
+      payload.publishDate = payload.publishDate
+        ? new Date(`${payload.publishDate}T12:00:00`).toISOString()
+        : new Date().toISOString();
+
+      setSaving(true);
+      setError("");
+      try {
+        const saved = await onSave(article?._id, payload);
+        setSavedNote(isNew ? "تم نشر المقال" : "تم حفظ التعديلات");
+        onSaved(saved?._id);
+      } catch (err) {
+        const errs = err?.response?.data?.errors;
+        setError(
+          errs?.length ? errs.join("، ") : apiMessage(err, "تعذّر حفظ المقال"),
+        );
+      } finally {
+        setSaving(false);
+      }
+      return undefined;
+    };
+
+    const handleDelete = async () => {
+      if (!window.confirm(`حذف المقال "${article.title}" نهائياً؟`)) return;
+      setDeleting(true);
+      try {
+        await onDelete(article._id);
+        onBack();
+      } catch (err) {
+        setError(apiMessage(err, "تعذّر حذف المقال"));
+        setDeleting(false);
+      }
+    };
+
+    return (
+      <S.Page $max="1100px">
+        <S.Row $between $wrap $gap="1rem">
+          <S.Row style={{ minWidth: 0 }}>
+            <S.Button
+              type="button"
+              $variant="ghost"
+              $icon
+              aria-label="رجوع"
+              onClick={onBack}
+            >
+              <ChevronRight size={18} />
+            </S.Button>
+            <S.PageTitle style={{ minWidth: 0 }}>
+              <S.Ellipsis>{isNew ? "مقال جديد" : article.title}</S.Ellipsis>
+            </S.PageTitle>
+          </S.Row>
+          <S.Row>
+            <S.Button type="button" onClick={onBack}>
+              {dirty ? "إلغاء" : "رجوع"}
+            </S.Button>
+            <S.Button
+              type="button"
+              $variant="primary"
+              disabled={saving || (!isNew && !dirty)}
+              onClick={handleSave}
+            >
+              {saving ? "جارٍ الحفظ..." : isNew ? "نشر المقال" : "حفظ"}
+            </S.Button>
+          </S.Row>
+        </S.Row>
+
+        {error && <S.Alert>{error}</S.Alert>}
+        {savedNote && !dirty && (
+          <S.Notice>
+            <Check size={16} style={{ color: T.success }} />
+            <span>
+              {savedNote}. يمكنك الآن إرساله لقائمة الانتظار بالبريد من القائمة
+              الجانبية.
+            </span>
+          </S.Notice>
+        )}
+
+        <S.EditorGrid>
+          {/* ---------- Main column ---------- */}
+          <S.Stack $gap="1rem">
+            <S.Card $padding="1.25rem" $gap="1rem">
+              <S.Field>
+                <S.FieldLabel>العنوان</S.FieldLabel>
+                <S.Input
+                  value={form.title}
+                  onChange={bind(setForm, "title")}
+                  placeholder="مثال: كيف يؤثر النوم على صحة القلب؟"
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel>المقدمة</S.FieldLabel>
+                <S.Textarea
+                  rows={6}
+                  value={form.mainText}
+                  onChange={bind(setForm, "mainText")}
+                  placeholder="الفقرة الأولى من المقال. تُستخدم أيضاً كملخص في رسائل البريد."
+                />
+              </S.Field>
+              <S.FormGrid>
+                <ImageField
+                  label="صورة الغلاف (مطلوبة)"
+                  value={form.titleImg}
+                  onChange={bind(setForm, "titleImg")}
+                  hint="تظهر في قائمة المقالات وفي صفحة المدونة."
+                />
+                <ImageField
+                  label="الصورة الرئيسية"
+                  value={form.mainImg}
+                  onChange={bind(setForm, "mainImg")}
+                />
+              </S.FormGrid>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Row $between>
+                <S.Heading $size="0.9375rem">أقسام المقال</S.Heading>
+                <S.Text $muted $size="0.75rem">
+                  {num(sectionCount)} من {num(SECTION_KEYS.length)}
+                </S.Text>
+              </S.Row>
+              {SECTION_KEYS.slice(0, sectionCount).map(
+                ([tKey, xKey, iKey], i) => (
+                  <S.SubCard key={tKey}>
+                    <S.Row $gap="0.5rem">
+                      <S.Text
+                        as="span"
+                        $muted
+                        $size="0.75rem"
+                        style={{ flexShrink: 0 }}
+                      >
+                        {num(i + 1)}
+                      </S.Text>
+                      <S.Input
+                        value={form[tKey]}
+                        onChange={bind(setForm, tKey)}
+                        placeholder="عنوان القسم"
+                      />
+                      <S.Button
+                        type="button"
+                        $variant="ghost"
+                        $icon
+                        aria-label="حذف القسم"
+                        onClick={() => removeSection(i)}
+                      >
+                        <Trash2 size={15} />
+                      </S.Button>
+                    </S.Row>
+                    <S.Textarea
+                      rows={5}
+                      value={form[xKey]}
+                      onChange={bind(setForm, xKey)}
+                      placeholder="نص القسم"
+                    />
+                    <ImageField
+                      label="صورة القسم (اختياري)"
+                      value={form[iKey]}
+                      onChange={bind(setForm, iKey)}
+                    />
+                  </S.SubCard>
+                ),
+              )}
+              {sectionCount < SECTION_KEYS.length && (
+                <div>
+                  <S.Button
+                    type="button"
+                    $size="sm"
+                    onClick={() => setSectionCount((n) => n + 1)}
+                  >
+                    <Plus size={14} />
+                    إضافة قسم
+                  </S.Button>
+                </div>
+              )}
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">المصادر</S.Heading>
+              {form.sources.length === 0 && (
+                <S.Text $muted $size="0.8125rem">
+                  أضف المراجع العلمية للمقال لتظهر في آخره.
+                </S.Text>
+              )}
+              {form.sources.map((s, i) => (
+                <S.SubCard key={i}>
+                  <S.FormGrid>
+                    <S.Input
+                      value={s.title}
+                      onChange={(e) => setSource(i, "title", e.target.value)}
+                      placeholder="عنوان المصدر"
+                    />
+                    <S.Input
+                      value={s.publisher}
+                      onChange={(e) =>
+                        setSource(i, "publisher", e.target.value)
+                      }
+                      placeholder="الناشر (اختياري)، مثال: WHO"
+                    />
+                  </S.FormGrid>
+                  <S.Row $gap="0.5rem">
+                    <S.Input
+                      value={s.url}
+                      onChange={(e) => setSource(i, "url", e.target.value)}
+                      placeholder="https://..."
+                      style={{ direction: "ltr" }}
+                    />
+                    <S.Button
+                      type="button"
+                      $variant="ghost"
+                      $icon
+                      aria-label="حذف المصدر"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          sources: f.sources.filter((_, idx) => idx !== i),
+                        }))
+                      }
+                    >
+                      <Trash2 size={15} />
+                    </S.Button>
+                  </S.Row>
+                </S.SubCard>
+              ))}
+              <div>
+                <S.Button
+                  type="button"
+                  $size="sm"
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      sources: [
+                        ...f.sources,
+                        { publisher: "", title: "", url: "" },
+                      ],
+                    }))
+                  }
+                >
+                  <Plus size={14} />
+                  إضافة مصدر
+                </S.Button>
+              </div>
+            </S.Card>
+          </S.Stack>
+
+          {/* ---------- Side column ---------- */}
+          <S.Stack $gap="1rem">
+            {!isNew && (
+              <S.Card $padding="1.25rem" $gap="0.75rem">
+                <S.Heading $size="0.9375rem">إرسال المقال</S.Heading>
+                <S.Button
+                  type="button"
+                  $variant="primary"
+                  disabled={dirty}
+                  onClick={() => onShareEmail(emailFromArticle(article, link))}
+                >
+                  <Mail size={15} />
+                  إرسال بالبريد لقائمة الانتظار
+                </S.Button>
+                {dirty && (
+                  <S.Text $muted $size="0.75rem">
+                    احفظ التعديلات أولاً.
+                  </S.Text>
+                )}
+                {link ? (
+                  <S.LinkButton
+                    as="a"
+                    href={link}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: "0.8125rem" }}
+                  >
+                    <ExternalLink size={13} /> فتح صفحة المقال
+                  </S.LinkButton>
+                ) : (
+                  <S.Text $muted $size="0.75rem">
+                    لإضافة رابط المقال في البريد، اضبط "رابط المقال" في أعلى
+                    صفحة المحتوى.
+                  </S.Text>
+                )}
+              </S.Card>
+            )}
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">الظهور</S.Heading>
+              <S.Check $bold>
+                <input
+                  type="checkbox"
+                  checked={form.isFeatured}
+                  onChange={bind(setForm, "isFeatured")}
+                />
+                مقال مميز
+              </S.Check>
+              <S.Check $bold>
+                <input
+                  type="checkbox"
+                  checked={form.isPopular}
+                  onChange={bind(setForm, "isPopular")}
+                />
+                الأكثر قراءة
+              </S.Check>
+              <S.Text $muted $size="0.75rem">
+                تحدد أين يظهر المقال في صفحة المدونة.
+              </S.Text>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">النشر</S.Heading>
+              <S.Field>
+                <S.FieldLabel $small>تاريخ النشر</S.FieldLabel>
+                <S.Input
+                  type="date"
+                  value={form.publishDate}
+                  onChange={bind(setForm, "publishDate")}
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>الكاتب</S.FieldLabel>
+                <S.Input
+                  value={form.author}
+                  onChange={bind(setForm, "author")}
+                />
+              </S.Field>
+              <S.Field>
+                <S.FieldLabel $small>المراجعة الطبية</S.FieldLabel>
+                <S.Input
+                  value={form.reviewedBy}
+                  onChange={bind(setForm, "reviewedBy")}
+                />
+              </S.Field>
+            </S.Card>
+
+            <S.Card $padding="1.25rem" $gap="0.75rem">
+              <S.Heading $size="0.9375rem">معاينة البطاقة</S.Heading>
+              <S.ArticleCard>
+                {form.titleImg.trim() ? (
+                  <img src={form.titleImg.trim()} alt="" />
+                ) : (
+                  <div className="ph">
+                    <FileText size={28} />
+                  </div>
+                )}
+                <div>
+                  <strong>{form.title || "عنوان المقال"}</strong>
+                  <p>{excerptOf(form, 140) || "المقدمة تظهر هنا"}</p>
+                  <small>
+                    {form.author} ·{" "}
+                    {form.publishDate
+                      ? new Date(form.publishDate).toLocaleDateString("ar-SA")
+                      : "—"}
+                  </small>
+                </div>
+              </S.ArticleCard>
+            </S.Card>
+          </S.Stack>
+        </S.EditorGrid>
+
+        {!isNew && (
+          <S.Row style={{ justifyContent: "flex-end" }}>
+            <S.Button
+              type="button"
+              $variant="danger"
+              disabled={deleting}
+              onClick={handleDelete}
+            >
+              <Trash2 size={15} />
+              {deleting ? "جارٍ الحذف..." : "حذف المقال"}
+            </S.Button>
+          </S.Row>
+        )}
+      </S.Page>
+    );
+  },
+);
+
+const ARTICLE_VIEWS = [
+  { id: "all", label: "الكل", test: () => true },
+  { id: "featured", label: "مميز", test: (a) => a.isFeatured },
+  { id: "popular", label: "الأكثر قراءة", test: (a) => a.isPopular },
+];
+
+const ARTICLE_SORTS = [
+  {
+    id: "newest",
+    label: "الأحدث نشراً",
+    fn: (a, b) =>
+      new Date(b.publishDate || b.createdAt) -
+      new Date(a.publishDate || a.createdAt),
+  },
+  {
+    id: "oldest",
+    label: "الأقدم نشراً",
+    fn: (a, b) =>
+      new Date(a.publishDate || a.createdAt) -
+      new Date(b.publishDate || b.createdAt),
+  },
+  {
+    id: "title",
+    label: "العنوان (أ-ي)",
+    fn: (a, b) => String(a.title).localeCompare(String(b.title), "ar"),
+  },
+];
+
+const ARTICLE_GRID = "minmax(280px, 2.6fr) 1fr 1fr 0.6fr 0.6fr 1fr";
+
+const ContentTab = memo(({ accessToken, onAuthError, onShareEmail }) => {
+  const ar = useArticles(accessToken, onAuthError);
+  const [editing, setEditing] = useState(null); // null | "new" | id
+  const [editorKey, setEditorKey] = useState(0);
+  const [view, setView] = useState("all");
+  const [query, setQuery] = useState("");
+  const [sortId, setSortId] = useState("newest");
+
+  const openEditor = (id) => {
+    setEditorKey((k) => k + 1);
+    setEditing(id);
+  };
+  const [busyId, setBusyId] = useState(null);
+
+  const [linkTemplate, setLinkTemplate] = useState(loadArticleUrl);
+  const [linkDraft, setLinkDraft] = useState(linkTemplate);
+  const linkValid =
+    !linkDraft.trim() ||
+    (/^https:\/\/\S+$/i.test(linkDraft.trim()) && linkDraft.includes("{id}"));
+  const saveLink = () => {
+    const v = linkDraft.trim();
+    try {
+      localStorage.setItem(ARTICLE_URL_KEY, v);
+    } catch {
+      /* ignore */
+    }
+    setLinkTemplate(v);
+  };
+
+  const rows = useMemo(() => {
+    const viewTest = ARTICLE_VIEWS.find((v) => v.id === view).test;
+    const q = normalizeAr(query);
+    return ar.items
+      .filter(
+        (a) =>
+          viewTest(a) &&
+          (!q ||
+            normalizeAr(`${a.title} ${a.author} ${a.mainText}`).includes(q)),
+      )
+      .sort(ARTICLE_SORTS.find((s) => s.id === sortId).fn);
+  }, [ar.items, view, query, sortId]);
+
+  const toggle = async (a, key) => {
+    setBusyId(`${a._id}${key}`);
+    try {
+      await ar.save(a._id, { [key]: !a[key] });
+    } catch (err) {
+      alert(apiMessage(err, "تعذّر تحديث المقال"));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (editing) {
+    return (
+      <ArticleEditor
+        key={editorKey}
+        article={
+          editing === "new" ? null : ar.items.find((a) => a._id === editing)
+        }
+        articleLinkTemplate={linkTemplate}
+        onBack={() => setEditing(null)}
+        onSave={ar.save}
+        onDelete={ar.remove}
+        onSaved={(id) => id && setEditing(id)}
+        onShareEmail={onShareEmail}
+      />
+    );
+  }
+
+  const activeSort = ARTICLE_SORTS.find((s) => s.id === sortId);
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="المحتوى">
+        <Popover
+          align="end"
+          trigger={({ toggle: open }) => (
+            <S.Button type="button" onClick={open}>
+              <Link size={15} />
+              رابط المقال
+            </S.Button>
+          )}
+        >
+          {({ close }) => (
+            <S.Stack
+              $gap="0.5rem"
+              style={{ padding: "0.75rem", width: "20rem" }}
+            >
+              <S.FieldLabel $small>رابط صفحة المقال في موقعك</S.FieldLabel>
+              <S.Input
+                value={linkDraft}
+                onChange={(e) => setLinkDraft(e.target.value)}
+                placeholder="https://yoursite.com/newsletter/{id}"
+                style={{ direction: "ltr" }}
+              />
+              <S.Text
+                $muted
+                $size="0.75rem"
+                style={{ color: linkValid ? undefined : T.danger }}
+              >
+                {linkValid
+                  ? "اكتب {id} مكان رقم المقال. يُضاف الرابط تلقائياً في رسائل البريد."
+                  : "يجب أن يبدأ بـ https:// ويحتوي على {id}"}
+              </S.Text>
+              <S.Button
+                type="button"
+                $size="sm"
+                $variant="primary"
+                disabled={!linkValid}
+                onClick={() => {
+                  saveLink();
+                  close();
+                }}
+              >
+                حفظ
+              </S.Button>
+            </S.Stack>
+          )}
+        </Popover>
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => openEditor("new")}
+        >
+          <Plus size={15} />
+          مقال جديد
+        </S.Button>
+      </PageHeader>
+
+      <LoadState
+        loading={ar.loading && !ar.items.length}
+        error={ar.error}
+        onRetry={ar.reload}
+      >
+        {ar.items.length === 0 ? (
+          <S.EmptyState>
+            <S.Illustration src={contentImage} alt="" $w="200px" />
+            <S.Heading $size="1.125rem">اكتب أول مقال في المدونة</S.Heading>
+            <S.Text $muted>
+              المقالات تظهر في صفحة المدونة، ويمكنك إرسالها بالبريد لقائمة
+              الانتظار بضغطة زر.
+            </S.Text>
+            <S.Button
+              type="button"
+              $variant="primary"
+              onClick={() => openEditor("new")}
+            >
+              <Plus size={15} />
+              مقال جديد
+            </S.Button>
+          </S.EmptyState>
+        ) : (
+          <>
+            <S.Grid $cols={3}>
+              <StatCard label="المقالات" value={num(ar.items.length)} />
+              <StatCard
+                label="مميزة"
+                value={num(ar.items.filter((a) => a.isFeatured).length)}
+              />
+              <StatCard
+                label="الأكثر قراءة"
+                value={num(ar.items.filter((a) => a.isPopular).length)}
+              />
+            </S.Grid>
+
+            <S.Card $flush $overflow>
+              <S.ViewTabs role="tablist">
+                {ARTICLE_VIEWS.map((v) => (
+                  <S.ViewTab
+                    key={v.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === v.id}
+                    $active={view === v.id}
+                    onClick={() => setView(v.id)}
+                  >
+                    {v.label}
+                    <S.MenuCount>
+                      {num(ar.items.filter(v.test).length)}
+                    </S.MenuCount>
+                  </S.ViewTab>
+                ))}
+              </S.ViewTabs>
+
+              <S.FilterBar>
+                <S.SearchField style={{ maxWidth: "22rem", flex: 1 }}>
+                  <Search size={15} />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="ابحث في المقالات"
+                  />
+                </S.SearchField>
+                <Popover
+                  align="end"
+                  trigger={({ toggle: open }) => (
+                    <S.Button type="button" $size="sm" onClick={open}>
+                      <ArrowUpDown size={14} />
+                      {activeSort.label}
+                    </S.Button>
+                  )}
+                >
+                  {({ close }) =>
+                    ARTICLE_SORTS.map((s) => (
+                      <S.MenuItem
+                        key={s.id}
+                        type="button"
+                        $active={sortId === s.id}
+                        onClick={() => {
+                          setSortId(s.id);
+                          close();
+                        }}
+                      >
+                        {s.label}
+                        {sortId === s.id && (
+                          <Check
+                            size={14}
+                            style={{ marginInlineStart: "auto" }}
+                          />
+                        )}
+                      </S.MenuItem>
+                    ))
+                  }
+                </Popover>
+              </S.FilterBar>
+
+              <S.TableScroll $minH="320px">
+                <S.GridTable $columns={ARTICLE_GRID} $minWidth="900px">
+                  <S.Th>المقال</S.Th>
+                  <S.Th>الكاتب</S.Th>
+                  <S.Th>تاريخ النشر</S.Th>
+                  <S.Th $align="center">مميز</S.Th>
+                  <S.Th $align="center">رائج</S.Th>
+                  <S.Th $align="center">إرسال</S.Th>
+                  {rows.length === 0 ? (
+                    <S.TableMessage>
+                      لا توجد مقالات تطابق البحث أو التصفية.
+                    </S.TableMessage>
+                  ) : (
+                    rows.map((a) => (
+                      <S.Tr key={a._id} onClick={() => openEditor(a._id)}>
+                        <S.Td>
+                          <S.Row $gap="0.75rem" style={{ minWidth: 0 }}>
+                            <ArticleThumb src={a.titleImg} />
+                            <S.Stack $gap="0.125rem" style={{ minWidth: 0 }}>
+                              <S.Ellipsis style={{ fontWeight: 600 }}>
+                                {a.title}
+                              </S.Ellipsis>
+                              <S.Ellipsis
+                                style={{
+                                  fontSize: "0.75rem",
+                                  color: T.textMuted,
+                                }}
+                              >
+                                {excerptOf(a, 90) || "—"}
+                              </S.Ellipsis>
+                            </S.Stack>
+                          </S.Row>
+                        </S.Td>
+                        <S.Td>
+                          <S.Ellipsis>{a.author || "—"}</S.Ellipsis>
+                        </S.Td>
+                        <S.Td>{formatDate(a.publishDate || a.createdAt)}</S.Td>
+                        <S.Td $align="center">
+                          <S.StarToggle
+                            type="button"
+                            $on={a.isFeatured}
+                            aria-pressed={a.isFeatured}
+                            aria-label={
+                              a.isFeatured ? "إلغاء التمييز" : "تمييز المقال"
+                            }
+                            disabled={busyId === `${a._id}isFeatured`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggle(a, "isFeatured");
+                            }}
+                          >
+                            <Star
+                              size={17}
+                              fill={a.isFeatured ? "currentColor" : "none"}
+                            />
+                          </S.StarToggle>
+                        </S.Td>
+                        <S.Td $align="center">
+                          <S.StarToggle
+                            type="button"
+                            $on={a.isPopular}
+                            aria-pressed={a.isPopular}
+                            aria-label={
+                              a.isPopular
+                                ? "إزالة من الأكثر قراءة"
+                                : "إضافة إلى الأكثر قراءة"
+                            }
+                            disabled={busyId === `${a._id}isPopular`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggle(a, "isPopular");
+                            }}
+                          >
+                            <Flame
+                              size={17}
+                              fill={a.isPopular ? "currentColor" : "none"}
+                            />
+                          </S.StarToggle>
+                        </S.Td>
+                        <S.Td
+                          $align="center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <S.Row
+                            $gap="0.25rem"
+                            style={{ justifyContent: "center" }}
+                          >
+                            <S.Button
+                              type="button"
+                              $variant="ghost"
+                              $size="sm"
+                              $icon
+                              aria-label="إرسال بالبريد"
+                              title="إرسال بالبريد لقائمة الانتظار"
+                              onClick={() =>
+                                onShareEmail(
+                                  emailFromArticle(
+                                    a,
+                                    articleUrl(linkTemplate, a._id),
+                                  ),
+                                )
+                              }
+                            >
+                              <Mail size={14} />
+                            </S.Button>
+                          </S.Row>
+                        </S.Td>
+                      </S.Tr>
+                    ))
+                  )}
+                </S.GridTable>
+              </S.TableScroll>
+              <S.TableFooter>
+                <span>
+                  {num(rows.length)} من {num(ar.items.length)} مقال
+                </span>
+              </S.TableFooter>
+            </S.Card>
+          </>
+        )}
+      </LoadState>
+    </S.Page>
+  );
+});
+
+/* ============================================================
+   Tab: الاقتباسات  (quote bank for the app)
+   ============================================================ */
+
+const QUOTE_VIEWS = [
+  { id: "all", label: "الكل", test: () => true },
+  { id: "active", label: "ظاهر", test: (q) => q.active },
+  { id: "hidden", label: "مخفي", test: (q) => !q.active },
+];
+
+const QuoteAddCard = memo(({ existing, onAdd, onClose }) => {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const lines = useMemo(
+    () => [
+      ...new Set(
+        text
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean),
+      ),
+    ],
+    [text],
+  );
+  const known = useMemo(
+    () => new Set(existing.map((q) => normalizeAr(q.textAr))),
+    [existing],
+  );
+  const fresh = lines.filter((l) => !known.has(normalizeAr(l)));
+  const dupes = lines.length - fresh.length;
+
+  const save = async () => {
+    if (!fresh.length)
+      return setError(
+        lines.length
+          ? "كل هذه الاقتباسات موجودة بالفعل"
+          : "اكتب اقتباساً واحداً على الأقل",
+      );
+    setBusy(true);
+    setError("");
+    try {
+      await onAdd(fresh);
+      onClose();
+    } catch (err) {
+      setError(apiMessage(err, "تعذّرت الإضافة"));
+      setBusy(false);
+    }
+    return undefined;
+  };
+
+  return (
+    <S.Card $padding="1.25rem" $gap="0.75rem">
+      <S.Row $between>
+        <S.Heading $size="0.9375rem">إضافة اقتباسات</S.Heading>
+        <S.Button
+          type="button"
+          $variant="ghost"
+          $icon
+          aria-label="إغلاق"
+          onClick={onClose}
+        >
+          <X size={16} />
+        </S.Button>
+      </S.Row>
+      <S.Textarea
+        rows={6}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={
+          "اقتباس في كل سطر\nالصحة تاج على رؤوس الأصحاء\nالوقاية خير من العلاج"
+        }
+        autoFocus
+      />
+      {error && (
+        <S.Text $size="0.8125rem" style={{ color: T.danger }}>
+          {error}
+        </S.Text>
+      )}
+      <S.Row $between $wrap $gap="0.5rem">
+        <S.Text $muted $size="0.75rem">
+          {lines.length
+            ? `${num(fresh.length)} جديد${dupes ? ` · ${num(dupes)} موجود مسبقاً وسيُتجاهل` : ""}`
+            : "يمكنك لصق قائمة كاملة دفعة واحدة."}
+        </S.Text>
+        <S.Button
+          type="button"
+          $variant="primary"
+          disabled={busy || !fresh.length}
+          onClick={save}
+        >
+          {busy
+            ? "جارٍ الإضافة..."
+            : `إضافة${fresh.length > 1 ? ` ${num(fresh.length)}` : ""}`}
+        </S.Button>
+      </S.Row>
+    </S.Card>
+  );
+});
+
+const QuoteRow = memo(({ q, isToday, onUpdate, onRemove }) => {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(q.textAr);
+  const [busy, setBusy] = useState(false);
+
+  const run = async (fn) => {
+    setBusy(true);
+    try {
+      await fn();
+      return true;
+    } catch (err) {
+      alert(apiMessage(err, "تعذّرت العملية"));
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveText = async () => {
+    const v = value.trim();
+    if (!v || v === q.textAr) return setEditing(false);
+    if (await run(() => onUpdate(q._id, { textAr: v }))) setEditing(false);
+    return undefined;
+  };
+
+  return (
+    <S.QuoteItem $muted={!q.active}>
+      <Quote size={16} className="mark" />
+      <S.Stack $gap="0.375rem" style={{ flex: 1, minWidth: 0 }}>
+        {editing ? (
+          <>
+            <S.Textarea
+              rows={2}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              autoFocus
+            />
+            <S.Row $gap="0.5rem">
+              <S.Button
+                type="button"
+                $size="sm"
+                $variant="primary"
+                disabled={busy}
+                onClick={saveText}
+              >
+                حفظ
+              </S.Button>
+              <S.Button
+                type="button"
+                $size="sm"
+                onClick={() => {
+                  setValue(q.textAr);
+                  setEditing(false);
+                }}
+              >
+                إلغاء
+              </S.Button>
+            </S.Row>
+          </>
+        ) : (
+          <p onDoubleClick={() => setEditing(true)}>{q.textAr}</p>
+        )}
+        <S.Row $gap="0.5rem" $wrap>
+          {isToday && (
+            <S.StatusBadge $tone="success">اقتباس اليوم</S.StatusBadge>
+          )}
+          {!q.active && <S.StatusBadge $tone="neutral">مخفي</S.StatusBadge>}
+          <S.Text as="span" $muted $size="0.6875rem">
+            أُضيف {formatDate(q.createdAt)}
+          </S.Text>
+        </S.Row>
+      </S.Stack>
+      <S.Row $gap="0.25rem" style={{ flexShrink: 0 }}>
+        <S.Button
+          type="button"
+          $variant="ghost"
+          $size="sm"
+          $icon
+          aria-label="تعديل"
+          title="تعديل"
+          disabled={busy}
+          onClick={() => setEditing(true)}
+        >
+          <Pencil size={14} />
+        </S.Button>
+        <S.Button
+          type="button"
+          $variant="ghost"
+          $size="sm"
+          $icon
+          aria-label="حذف"
+          title="حذف"
+          disabled={busy}
+          onClick={() =>
+            window.confirm("حذف هذا الاقتباس نهائياً؟") &&
+            run(() => onRemove(q._id))
+          }
+        >
+          <Trash2 size={14} />
+        </S.Button>
+        <S.Switch
+          type="button"
+          role="switch"
+          aria-checked={q.active}
+          aria-label={q.active ? "إخفاء من التطبيق" : "إظهار في التطبيق"}
+          title={q.active ? "ظاهر في التطبيق" : "مخفي من التطبيق"}
+          $on={q.active}
+          disabled={busy}
+          onClick={() => run(() => onUpdate(q._id, { active: !q.active }))}
+          style={{ marginInlineStart: "0.375rem" }}
+        />
+      </S.Row>
+    </S.QuoteItem>
+  );
+});
+
+const QUOTES_PAGE = 50;
+
+const QuotesTab = memo(({ accessToken, onAuthError }) => {
+  const qs = useQuotes(accessToken, onAuthError);
+  const daily = useAdminGet(
+    accessToken,
+    onAuthError,
+    qs.items.length
+      ? `/quotes/daily?n=${qs.items.filter((q) => q.active).length}`
+      : null,
+  );
+  const [adding, setAdding] = useState(false);
+  const [view, setView] = useState("all");
+  const [query, setQuery] = useState("");
+  const [shown, setShown] = useState(QUOTES_PAGE);
+
+  const rows = useMemo(() => {
+    const test = QUOTE_VIEWS.find((v) => v.id === view).test;
+    const q = normalizeAr(query);
+    return qs.items.filter(
+      (x) => test(x) && (!q || normalizeAr(x.textAr).includes(q)),
+    );
+  }, [qs.items, view, query]);
+
+  useEffect(() => setShown(QUOTES_PAGE), [view, query]);
+
+  const todayId = daily.data?._id;
+  const activeCount = qs.items.filter((q) => q.active).length;
+
+  const exportCsv = () => {
+    const lines = [
+      ["الاقتباس", "الحالة", "تاريخ الإضافة"],
+      ...qs.items.map((q) => [
+        q.textAr,
+        q.active ? "ظاهر" : "مخفي",
+        exportDateTime(q.createdAt),
+      ]),
+    ];
+    downloadFile(
+      `﻿${lines.map((r) => r.map(csvCell).join(",")).join("\r\n")}`,
+      `quotes-${new Date().toISOString().slice(0, 10)}.csv`,
+      "text/csv;charset=utf-8",
+    );
+  };
+
+  return (
+    <S.Page>
+      <PageHeader icon={contentIcon} title="الاقتباسات">
+        {qs.items.length > 0 && (
+          <S.Button type="button" onClick={exportCsv}>
+            <Download size={15} />
+            تصدير
+          </S.Button>
+        )}
+        <S.Button
+          type="button"
+          $variant="primary"
+          onClick={() => setAdding(true)}
+        >
+          <Plus size={15} />
+          إضافة اقتباسات
+        </S.Button>
+      </PageHeader>
+
+      {adding && (
+        <QuoteAddCard
+          existing={qs.items}
+          onAdd={qs.add}
+          onClose={() => setAdding(false)}
+        />
+      )}
+
+      <LoadState
+        loading={qs.loading && !qs.items.length}
+        error={qs.error}
+        onRetry={qs.reload}
+      >
+        {qs.items.length === 0 ? (
+          !adding && (
+            <S.EmptyState>
+              <S.Illustration src={contentImage} alt="" $w="200px" />
+              <S.Heading $size="1.125rem">اقتباس ملهم كل يوم</S.Heading>
+              <S.Text $muted>
+                أضف اقتباساتك هنا. يظهر اقتباس مختلف كل يوم في التطبيق.
+              </S.Text>
+              <S.Button
+                type="button"
+                $variant="primary"
+                onClick={() => setAdding(true)}
+              >
+                <Plus size={15} />
+                إضافة اقتباسات
+              </S.Button>
+            </S.EmptyState>
+          )
+        ) : (
+          <>
+            <S.ContentSplit>
+              <S.Card $padding="1.5rem" $gap="0.875rem">
+                <S.Row $between>
+                  <S.CardLabel>اقتباس اليوم في التطبيق</S.CardLabel>
+                  <Sparkles size={16} style={{ color: "#f59e0b" }} />
+                </S.Row>
+                {daily.data?.textAr ? (
+                  <S.DailyQuote>{daily.data.textAr}</S.DailyQuote>
+                ) : (
+                  <S.Text $muted>
+                    {daily.loading ? "..." : "لا توجد اقتباسات ظاهرة"}
+                  </S.Text>
+                )}
+                <S.Text $muted $size="0.75rem">
+                  يتغير تلقائياً كل يوم، ويراه كل المستخدمين في التطبيق.
+                </S.Text>
+              </S.Card>
+              <S.Grid $cols={2}>
+                <StatCard label="كل الاقتباسات" value={num(qs.items.length)} />
+                <StatCard
+                  label="ظاهرة في التطبيق"
+                  value={num(activeCount)}
+                  hint={
+                    activeCount
+                      ? `تكفي ${num(activeCount)} يوماً دون تكرار تقريباً`
+                      : undefined
+                  }
+                />
+              </S.Grid>
+            </S.ContentSplit>
+
+            <S.Card $flush $overflow>
+              <S.ViewTabs role="tablist">
+                {QUOTE_VIEWS.map((v) => (
+                  <S.ViewTab
+                    key={v.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === v.id}
+                    $active={view === v.id}
+                    onClick={() => setView(v.id)}
+                  >
+                    {v.label}
+                    <S.MenuCount>
+                      {num(qs.items.filter(v.test).length)}
+                    </S.MenuCount>
+                  </S.ViewTab>
+                ))}
+              </S.ViewTabs>
+              <S.FilterBar>
+                <S.SearchField style={{ maxWidth: "22rem", flex: 1 }}>
+                  <Search size={15} />
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="ابحث في الاقتباسات"
+                  />
+                </S.SearchField>
+                <S.Text $muted $size="0.75rem">
+                  اضغط مرتين على النص لتعديله
+                </S.Text>
+              </S.FilterBar>
+              {rows.length === 0 ? (
+                <S.Text $muted $center style={{ padding: "2.5rem 1rem" }}>
+                  لا توجد اقتباسات تطابق البحث.
+                </S.Text>
+              ) : (
+                <div>
+                  {rows.slice(0, shown).map((q) => (
+                    <QuoteRow
+                      key={`${q._id}-${q.updatedAt}`}
+                      q={q}
+                      isToday={q._id === todayId}
+                      onUpdate={qs.update}
+                      onRemove={qs.remove}
+                    />
+                  ))}
+                </div>
+              )}
+              <S.TableFooter>
+                <span>
+                  {num(Math.min(shown, rows.length))} من {num(rows.length)}{" "}
+                  اقتباس
+                </span>
+                {shown < rows.length && (
+                  <S.LinkButton
+                    type="button"
+                    onClick={() => setShown((n) => n + QUOTES_PAGE)}
+                  >
+                    عرض المزيد
+                  </S.LinkButton>
+                )}
+              </S.TableFooter>
+            </S.Card>
+          </>
+        )}
+      </LoadState>
+    </S.Page>
+  );
+});
+
+/* ============================================================
    Tab: المتجر (appointment settings)
    ============================================================ */
 
@@ -7991,6 +9500,17 @@ const Dashboard = () => {
     [goTo, goToTab, openNewProduct],
   );
 
+  // Content → email hand-off
+  const [emailDraft, setEmailDraft] = useState(null);
+  const clearEmailDraft = useCallback(() => setEmailDraft(null), []);
+  const shareByEmail = useCallback(
+    (d) => {
+      setEmailDraft(d);
+      goToTab("التسويق");
+    },
+    [goToTab],
+  );
+
   const openOrder = useCallback(
     (id) => id && navigate(`/quota/${id}`),
     [navigate],
@@ -8079,6 +9599,20 @@ const Dashboard = () => {
         />
       );
     }
+    if (CONTENT_TAB_NAMES.includes(activeTab)) {
+      return (
+        <ContentTab
+          accessToken={accessToken}
+          onAuthError={handleAuthError}
+          onShareEmail={shareByEmail}
+        />
+      );
+    }
+    if (QUOTES_TAB_NAMES.includes(activeTab)) {
+      return (
+        <QuotesTab accessToken={accessToken} onAuthError={handleAuthError} />
+      );
+    }
     if (EMPTY_TABS[activeTab])
       return <EmptyTab {...EMPTY_TABS[activeTab]} onNavigate={goTo} />;
     if (LIST_TABS[activeTab])
@@ -8129,6 +9663,8 @@ const Dashboard = () => {
             accessToken={accessToken}
             onAuthError={handleAuthError}
             onGoTab={goToTab}
+            draft={emailDraft}
+            onDraftUsed={clearEmailDraft}
           />
         );
       case "الحملات":
