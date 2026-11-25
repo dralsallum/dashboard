@@ -29,6 +29,7 @@ import {
   Globe,
   LayoutGrid,
   Link,
+  LogOut,
   Mail,
   Monitor,
   Package,
@@ -409,19 +410,46 @@ const Rating = memo(({ value, reviews }) => (
    Modals
    ============================================================ */
 
-const TimeoutModal = memo(({ open, onLogin }) =>
-  open ? (
+// Blocks the dashboard until the user logs out; there is no way to close it otherwise
+const TimeoutModal = memo(({ open, onLogin }) => {
+  const buttonRef = useRef(null);
+  useEffect(() => {
+    if (open) buttonRef.current?.focus();
+  }, [open]);
+
+  return open ? (
     <S.Overlay>
-      <S.ModalBox $center role="alertdialog" aria-modal="true">
-        <S.Heading $size="1.125rem">انتهت الجلسة</S.Heading>
-        <S.Text $muted>يجب تسجيل الدخول من جديد للمتابعة.</S.Text>
-        <S.Button type="button" $variant="primary" $size="lg" onClick={onLogin}>
-          سجل الآن
+      <S.ModalBox
+        $center
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="session-expired-title"
+        onKeyDown={(e) => e.key === "Tab" && e.preventDefault()}
+      >
+        <S.IconBubble style={{ margin: "0 auto" }}>
+          <Clock size={20} />
+        </S.IconBubble>
+        <S.Heading id="session-expired-title" $size="1.125rem">
+          انتهت صلاحية الجلسة
+        </S.Heading>
+        <S.Text $muted>
+          لحماية حسابك، انتهت صلاحية تسجيل الدخول. سجّل الخروج ثم ادخل من جديد
+          للمتابعة.
+        </S.Text>
+        <S.Button
+          ref={buttonRef}
+          type="button"
+          $variant="primary"
+          $size="lg"
+          onClick={onLogin}
+        >
+          <LogOut size={16} />
+          تسجيل الخروج
         </S.Button>
       </S.ModalBox>
     </S.Overlay>
-  ) : null,
-);
+  ) : null;
+});
 
 const StoreNameModal = memo(({ value, onChange, onClose, onSave, saving }) => (
   <S.Overlay onClick={onClose}>
@@ -854,6 +882,42 @@ const formatPhone = (p) => {
 // Booking requests live on the theknot server; everything else is on amanapi (userRequest)
 const QUOTA_URL = "https://theknot-30278e2ff419.herokuapp.com/api/quota";
 
+/* ---------- Session (login token) ---------- */
+
+// amanapi answers 401 when the token is missing and 403 when it is expired or invalid.
+// A 403 for a real permission problem ("not allowed") is not treated as an expired session.
+const SESSION_MSG_RE = /token|jwt|expired|authenticat|not valid|التوكن|الجلسة/i;
+const LOGIN_PATH = "/login";
+
+const isAuthFailure = (err) => {
+  const status = err?.response?.status;
+  if (status === 401) return true;
+  if (status !== 403) return false;
+  const d = err.response.data;
+  const msg = typeof d === "string" ? d : d?.message || d?.error || "";
+  return !msg || SESSION_MSG_RE.test(msg);
+};
+
+// Expiry time (ms) written inside the JWT, or null if the token has none
+const tokenExpiresAt = (token) => {
+  try {
+    const part = String(token)
+      .split(".")[1]
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(part)
+        .split("")
+        .map((c) => `%${c.charCodeAt(0).toString(16).padStart(2, "0")}`)
+        .join(""),
+    );
+    const { exp } = JSON.parse(json);
+    return exp ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+};
+
 const amanapiError = (status, fallback) =>
   status === 401 || status === 403
     ? "انتهت صلاحية الجلسة أو لا تملك صلاحية — سجّل الدخول من جديد"
@@ -1124,11 +1188,12 @@ const OrdersTab = memo(
         ]);
         if (controller.signal.aborted) return;
 
-        // The login token comes from amanapi (/bus_auth/login):
-        // 401 from amanapi = no/expired session -> show the "login again" modal.
+        // The login token comes from amanapi (/bus_auth/login): an expired session there
+        // shows the "session expired" popup.
         const quotaStatus = quotaRes.reason?.response?.status;
         const waitlistStatus = waitlistRes.reason?.response?.status;
-        if (waitlistStatus === 401 || quotaStatus === 401) onAuthError();
+        if (isAuthFailure(waitlistRes.reason) || quotaStatus === 401)
+          onAuthError();
 
         const next = { quota: [], paid: [], waitlist: [] };
         const errs = {};
@@ -1675,7 +1740,7 @@ const useWaitlist = (accessToken, onAuthError) => {
       } catch (err) {
         if (axios.isCancel(err)) return;
         const status = err.response?.status;
-        if (status === 401) onAuthError();
+        if (isAuthFailure(err)) onAuthError();
         setError(amanapiError(status, "تعذّر جلب قائمة العملاء"));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -2832,7 +2897,7 @@ const usePackages = (accessToken, onAuthError) => {
       } catch (err) {
         if (axios.isCancel(err)) return;
         const status = err.response?.status;
-        if (status === 401) onAuthError();
+        if (isAuthFailure(err)) onAuthError();
         setError(
           status === 404
             ? "مسار المنتجات غير موجود على الخادم بعد (/api/packages)"
@@ -2852,7 +2917,7 @@ const usePackages = (accessToken, onAuthError) => {
       try {
         return await fn();
       } catch (err) {
-        if (err.response?.status === 401) onAuthError();
+        if (isAuthFailure(err)) onAuthError();
         throw err;
       }
     },
@@ -4294,7 +4359,7 @@ const useDiscounts = (accessToken, onAuthError) => {
       } catch (err) {
         if (axios.isCancel(err)) return;
         const status = err.response?.status;
-        if (status === 401) onAuthError();
+        if (isAuthFailure(err)) onAuthError();
         setError(
           status === 404
             ? "مسار الخصومات غير موجود على الخادم بعد (/api/discounts)"
@@ -4314,7 +4379,7 @@ const useDiscounts = (accessToken, onAuthError) => {
       try {
         return await fn();
       } catch (err) {
-        if (err.response?.status === 401) onAuthError();
+        if (isAuthFailure(err)) onAuthError();
         throw err;
       }
     },
@@ -5187,7 +5252,7 @@ const useAdminGet = (accessToken, onAuthError, path, { pollMs = 0 } = {}) => {
       } catch (err) {
         if (axios.isCancel(err)) return;
         const status = err.response?.status;
-        if (status === 401) onAuthError();
+        if (isAuthFailure(err)) onAuthError();
         if (!silent) {
           setError(
             status === 404
@@ -5221,7 +5286,7 @@ const callApi = async (fn, onAuthError) => {
   try {
     return await fn();
   } catch (err) {
-    if (err.response?.status === 401) onAuthError();
+    if (isAuthFailure(err)) onAuthError();
     throw err;
   }
 };
@@ -9523,9 +9588,50 @@ const Dashboard = () => {
   const handleAuthError = useCallback(() => setShowTimeout(true), []);
 
   const handleLogin = useCallback(() => {
+    setShowTimeout(false);
     dispatch(signOut());
     dispatch(clearState());
-  }, [dispatch]);
+    navigate(LOGIN_PATH, { replace: true });
+  }, [dispatch, navigate]);
+
+  // 1) Show the popup the moment the token's own expiry time passes.
+  //    Also re-check when the tab comes back into view (timers pause while a laptop sleeps).
+  useEffect(() => {
+    if (!accessToken) return undefined;
+    const expiresAt = tokenExpiresAt(accessToken);
+    if (!expiresAt) return undefined;
+
+    const check = () => {
+      if (Date.now() >= expiresAt) setShowTimeout(true);
+    };
+    check();
+    const timer = setTimeout(
+      check,
+      Math.min(Math.max(expiresAt - Date.now(), 0) + 1000, 2147483647),
+    );
+    const onVisible = () => document.visibilityState === "visible" && check();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", check);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", check);
+    };
+  }, [accessToken]);
+
+  // 2) Any amanapi request rejected because of the session (e.g. the server ended it early)
+  useEffect(() => {
+    const interceptors = userRequest.interceptors?.response;
+    if (!interceptors) return undefined;
+    const id = interceptors.use(
+      (res) => res,
+      (err) => {
+        if (isAuthFailure(err)) setShowTimeout(true);
+        return Promise.reject(err);
+      },
+    );
+    return () => interceptors.eject(id);
+  }, []);
 
   /* ---------- Store name ---------- */
 
